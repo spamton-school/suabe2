@@ -198,10 +198,10 @@ The dev build contains experimental features and forward-looking additions.
     - Automatically restores the active panel on reload via `restoreActiveSubmenu()`; if all panels were closed, none open on reload.
     - Included in JSON export/import.
 
-19. **Full-Height Favicons Panel & Scroll Affordance (`#faviconScrollHint`)**:
-    - `#faviconPanel` expands downward to `bottom: 24px;` (`top: 30px`, `width: 320px`, `display: flex`, `flex-direction: column`, `overflow: hidden`) providing full-screen height utilization for cloaks.
-    - `#faviconList` is nested inside `.favicon-list-container` (`flex: 1`, `min-height: 0`).
-    - Dynamic scroll affordance: When scrolling is possible (`scrollHeight > clientHeight + 6`), a subtle bottom gradient shadow and bouncing cyan arrow indicator (`#faviconScrollHint`) appear at the bottom of the list.
+19. **Content-Aware Favicons Panel & Scroll Affordance (`#faviconScrollHint`)**:
+    - `#faviconPanel` naturally hugs its content when few cloaks are present, while capping its maximum expansion at `max-height: calc(100vh - 54px)` (`top: 30px`, `width: 320px`, resting 24px above screen bottom, `display: flex`, `flex-direction: column`, `overflow: hidden`).
+    - `#faviconList` is nested inside `.favicon-list-container` (`flex: 0 1 auto`, `min-height: 0`, `max-height: calc(100vh - 290px)`).
+    - Dynamic scroll affordance: When scrolling is possible (`scrollHeight > clientHeight + 6`), a subtle bottom gradient shadow and bouncing purple arrow indicator (`#faviconScrollHint`, SVG `#9d4edd`) appear at the bottom of the list.
     - The indicator is only visible when at the top of the list (`scrollTop <= 12`), smoothly fading out (`opacity: 0`, `visibility: hidden`) upon scrolling down so it takes away zero space.
     - Re-evaluates dynamically on list scroll, window resize, cloak addition/deletion, or panel opening via `updateFaviconScrollHint()`.
 
