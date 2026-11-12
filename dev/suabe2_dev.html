@@ -683,7 +683,6 @@
             background: transparent;
             font-size: 14px;
             font-weight: 600;
-            cursor: pointer;
             border-radius: 7px;
             transition: color 0.25s ease;
             letter-spacing: 0.5px;
@@ -692,6 +691,7 @@
             justify-content: center;
             padding: 0;
             color: #777;
+            pointer-events: none;
         }
 
         .mode-slider-btn:hover {
@@ -1205,7 +1205,7 @@
         <button class="datauri-generate-btn" id="generateDataUriBtn">Generate Data URI</button>
         <div class="datauri-output-group">
             <label>Data URI Result</label>
-            <textarea id="dataUriOutput" class="datauri-output" readonly placeholder="Click Generate to produce Data URI..."></textarea>
+            <textarea id="dataUriOutput" class="datauri-output" readonly placeholder="Click Generate to produce Data URI..." autocomplete="off"></textarea>
             <div class="datauri-actions">
                 <button class="datauri-action-btn" id="copyDataUriBtn" disabled>Copy</button>
                 <button class="datauri-action-btn" id="openDataUriBtn" disabled>Open in New Tab</button>
@@ -1360,7 +1360,7 @@
         const fileButtonUI = document.getElementById('fileButtonUI');
         const confirmBtn = document.getElementById('confirmBtn');
         const statusMsg = document.getElementById('statusMsg');
-        const categoryBtns = document.querySelectorAll('.category-btn, .mode-slider-btn');
+        const categoryBtns = document.querySelectorAll('.category-btn');
         const modeContents = document.querySelectorAll('.mode-content');
         const historyMenu = document.getElementById('historyMenu');
         const modeSlider = document.getElementById('modeSlider');
@@ -1951,6 +1951,10 @@
                     } catch (e) {
                         console.warn('LocalStorage error caching Data URI:', e);
                     }
+                } else {
+                    try {
+                        localStorage.removeItem('suabe2_cached_data_uri');
+                    } catch (e) {}
                 }
 
                 generateDataUriBtn.textContent = 'Regenerate Data URI';
@@ -1979,6 +1983,17 @@
                         if (openDataUriBtn) openDataUriBtn.disabled = false;
                         if (generateDataUriBtn) generateDataUriBtn.textContent = 'Regenerate Data URI';
                     }
+                } else {
+                    // Cache setting is OFF: ensure localStorage is completely purged and textarea is reset
+                    try {
+                        localStorage.removeItem('suabe2_cached_data_uri');
+                    } catch (e) {}
+                    if (dataUriOutput) {
+                        dataUriOutput.value = '';
+                    }
+                    if (copyDataUriBtn) copyDataUriBtn.disabled = true;
+                    if (openDataUriBtn) openDataUriBtn.disabled = true;
+                    if (generateDataUriBtn) generateDataUriBtn.textContent = 'Generate Data URI';
                 }
             } catch (e) {
                 console.warn('Could not read Data URI cache from localStorage:', e);
@@ -3402,15 +3417,11 @@
             updateSwitcherUI();
         });
 
-        // Mode Slider click handler
+        // Mode Slider click handler - toggles between URL and File no matter where clicked
         if (modeSlider) {
             modeSlider.addEventListener('click', (e) => {
-                const btn = e.target.closest('.mode-slider-btn');
-                if (btn && btn.dataset.mode) {
-                    switchMode(btn.dataset.mode);
-                } else if (!btn) {
-                    switchMode(currentMode === 'url' ? 'file' : 'url');
-                }
+                if (e && e.preventDefault) e.preventDefault();
+                switchMode(currentMode === 'url' ? 'file' : 'url');
             });
         }
 
@@ -3449,18 +3460,48 @@
 
         openDataUriBtn.addEventListener('click', () => {
             if (!dataUriOutput.value) return;
-            window.open(dataUriOutput.value, '_blank');
+            const dataUri = dataUriOutput.value;
+            try {
+                // Modern browsers like Chrome block direct top-level navigation to data: URLs (window.open(dataUri)),
+                // which causes the new tab to immediately close.
+                // To keep the new tab open and fully functional without closing, we open a tab and load the exact
+                // Data URI inside a full-screen borderless iframe.
+                const win = window.open('', '_blank');
+                if (win) {
+                    win.document.open();
+                    win.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>SUABE 2</title><style>html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#0f0f0f;}iframe{position:fixed;inset:0;width:100%;height:100%;border:none;}</style></head><body><iframe src="${dataUri}"></iframe></body></html>`);
+                    win.document.close();
+                } else {
+                    const b64 = dataUri.split(',')[1];
+                    const decoded = decodeURIComponent(escape(atob(b64)));
+                    const blob = new Blob([decoded], { type: 'text/html;charset=utf-8' });
+                    window.open(URL.createObjectURL(blob), '_blank');
+                }
+            } catch (err) {
+                console.error('Error opening Data URI:', err);
+                const b64 = dataUri.split(',')[1];
+                const decoded = decodeURIComponent(escape(atob(b64)));
+                const blob = new Blob([decoded], { type: 'text/html;charset=utf-8' });
+                window.open(URL.createObjectURL(blob), '_blank');
+            }
         });
 
         cacheDataUriCheckbox.addEventListener('change', () => {
             try {
-                localStorage.setItem('suabe2_cache_data_uri_pref', cacheDataUriCheckbox.checked ? 'true' : 'false');
-                if (cacheDataUriCheckbox.checked) {
+                const isChecked = cacheDataUriCheckbox.checked;
+                localStorage.setItem('suabe2_cache_data_uri_pref', isChecked ? 'true' : 'false');
+                if (isChecked) {
                     if (dataUriOutput.value && !dataUriOutput.value.startsWith('Error')) {
                         localStorage.setItem('suabe2_cached_data_uri', dataUriOutput.value);
                     }
                 } else {
                     localStorage.removeItem('suabe2_cached_data_uri');
+                    if (dataUriOutput) {
+                        dataUriOutput.value = '';
+                    }
+                    if (copyDataUriBtn) copyDataUriBtn.disabled = true;
+                    if (openDataUriBtn) openDataUriBtn.disabled = true;
+                    if (generateDataUriBtn) generateDataUriBtn.textContent = 'Generate Data URI';
                 }
             } catch (e) {
                 console.warn('LocalStorage error with cacheDataUriCheckbox:', e);

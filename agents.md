@@ -156,6 +156,7 @@ The dev build contains experimental features and forward-looking additions.
     - Interactive sliding glider (`#sliderGlider`) smoothly shifts between URL (cyan accent `#00d9ff`) and File (amber accent `#ff9d3d`) using cubic-bezier easing.
     - Added subtle fade and slide animation (`@keyframes modeFadeSlide`) when toggling between URL input and file chooser.
     - Standardized `#urlInput` and `#fileButtonUI` to exact `height: 52px; box-sizing: border-box; line-height: 20px; font-family: inherit;` to eliminate any sizing differences between modes.
+    - Clicking anywhere on the mode slider toggles between URL and File modes smoothly.
     - **Toggle in Settings**: "Classic Mode Switcher" (`#classicSwitcherCheckbox`). Default: `off` (`false`). When enabled, restores the original two separate category buttons.
     - **Storage & Sync**: Key `classicSwitcher` is saved to `suabe2_settings` and supported in JSON export/import.
 
@@ -163,10 +164,10 @@ The dev build contains experimental features and forward-looking additions.
     - Dedicated Data URI button (`#dataUriBtn`) with link icon and green theme (`#00ff88`) placed to the left of the cloak disguises button (`#faviconBtn`).
     - Panel `#dataUriPanel` generates an HTML Data URI (`data:text/html;base64,...`) from `image.svg` embedded HTML content (compressed and base64-encoded).
     - Includes:
-      - Selectable readonly output textbox (`#dataUriOutput`).
+      - Selectable readonly output textbox (`#dataUriOutput`) with `autocomplete="off"`.
       - "Copy" button (`#copyDataUriBtn`) with clipboard copy and visual feedback.
-      - "Open in New Tab" button (`#openDataUriBtn`) that opens the raw data URI directly into a true new browser tab without `about:blank` wrapping.
-      - "Cache Data URI in browser" toggle (`#cacheDataUriCheckbox`, default: `off`) inside the panel to persist the generated data URI in `localStorage` under `suabe2_cached_data_uri`.
+      - "Open in New Tab" button (`#openDataUriBtn`) that opens a tab and embeds the Data URI in a full-screen borderless iframe (with Blob URL fallback) to bypass modern Chromium policies that abort top-frame navigation to `data:text/html` and auto-close the tab.
+      - "Cache Data URI in browser" toggle (`#cacheDataUriCheckbox`, default: `off`) inside the panel to persist the generated data URI in `localStorage` under `suabe2_cached_data_uri`. When unchecked, existing cache is purged and the output textarea is reset.
 
 14. **Organized Settings Menu**:
     - Cleanly structured into four distinct categories:
