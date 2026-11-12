@@ -77,7 +77,7 @@ The dev build contains experimental features and forward-looking additions.
    - **Key Components**:
      - **URL Bar (`#navUrl`)**: Displays current URL or loaded filename, allows in-page navigation (auto-prefixes `https://`), navigates on `Enter` or clicking the Go button (`#goBtn`).
      - **Upload File Button (`#topUpload` / `.top-upload-btn`)**: Positioned next to the URL bar, allows uploading and switching files directly within the viewer. Supports HTML-like files and plain text/code files.
-     - **Maximize (Fullscreen) (`#fullscreenBtn`)**: Toggles browser fullscreen via Fullscreen API (`requestFullscreen` / `exitFullscreen`). Dynamically swaps between expand and compress SVG icons on `fullscreenchange`.
+     - **Maximize (Fullscreen) (`#fullscreenBtn`)**: Toggles browser fullscreen via Fullscreen API (`requestFullscreen` / `exitFullscreen`). Automatically minimizes the navbar (`topbar-minimized`) upon entering fullscreen for an unobstructed full-screen view, and automatically restores the navbar upon exiting fullscreen. Dynamically swaps between expand and compress SVG icons on `fullscreenchange`.
      - **Minimize Topbar (`#minimizeBtn`)**: Collapses the topbar (`transform: translateY(-100%)`) and expands the iframe to full 100vh. Reveals a sleek floating restore pill (`#restoreBarBtn`, "Show Bar") at the top center to smoothly restore the bar.
      - **Reload Button (`#refreshBtn`)**: Refreshes the iframe (`contentWindow.location.reload()` with `iframe.src = iframe.src` cross-origin fallback) with a subtle spin animation.
      - **Inline SVGs**: Completely self-contained; zero external flaticon or image dependencies.

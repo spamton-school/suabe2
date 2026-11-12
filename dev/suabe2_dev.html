@@ -1761,25 +1761,39 @@
             }
 
             function toggleFullscreen() {
-                if (!document.fullscreenElement) {
-                    document.documentElement.requestFullscreen().catch(function() {});
+                var isFull = !!(document.fullscreenElement || document.webkitFullscreenElement);
+                if (!isFull) {
+                    if (document.documentElement.requestFullscreen) {
+                        document.documentElement.requestFullscreen().catch(function() {});
+                    } else if (document.documentElement.webkitRequestFullscreen) {
+                        document.documentElement.webkitRequestFullscreen();
+                    }
                 } else {
                     if (document.exitFullscreen) {
                         document.exitFullscreen().catch(function() {});
+                    } else if (document.webkitExitFullscreen) {
+                        document.webkitExitFullscreen();
                     }
                 }
             }
             if (fullscreenBtn) fullscreenBtn.addEventListener('click', toggleFullscreen);
 
-            document.addEventListener('fullscreenchange', function() {
-                var isFull = !!document.fullscreenElement;
+            function onFullscreenChange() {
+                var isFull = !!(document.fullscreenElement || document.webkitFullscreenElement);
+                if (isFull) {
+                    document.body.classList.add('topbar-minimized');
+                } else {
+                    document.body.classList.remove('topbar-minimized');
+                }
                 if (fullscreenBtn) {
                     fullscreenBtn.setAttribute('title', isFull ? 'Exit Fullscreen' : 'Maximize (Fullscreen)');
                 }
                 if (fullscreenIcon) {
                     fullscreenIcon.innerHTML = isFull ? exitFsSvg : enterFsSvg;
                 }
-            });
+            }
+            document.addEventListener('fullscreenchange', onFullscreenChange);
+            document.addEventListener('webkitfullscreenchange', onFullscreenChange);
         })();
     <\/script>
 </body>
