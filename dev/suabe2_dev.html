@@ -246,17 +246,19 @@
             text-align: center;
         }
 
-        .datauri-action-btn:hover:not(:disabled) {
+        .datauri-action-btn:hover:not(:disabled):not(.disabled) {
             background: rgba(0, 255, 136, 0.15);
             box-shadow: 0 2px 8px rgba(0, 255, 136, 0.25);
             transform: translateY(-1px);
         }
 
-        .datauri-action-btn:disabled {
+        .datauri-action-btn:disabled,
+        .datauri-action-btn.disabled {
             opacity: 0.4;
             cursor: not-allowed;
             border-color: #444;
             color: #666;
+            pointer-events: none;
         }
 
         .datauri-cache-group {
@@ -461,6 +463,43 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            user-select: none;
+            position: relative;
+        }
+
+        .favicon-item.dragging {
+            opacity: 0.35;
+            border: 1px dashed #00d9ff;
+            transform: scale(0.99);
+        }
+
+        .favicon-item.drag-over-top {
+            border-top: 2px solid #00d9ff !important;
+            box-shadow: 0 -4px 8px rgba(0, 217, 255, 0.25);
+        }
+
+        .favicon-item.drag-over-bottom {
+            border-bottom: 2px solid #00d9ff !important;
+            box-shadow: 0 4px 8px rgba(0, 217, 255, 0.25);
+        }
+
+        .favicon-item-grip {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: grab;
+            padding: 2px 2px 2px 0;
+            flex-shrink: 0;
+            opacity: 0.5;
+            transition: opacity 0.2s ease;
+        }
+
+        .favicon-item:hover .favicon-item-grip {
+            opacity: 1;
+        }
+
+        .favicon-item-grip:active {
+            cursor: grabbing;
         }
 
         .favicon-item:hover {
@@ -1208,7 +1247,7 @@
             <textarea id="dataUriOutput" class="datauri-output" readonly placeholder="Click Generate to produce Data URI..." autocomplete="off"></textarea>
             <div class="datauri-actions">
                 <button class="datauri-action-btn" id="copyDataUriBtn" disabled>Copy</button>
-                <button class="datauri-action-btn" id="openDataUriBtn" disabled>Open in New Tab</button>
+                <a class="datauri-action-btn disabled" id="openDataUriBtn" href="#" target="_blank" rel="noopener noreferrer" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box;">Open in New Tab</a>
             </div>
         </div>
         <div class="datauri-cache-group">
@@ -1220,7 +1259,7 @@
     </div>
 
     <!-- Favicon Panel -->
-    <div class="favicon-panel active" id="faviconPanel">
+    <div class="favicon-panel" id="faviconPanel">
         <h2>Favicons & Cloaks</h2>
         <div class="favicon-list" id="faviconList"></div>
         <div class="favicon-input-group">
@@ -1401,10 +1440,26 @@
             // Open the specified panel
             if (panelToOpen === 'settings') {
                 settingsPanel.classList.add('active');
-            } else if (panelToOpen === 'favicon') {
+                try { localStorage.setItem('suabe2_active_submenu', 'settings'); } catch (e) {}
+            } else if (panelToOpen === 'favicon' || panelToOpen === 'cloaks') {
                 faviconPanel.classList.add('active');
+                try { localStorage.setItem('suabe2_active_submenu', 'favicon'); } catch (e) {}
             } else if (panelToOpen === 'dataUri') {
                 dataUriPanel.classList.add('active');
+                try { localStorage.setItem('suabe2_active_submenu', 'dataUri'); } catch (e) {}
+            } else {
+                try { localStorage.removeItem('suabe2_active_submenu'); } catch (e) {}
+            }
+        }
+
+        function restoreActiveSubmenu() {
+            try {
+                const saved = localStorage.getItem('suabe2_active_submenu');
+                if (saved) {
+                    openPanel(saved);
+                }
+            } catch (e) {
+                console.warn('Error restoring active submenu:', e);
             }
         }
         function getHistory() {
@@ -1541,8 +1596,42 @@
             }
         }
 
+        function getCloakOrder() {
+            try {
+                const stored = localStorage.getItem('suabe2_cloak_order');
+                return stored ? JSON.parse(stored) : [];
+            } catch (e) {
+                console.error('Error reading cloak order:', e);
+                return [];
+            }
+        }
+
+        function saveCloakOrder(orderIds) {
+            try {
+                localStorage.setItem('suabe2_cloak_order', JSON.stringify(orderIds));
+            } catch (e) {
+                console.error('Error saving cloak order:', e);
+            }
+        }
+
         function getFavicons() {
-            return [...DEFAULT_FAVICONS, ...getCustomFavicons()];
+            const allFavicons = [...DEFAULT_FAVICONS, ...getCustomFavicons()];
+            const savedOrder = getCloakOrder();
+            if (Array.isArray(savedOrder) && savedOrder.length > 0) {
+                const map = new Map();
+                allFavicons.forEach(f => map.set(String(f.id), f));
+                const ordered = [];
+                savedOrder.forEach(id => {
+                    const item = map.get(String(id));
+                    if (item) {
+                        ordered.push(item);
+                        map.delete(String(id));
+                    }
+                });
+                map.forEach(item => ordered.push(item));
+                return ordered;
+            }
+            return allFavicons;
         }
 
         function saveCustomFavicons(customFavicons) {
@@ -1565,15 +1654,21 @@
                 return;
             }
 
+            const newId = Date.now();
             const custom = getCustomFavicons();
             custom.unshift({
-                id: Date.now(),
+                id: newId,
                 title: title.trim(),
                 url: url.trim(),
                 isDefault: false
             });
 
             saveCustomFavicons(custom);
+            const currentOrder = getCloakOrder();
+            if (currentOrder.length > 0) {
+                currentOrder.unshift(String(newId));
+                saveCloakOrder(currentOrder);
+            }
             faviconTitleInput.value = '';
             faviconUrlInput.value = '';
             showStatus('Favicon added!', 'success');
@@ -1583,7 +1678,14 @@
             const custom = getCustomFavicons();
             const filtered = custom.filter(f => f.id !== id);
             saveCustomFavicons(filtered);
+            const currentOrder = getCloakOrder();
+            if (currentOrder.length > 0) {
+                saveCloakOrder(currentOrder.filter(item => String(item) !== String(id)));
+            }
         }
+
+        let isDraggingFavicon = false;
+        let draggedFaviconId = null;
 
         function renderFavicons() {
             const favicons = getFavicons();
@@ -1594,6 +1696,17 @@
             favicons.forEach(favicon => {
                 const item = document.createElement('div');
                 item.className = 'favicon-item';
+                item.dataset = item.dataset || {};
+                item.dataset.id = String(favicon.id);
+                item.setAttribute('data-id', String(favicon.id));
+                item.draggable = true;
+
+                // Drag handle
+                const grip = document.createElement('span');
+                grip.className = 'favicon-item-grip';
+                grip.title = 'Drag to reorder cloak';
+                grip.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="5" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="9" cy="19" r="1.5"/><circle cx="15" cy="5" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="15" cy="19" r="1.5"/></svg>';
+                item.appendChild(grip);
 
                 const img = document.createElement('img');
                 img.src = favicon.url;
@@ -1629,7 +1742,77 @@
                     item.appendChild(deleteBtn);
                 }
 
+                // Drag and drop listeners
+                item.addEventListener('dragstart', (e) => {
+                    draggedFaviconId = String(favicon.id);
+                    isDraggingFavicon = true;
+                    item.classList.add('dragging');
+                    if (e.dataTransfer) {
+                        e.dataTransfer.effectAllowed = 'move';
+                        e.dataTransfer.setData('text/plain', String(favicon.id));
+                    }
+                });
+
+                item.addEventListener('dragend', () => {
+                    item.classList.remove('dragging');
+                    document.querySelectorAll('.favicon-item').forEach(el => {
+                        el.classList.remove('drag-over-top', 'drag-over-bottom');
+                    });
+                    setTimeout(() => {
+                        isDraggingFavicon = false;
+                        draggedFaviconId = null;
+                    }, 50);
+                });
+
+                item.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+                    if (!draggedFaviconId || draggedFaviconId === String(favicon.id)) return;
+
+                    const rect = item.getBoundingClientRect ? item.getBoundingClientRect() : { top: 0, height: 40 };
+                    const midY = rect.top + rect.height / 2;
+                    if (e.clientY < midY) {
+                        item.classList.add('drag-over-top');
+                        item.classList.remove('drag-over-bottom');
+                    } else {
+                        item.classList.add('drag-over-bottom');
+                        item.classList.remove('drag-over-top');
+                    }
+                });
+
+                item.addEventListener('dragleave', () => {
+                    item.classList.remove('drag-over-top', 'drag-over-bottom');
+                });
+
+                item.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    item.classList.remove('drag-over-top', 'drag-over-bottom');
+                    const sourceId = draggedFaviconId || (e.dataTransfer ? e.dataTransfer.getData('text/plain') : null);
+                    const targetId = String(favicon.id);
+                    if (!sourceId || sourceId === targetId) return;
+
+                    const currentFavicons = getFavicons();
+                    const sourceIdx = currentFavicons.findIndex(f => String(f.id) === String(sourceId));
+                    const targetIdx = currentFavicons.findIndex(f => String(f.id) === String(targetId));
+                    if (sourceIdx === -1 || targetIdx === -1) return;
+
+                    const rect = item.getBoundingClientRect ? item.getBoundingClientRect() : { top: 0, height: 40 };
+                    const insertAfter = (e.clientY || 0) >= (rect.top + rect.height / 2);
+
+                    const [movedItem] = currentFavicons.splice(sourceIdx, 1);
+                    let newTargetIdx = currentFavicons.findIndex(f => String(f.id) === String(targetId));
+                    if (insertAfter) {
+                        newTargetIdx += 1;
+                    }
+                    currentFavicons.splice(newTargetIdx, 0, movedItem);
+
+                    saveCloakOrder(currentFavicons.map(f => String(f.id)));
+                    renderFavicons();
+                    showStatus('Cloak order saved', 'success');
+                });
+
                 item.addEventListener('click', () => {
+                    if (isDraggingFavicon) return;
                     document.querySelectorAll('.favicon-item').forEach(el => el.classList.remove('selected'));
                     item.classList.add('selected');
                     currentFavicon = favicon;
@@ -1639,7 +1822,7 @@
 
                 // Highlight: prefer lastSelected, fallback to Google
                 if (!alreadySelected) {
-                    if (lastSelected && (lastSelected.id === favicon.id || (lastSelected.title === favicon.title && lastSelected.url === favicon.url))) {
+                    if (lastSelected && (String(lastSelected.id) === String(favicon.id) || (lastSelected.title === favicon.title && lastSelected.url === favicon.url))) {
                         item.classList.add('selected');
                         currentFavicon = favicon;
                         alreadySelected = true;
@@ -1943,7 +2126,12 @@
                     dataUriOutput.value = dataUri;
                 }
                 if (copyDataUriBtn) copyDataUriBtn.disabled = false;
-                if (openDataUriBtn) openDataUriBtn.disabled = false;
+                if (openDataUriBtn) {
+                    openDataUriBtn.disabled = false;
+                    openDataUriBtn.classList.remove('disabled');
+                    if (openDataUriBtn.removeAttribute) openDataUriBtn.removeAttribute('disabled');
+                    openDataUriBtn.href = dataUri;
+                }
 
                 if (cacheDataUriCheckbox && cacheDataUriCheckbox.checked) {
                     try {
@@ -1980,7 +2168,12 @@
                     if (cachedDataUri && dataUriOutput) {
                         dataUriOutput.value = cachedDataUri;
                         if (copyDataUriBtn) copyDataUriBtn.disabled = false;
-                        if (openDataUriBtn) openDataUriBtn.disabled = false;
+                        if (openDataUriBtn) {
+                            openDataUriBtn.disabled = false;
+                            openDataUriBtn.classList.remove('disabled');
+                            if (openDataUriBtn.removeAttribute) openDataUriBtn.removeAttribute('disabled');
+                            openDataUriBtn.href = cachedDataUri;
+                        }
                         if (generateDataUriBtn) generateDataUriBtn.textContent = 'Regenerate Data URI';
                     }
                 } else {
@@ -1992,7 +2185,12 @@
                         dataUriOutput.value = '';
                     }
                     if (copyDataUriBtn) copyDataUriBtn.disabled = true;
-                    if (openDataUriBtn) openDataUriBtn.disabled = true;
+                    if (openDataUriBtn) {
+                        openDataUriBtn.disabled = true;
+                        openDataUriBtn.classList.add('disabled');
+                        openDataUriBtn.setAttribute('disabled', 'true');
+                        openDataUriBtn.href = '#';
+                    }
                     if (generateDataUriBtn) generateDataUriBtn.textContent = 'Generate Data URI';
                 }
             } catch (e) {
@@ -3197,10 +3395,12 @@
                 const recentHistory = historyArray.slice(0, 30);
                 
                 const exportData = {
-                    version: 1,
+                    version: 2,
                     timestamp: new Date().toISOString(),
                     history: recentHistory,
                     favicons: favicons,
+                    cloakOrder: getCloakOrder(),
+                    activeSubmenu: localStorage.getItem('suabe2_active_submenu') || null,
                     settings: settings
                 };
                 
@@ -3280,6 +3480,20 @@
                         searchFallbackCheckbox.checked = mergedSettings.searchFallback !== false;
                         if (classicSwitcherCheckbox) classicSwitcherCheckbox.checked = mergedSettings.classicSwitcher || false;
                         updateSwitcherUI();
+
+                        // Restore imported cloak order if present
+                        if (importedData.cloakOrder && Array.isArray(importedData.cloakOrder)) {
+                            saveCloakOrder(importedData.cloakOrder);
+                            renderFavicons();
+                        }
+
+                        // Restore imported active submenu if present
+                        if (importedData.activeSubmenu) {
+                            try {
+                                localStorage.setItem('suabe2_active_submenu', importedData.activeSubmenu);
+                                openPanel(importedData.activeSubmenu);
+                            } catch (e) {}
+                        }
                         
                         showStatus('Data imported!', 'success');
                     } catch (parseError) {
@@ -3361,7 +3575,7 @@
         // Settings handlers
         settingsBtn.addEventListener('click', () => {
             if (settingsPanel.classList.contains('active')) {
-                settingsPanel.classList.remove('active');
+                openPanel(null);
             } else {
                 openPanel('settings');
             }
@@ -3370,7 +3584,7 @@
         // Favicon handlers
         faviconBtn.addEventListener('click', () => {
             if (faviconPanel.classList.contains('active')) {
-                faviconPanel.classList.remove('active');
+                openPanel(null);
             } else {
                 openPanel('favicon');
             }
@@ -3428,7 +3642,7 @@
         // Data URI handlers
         dataUriBtn.addEventListener('click', () => {
             if (dataUriPanel.classList.contains('active')) {
-                dataUriPanel.classList.remove('active');
+                openPanel(null);
             } else {
                 openPanel('dataUri');
             }
@@ -3458,32 +3672,19 @@
             }
         });
 
-        openDataUriBtn.addEventListener('click', () => {
-            if (!dataUriOutput.value) return;
-            const dataUri = dataUriOutput.value;
-            try {
-                // Modern browsers like Chrome block direct top-level navigation to data: URLs (window.open(dataUri)),
-                // which causes the new tab to immediately close.
-                // To keep the new tab open and fully functional without closing, we open a tab and load the exact
-                // Data URI inside a full-screen borderless iframe.
-                const win = window.open('', '_blank');
-                if (win) {
-                    win.document.open();
-                    win.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>SUABE 2</title><style>html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#0f0f0f;}iframe{position:fixed;inset:0;width:100%;height:100%;border:none;}</style></head><body><iframe src="${dataUri}"></iframe></body></html>`);
-                    win.document.close();
-                } else {
-                    const b64 = dataUri.split(',')[1];
-                    const decoded = decodeURIComponent(escape(atob(b64)));
-                    const blob = new Blob([decoded], { type: 'text/html;charset=utf-8' });
-                    window.open(URL.createObjectURL(blob), '_blank');
-                }
-            } catch (err) {
-                console.error('Error opening Data URI:', err);
-                const b64 = dataUri.split(',')[1];
-                const decoded = decodeURIComponent(escape(atob(b64)));
-                const blob = new Blob([decoded], { type: 'text/html;charset=utf-8' });
-                window.open(URL.createObjectURL(blob), '_blank');
+        openDataUriBtn.addEventListener('click', (e) => {
+            const dataUri = dataUriOutput ? dataUriOutput.value : '';
+            if (!dataUri || openDataUriBtn.disabled || openDataUriBtn.classList.contains('disabled') || dataUri.startsWith('Error')) {
+                if (e && e.preventDefault) e.preventDefault();
+                return;
             }
+            openDataUriBtn.href = dataUri;
+            try {
+                // If triggered programmatically in environments where anchor navigation doesn't fire automatically
+                if (typeof window !== 'undefined' && window.open && (!e || !e.isTrusted)) {
+                    window.open(dataUri, '_blank');
+                }
+            } catch (err) {}
         });
 
         cacheDataUriCheckbox.addEventListener('change', () => {
@@ -3494,13 +3695,24 @@
                     if (dataUriOutput.value && !dataUriOutput.value.startsWith('Error')) {
                         localStorage.setItem('suabe2_cached_data_uri', dataUriOutput.value);
                     }
+                    if (openDataUriBtn && dataUriOutput.value && !dataUriOutput.value.startsWith('Error')) {
+                        openDataUriBtn.disabled = false;
+                        openDataUriBtn.classList.remove('disabled');
+                        if (openDataUriBtn.removeAttribute) openDataUriBtn.removeAttribute('disabled');
+                        openDataUriBtn.href = dataUriOutput.value;
+                    }
                 } else {
                     localStorage.removeItem('suabe2_cached_data_uri');
                     if (dataUriOutput) {
                         dataUriOutput.value = '';
                     }
                     if (copyDataUriBtn) copyDataUriBtn.disabled = true;
-                    if (openDataUriBtn) openDataUriBtn.disabled = true;
+                    if (openDataUriBtn) {
+                        openDataUriBtn.disabled = true;
+                        openDataUriBtn.classList.add('disabled');
+                        openDataUriBtn.setAttribute('disabled', 'true');
+                        openDataUriBtn.href = '#';
+                    }
                     if (generateDataUriBtn) generateDataUriBtn.textContent = 'Generate Data URI';
                 }
             } catch (e) {
@@ -3571,6 +3783,7 @@
         renderFavicons();
         initDataUriCache();
         updateSwitcherUI();
+        restoreActiveSubmenu();
 
         // Focus input on load
         urlInput.focus();

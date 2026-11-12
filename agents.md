@@ -166,7 +166,7 @@ The dev build contains experimental features and forward-looking additions.
     - Includes:
       - Selectable readonly output textbox (`#dataUriOutput`) with `autocomplete="off"`.
       - "Copy" button (`#copyDataUriBtn`) with clipboard copy and visual feedback.
-      - "Open in New Tab" button (`#openDataUriBtn`) that opens a tab and embeds the Data URI in a full-screen borderless iframe (with Blob URL fallback) to bypass modern Chromium policies that abort top-frame navigation to `data:text/html` and auto-close the tab.
+      - "Open in New Tab" link button (`#openDataUriBtn`) configured as an anchor `<a>` (`target="_blank"`, `rel="noopener noreferrer"`) with `href` set to the generated Data URI, opening the true `data:text/html;base64,...` URL in a new tab without `about:blank` wrapping.
       - "Cache Data URI in browser" toggle (`#cacheDataUriCheckbox`, default: `off`) inside the panel to persist the generated data URI in `localStorage` under `suabe2_cached_data_uri`. When unchecked, existing cache is purged and the output textarea is reset.
 
 14. **Organized Settings Menu**:
@@ -184,6 +184,16 @@ The dev build contains experimental features and forward-looking additions.
     - Amber `DEV` badge on header to differentiate from stable release.
     - Exports data as `suabe_dev_YYYY-MM-DD.json`.
 
+17. **Draggable & Reorderable Cloaks (`suabe2_cloak_order`)**:
+    - Cloak items in `#faviconList` can be freely dragged and reordered.
+    - Each row includes a subtle 6-dot grip icon (`.favicon-item-grip`) and responsive drag styling (`.dragging`, `.drag-over-top`, `.drag-over-bottom`).
+    - The custom order of both default disguises and user custom cloaks is persisted in `localStorage` under `suabe2_cloak_order` (array of IDs) and synced in JSON export/import.
+
+18. **Persistent Submenu State Across Reloads (`suabe2_active_submenu`)**:
+    - Remembers which panel was open last (*Settings*, *Cloaks*, or *Data URI*) under `suabe2_active_submenu`.
+    - Automatically restores the active panel on reload via `restoreActiveSubmenu()`; if all panels were closed, none open on reload.
+    - Included in JSON export/import.
+
 ---
 
 ## 🛠️ Technical Details & Architecture for Future Agents
@@ -193,6 +203,8 @@ The dev build contains experimental features and forward-looking additions.
   - `suabe2_settings`: JSON object `{ replaceCurrentPage: boolean, useBlobUrl?: boolean, showViewerTopbar?: boolean, autoHideTopbar?: boolean, searchFallback?: boolean, classicSwitcher?: boolean }`.
   - `suabe2_history`: JSON array of entries `{ id, type, url, filename, display, timestamp, isSaved, isLargeFile, isPinned?: boolean, inIndexedDB?: boolean, isFlash?: boolean, content?: string }`.
   - `suabe2_favicons`: JSON array of `{ id, title, url }`.
+  - `suabe2_cloak_order`: JSON array of string IDs representing custom cloak order.
+  - `suabe2_active_submenu`: String (`'settings'`, `'favicon'`, `'dataUri'`) or null indicating the last open submenu.
   - `suabe2_lastSelectedFavicon`: JSON object `{ id, title, url }`.
   - `suabe2_cached_data_uri`: Base64 string of the generated HTML Data URI.
   - `suabe2_cache_data_uri_pref`: String (`'true'` / `'false'`) indicating whether to cache the generated Data URI.
