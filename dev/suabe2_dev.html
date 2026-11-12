@@ -377,19 +377,22 @@
         .favicon-panel {
             position: fixed;
             top: 30px;
+            bottom: 24px;
             left: 590px;
-            width: 300px;
+            width: 320px;
             background: #1a1a1a;
             border: 2px solid #404040;
             border-radius: 8px;
             padding: 20px;
-            max-height: calc(100vh - 60px);
-            overflow-y: auto;
             z-index: 1000;
             opacity: 0;
             transform: translateX(-20px);
             pointer-events: none;
             transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+            overflow: hidden;
         }
 
         .favicon-panel.active {
@@ -400,8 +403,87 @@
 
         .favicon-panel h2 {
             font-size: 18px;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
             color: #e0e0e0;
+            flex-shrink: 0;
+        }
+
+        .favicon-list-container {
+            position: relative;
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .favicon-list {
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+            overscroll-behavior: contain;
+            padding-bottom: 4px;
+            scrollbar-width: thin;
+            scrollbar-color: #404040 #1a1a1a;
+        }
+
+        .favicon-list::-webkit-scrollbar {
+            width: 6px;
+        }
+        .favicon-list::-webkit-scrollbar-track {
+            background: #1a1a1a;
+        }
+        .favicon-list::-webkit-scrollbar-thumb {
+            background: #404040;
+            border-radius: 3px;
+        }
+        .favicon-list::-webkit-scrollbar-thumb:hover {
+            background: #606060;
+        }
+
+        .favicon-scroll-hint {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 42px;
+            background: linear-gradient(to bottom, rgba(26, 26, 26, 0) 0%, rgba(26, 26, 26, 0.96) 80%);
+            pointer-events: none;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding-bottom: 4px;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.25s ease, visibility 0.25s ease;
+            z-index: 10;
+            border-bottom-left-radius: 6px;
+            border-bottom-right-radius: 6px;
+        }
+
+        .favicon-scroll-hint.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .favicon-scroll-arrow {
+            animation: bounceDown 1.6s ease-in-out infinite;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.8));
+        }
+
+        @keyframes bounceDown {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(4px);
+            }
+            60% {
+                transform: translateY(2px);
+            }
         }
 
         .favicon-input-group {
@@ -412,6 +494,7 @@
             padding-top: 15px;
             border-top: 1px solid #333;
             margin-bottom: 0;
+            flex-shrink: 0;
         }
 
         .favicon-input-group input {
@@ -447,11 +530,6 @@
             box-shadow: 0 4px 12px rgba(157, 78, 221, 0.3);
         }
 
-        .favicon-list {
-            max-height: 250px;
-            overflow-y: auto;
-        }
-
         .favicon-item {
             padding: 10px 12px;
             background: #2a2a2a;
@@ -459,28 +537,21 @@
             border-radius: 6px;
             margin-bottom: 8px;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
+            will-change: transform;
             display: flex;
             align-items: center;
             gap: 8px;
             user-select: none;
             position: relative;
+            box-sizing: border-box;
         }
 
         .favicon-item.dragging {
             opacity: 0.35;
             border: 1px dashed #00d9ff;
-            transform: scale(0.99);
-        }
-
-        .favicon-item.drag-over-top {
-            border-top: 2px solid #00d9ff !important;
-            box-shadow: 0 -4px 8px rgba(0, 217, 255, 0.25);
-        }
-
-        .favicon-item.drag-over-bottom {
-            border-bottom: 2px solid #00d9ff !important;
-            box-shadow: 0 4px 8px rgba(0, 217, 255, 0.25);
+            transform: scale(0.98);
+            z-index: 5;
         }
 
         .favicon-item-grip {
@@ -1263,7 +1334,16 @@
     <!-- Favicon Panel -->
     <div class="favicon-panel" id="faviconPanel">
         <h2>Favicons & Cloaks</h2>
-        <div class="favicon-list" id="faviconList"></div>
+        <div class="favicon-list-container">
+            <div class="favicon-list" id="faviconList"></div>
+            <div class="favicon-scroll-hint" id="faviconScrollHint">
+                <div class="favicon-scroll-arrow">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00d9ff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6 9l6 6 6-6"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
         <div class="favicon-input-group">
             <input type="text" id="faviconTitle" placeholder="Title (e.g., Google)">
             <input type="text" id="faviconUrl" placeholder="Icon URL (.ico)">
@@ -1428,6 +1508,7 @@
         const faviconUrlInput = document.getElementById('faviconUrl');
         const faviconAddBtn = document.getElementById('faviconAddBtn');
         const faviconList = document.getElementById('faviconList');
+        const faviconScrollHint = document.getElementById('faviconScrollHint');
         const dragDropOverlay = document.getElementById('dragDropOverlay');
         const exportBtn = document.getElementById('exportBtn');
         const importBtn = document.getElementById('importBtn');
@@ -1446,6 +1527,8 @@
             } else if (panelToOpen === 'favicon' || panelToOpen === 'cloaks') {
                 faviconPanel.classList.add('active');
                 try { localStorage.setItem('suabe2_active_submenu', 'favicon'); } catch (e) {}
+                updateFaviconScrollHint();
+                setTimeout(updateFaviconScrollHint, 320);
             } else if (panelToOpen === 'dataUri') {
                 dataUriPanel.classList.add('active');
                 try { localStorage.setItem('suabe2_active_submenu', 'dataUri'); } catch (e) {}
@@ -1688,6 +1771,183 @@
 
         let isDraggingFavicon = false;
         let draggedFaviconId = null;
+        let dragStartIndex = -1;
+        let currentDropSlot = -1;
+
+        function getFaviconItems() {
+            if (!faviconList) return [];
+            return faviconList.querySelectorAll ? Array.from(faviconList.querySelectorAll('.favicon-item')) : Array.from(faviconList.children || []);
+        }
+
+        function clearFaviconDragTransforms() {
+            const items = getFaviconItems();
+            items.forEach(el => {
+                if (el && el.style) el.style.transform = '';
+            });
+        }
+
+        function updateFaviconScrollHint() {
+            const list = document.getElementById('faviconList');
+            const hint = document.getElementById('faviconScrollHint');
+            if (!list || !hint) return;
+            const canScroll = (list.scrollHeight || 0) > ((list.clientHeight || 0) + 6);
+            const isAtTop = (list.scrollTop || 0) <= 12;
+            if (canScroll && isAtTop) {
+                hint.classList.add('visible');
+            } else {
+                hint.classList.remove('visible');
+            }
+        }
+
+        function handleFaviconDragOver(e) {
+            if (e && e.preventDefault) e.preventDefault();
+            if (!isDraggingFavicon || draggedFaviconId === null) return;
+            if (e && e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+
+            const items = getFaviconItems();
+            if (items.length <= 1) return;
+
+            const sampleEl = items[0];
+            const itemHeight = (sampleEl && sampleEl.offsetHeight) ? (sampleEl.offsetHeight + 8) : 48;
+
+            const clientY = (e && typeof e.clientY === 'number') ? e.clientY : 0;
+            let targetSlot = -1;
+
+            for (let i = 0; i < items.length; i++) {
+                const rect = (items[i].getBoundingClientRect && items[i].getBoundingClientRect()) || { top: i * itemHeight, bottom: (i + 1) * itemHeight, height: itemHeight };
+                if (clientY >= rect.top && clientY <= rect.bottom) {
+                    const midY = rect.top + rect.height / 2;
+                    targetSlot = clientY < midY ? i : (i + 1);
+                    break;
+                }
+            }
+
+            if (targetSlot === -1) {
+                const firstRect = (items[0].getBoundingClientRect && items[0].getBoundingClientRect()) || { top: 0 };
+                const lastRect = (items[items.length - 1].getBoundingClientRect && items[items.length - 1].getBoundingClientRect()) || { bottom: 1000 };
+                if (clientY < firstRect.top) {
+                    targetSlot = 0;
+                } else if (clientY > lastRect.bottom) {
+                    targetSlot = items.length;
+                }
+            }
+
+            if (targetSlot === -1) return;
+            currentDropSlot = targetSlot;
+
+            // Target index for the dragged item
+            let newIndex = targetSlot;
+            if (targetSlot > dragStartIndex) {
+                newIndex = targetSlot - 1;
+            }
+
+            // Apply smooth live translation
+            items.forEach((el, idx) => {
+                if (idx === dragStartIndex || !el || !el.style) return;
+
+                if (newIndex > dragStartIndex) {
+                    if (idx > dragStartIndex && idx <= newIndex) {
+                        el.style.transform = `translateY(-${itemHeight}px)`;
+                    } else {
+                        el.style.transform = '';
+                    }
+                } else if (newIndex < dragStartIndex) {
+                    if (idx >= newIndex && idx < dragStartIndex) {
+                        el.style.transform = `translateY(${itemHeight}px)`;
+                    } else {
+                        el.style.transform = '';
+                    }
+                } else {
+                    el.style.transform = '';
+                }
+            });
+        }
+
+        function handleFaviconDrop(e) {
+            if (e) {
+                if (e._handled) return;
+                e._handled = true;
+                if (e.preventDefault) e.preventDefault();
+            }
+            if (!isDraggingFavicon || draggedFaviconId === null) return;
+
+            const items = getFaviconItems();
+            if (items.length <= 1) {
+                clearFaviconDragTransforms();
+                isDraggingFavicon = false;
+                draggedFaviconId = null;
+                return;
+            }
+
+            let newIndex = currentDropSlot;
+            if (newIndex === -1 && e && typeof e.clientY === 'number') {
+                handleFaviconDragOver(e);
+                newIndex = currentDropSlot;
+            }
+            if (newIndex > dragStartIndex) {
+                newIndex = newIndex - 1;
+            }
+
+            if (newIndex >= 0 && newIndex !== dragStartIndex && newIndex < items.length) {
+                // First: record positions of all items for FLIP animation
+                const firstTops = new Map();
+                items.forEach(el => {
+                    const id = el.dataset ? el.dataset.id : (el.getAttribute ? el.getAttribute('data-id') : null);
+                    if (id && el.getBoundingClientRect) {
+                        firstTops.set(id, el.getBoundingClientRect().top);
+                    }
+                });
+
+                // Clear live transforms before re-rendering
+                clearFaviconDragTransforms();
+
+                // Update data model
+                const currentFavicons = getFavicons();
+                const sourceIdx = currentFavicons.findIndex(f => String(f.id) === String(draggedFaviconId));
+                if (sourceIdx !== -1) {
+                    const [movedItem] = currentFavicons.splice(sourceIdx, 1);
+                    currentFavicons.splice(newIndex, 0, movedItem);
+                    saveCloakOrder(currentFavicons.map(f => String(f.id)));
+                    renderFavicons();
+
+                    // Play FLIP animation on the newly rendered items
+                    const newItems = getFaviconItems();
+                    newItems.forEach(el => {
+                        const id = el.dataset ? el.dataset.id : (el.getAttribute ? el.getAttribute('data-id') : null);
+                        if (id && firstTops.has(id) && el.getBoundingClientRect && el.style) {
+                            const firstTop = firstTops.get(id);
+                            const lastTop = el.getBoundingClientRect().top;
+                            const deltaY = firstTop - lastTop;
+                            if (Math.abs(deltaY) > 0.5) {
+                                el.style.transition = 'none';
+                                el.style.transform = `translateY(${deltaY}px)`;
+                                if (typeof requestAnimationFrame !== 'undefined') {
+                                    requestAnimationFrame(() => {
+                                        if (el.offsetHeight) el.offsetHeight; // force reflow
+                                        el.style.transition = 'transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1)';
+                                        el.style.transform = '';
+                                        setTimeout(() => {
+                                            if (el.style) el.style.transition = '';
+                                        }, 280);
+                                    });
+                                }
+                            }
+                        }
+                    });
+                    showStatus('Cloak order saved', 'success');
+                }
+            } else {
+                clearFaviconDragTransforms();
+                renderFavicons();
+            }
+
+            setTimeout(() => {
+                isDraggingFavicon = false;
+                draggedFaviconId = null;
+                dragStartIndex = -1;
+                currentDropSlot = -1;
+            }, 50);
+        }
 
         function renderFavicons() {
             const favicons = getFavicons();
@@ -1748,6 +2008,9 @@
                 item.addEventListener('dragstart', (e) => {
                     draggedFaviconId = String(favicon.id);
                     isDraggingFavicon = true;
+                    const allItems = Array.from(faviconList.children);
+                    dragStartIndex = allItems.indexOf(item);
+                    currentDropSlot = dragStartIndex;
                     item.classList.add('dragging');
                     if (e.dataTransfer) {
                         e.dataTransfer.effectAllowed = 'move';
@@ -1757,61 +2020,17 @@
 
                 item.addEventListener('dragend', () => {
                     item.classList.remove('dragging');
-                    document.querySelectorAll('.favicon-item').forEach(el => {
-                        el.classList.remove('drag-over-top', 'drag-over-bottom');
-                    });
+                    clearFaviconDragTransforms();
                     setTimeout(() => {
                         isDraggingFavicon = false;
                         draggedFaviconId = null;
+                        dragStartIndex = -1;
+                        currentDropSlot = -1;
                     }, 50);
                 });
 
-                item.addEventListener('dragover', (e) => {
-                    e.preventDefault();
-                    if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
-                    if (!draggedFaviconId || draggedFaviconId === String(favicon.id)) return;
-
-                    const rect = item.getBoundingClientRect ? item.getBoundingClientRect() : { top: 0, height: 40 };
-                    const midY = rect.top + rect.height / 2;
-                    if (e.clientY < midY) {
-                        item.classList.add('drag-over-top');
-                        item.classList.remove('drag-over-bottom');
-                    } else {
-                        item.classList.add('drag-over-bottom');
-                        item.classList.remove('drag-over-top');
-                    }
-                });
-
-                item.addEventListener('dragleave', () => {
-                    item.classList.remove('drag-over-top', 'drag-over-bottom');
-                });
-
-                item.addEventListener('drop', (e) => {
-                    e.preventDefault();
-                    item.classList.remove('drag-over-top', 'drag-over-bottom');
-                    const sourceId = draggedFaviconId || (e.dataTransfer ? e.dataTransfer.getData('text/plain') : null);
-                    const targetId = String(favicon.id);
-                    if (!sourceId || sourceId === targetId) return;
-
-                    const currentFavicons = getFavicons();
-                    const sourceIdx = currentFavicons.findIndex(f => String(f.id) === String(sourceId));
-                    const targetIdx = currentFavicons.findIndex(f => String(f.id) === String(targetId));
-                    if (sourceIdx === -1 || targetIdx === -1) return;
-
-                    const rect = item.getBoundingClientRect ? item.getBoundingClientRect() : { top: 0, height: 40 };
-                    const insertAfter = (e.clientY || 0) >= (rect.top + rect.height / 2);
-
-                    const [movedItem] = currentFavicons.splice(sourceIdx, 1);
-                    let newTargetIdx = currentFavicons.findIndex(f => String(f.id) === String(targetId));
-                    if (insertAfter) {
-                        newTargetIdx += 1;
-                    }
-                    currentFavicons.splice(newTargetIdx, 0, movedItem);
-
-                    saveCloakOrder(currentFavicons.map(f => String(f.id)));
-                    renderFavicons();
-                    showStatus('Cloak order saved', 'success');
-                });
+                item.addEventListener('dragover', handleFaviconDragOver);
+                item.addEventListener('drop', handleFaviconDrop);
 
                 item.addEventListener('click', () => {
                     if (isDraggingFavicon) return;
@@ -1837,6 +2056,12 @@
 
                 faviconList.appendChild(item);
             });
+
+            if (typeof requestAnimationFrame !== 'undefined') {
+                requestAnimationFrame(updateFaviconScrollHint);
+            } else {
+                setTimeout(updateFaviconScrollHint, 50);
+            }
         }
 
         let currentFavicon = null;
@@ -3752,6 +3977,19 @@
                 importFileInput.value = '';
             }
         });
+
+        // Favicon list container drag and scroll hint listeners
+        if (faviconList) {
+            faviconList.addEventListener('dragover', handleFaviconDragOver);
+            faviconList.addEventListener('drop', handleFaviconDrop);
+            faviconList.addEventListener('dragleave', (e) => {
+                if (e.relatedTarget && faviconList.contains(e.relatedTarget)) return;
+                clearFaviconDragTransforms();
+                currentDropSlot = dragStartIndex;
+            });
+            faviconList.addEventListener('scroll', updateFaviconScrollHint);
+        }
+        window.addEventListener('resize', updateFaviconScrollHint);
 
         // Expose renderHistory and listen to storage events for viewer tabs
         window.renderHistory = renderHistory;

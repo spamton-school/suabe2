@@ -186,7 +186,10 @@ The dev build contains experimental features and forward-looking additions.
 
 17. **Draggable & Reorderable Cloaks (`suabe2_cloak_order`)**:
     - Cloak items in `#faviconList` can be freely dragged and reordered.
-    - Each row includes a subtle 6-dot grip icon (`.favicon-item-grip`) and responsive drag styling (`.dragging`, `.drag-over-top`, `.drag-over-bottom`).
+    - Each row includes a subtle 6-dot grip icon (`.favicon-item-grip`) and responsive drag styling (`.dragging`).
+    - Smooth GPU-accelerated live translation: As a cloak is dragged over the list, neighboring items glide up or down out of the way using `transform: translateY(...)` with `cubic-bezier(0.2, 0.8, 0.2, 1)`, visually opening a slot for the dragged item.
+    - FLIP animation on drop smoothly slides elements into their resting positions with zero layout thrashing or sudden teleportation.
+    - Container scrolling is stabilized by locking `.favicon-panel` to `overflow: hidden;` and isolating scrolling to `#faviconList` with `overscroll-behavior: contain;`, eliminating erratic auto-scroll jumps.
     - The custom order of both default disguises and user custom cloaks is persisted in `localStorage` under `suabe2_cloak_order` (array of IDs) and synced in JSON export/import.
     - Segregated drag events (`isExternalFileDrag`) ensure dragging cloaks inside `#faviconList` never triggers the full-screen file drop overlay (`#dragDropOverlay`).
 
@@ -194,6 +197,13 @@ The dev build contains experimental features and forward-looking additions.
     - Remembers which panel was open last (*Settings*, *Cloaks*, or *Data URI*) under `suabe2_active_submenu`.
     - Automatically restores the active panel on reload via `restoreActiveSubmenu()`; if all panels were closed, none open on reload.
     - Included in JSON export/import.
+
+19. **Full-Height Favicons Panel & Scroll Affordance (`#faviconScrollHint`)**:
+    - `#faviconPanel` expands downward to `bottom: 24px;` (`top: 30px`, `width: 320px`, `display: flex`, `flex-direction: column`, `overflow: hidden`) providing full-screen height utilization for cloaks.
+    - `#faviconList` is nested inside `.favicon-list-container` (`flex: 1`, `min-height: 0`).
+    - Dynamic scroll affordance: When scrolling is possible (`scrollHeight > clientHeight + 6`), a subtle bottom gradient shadow and bouncing cyan arrow indicator (`#faviconScrollHint`) appear at the bottom of the list.
+    - The indicator is only visible when at the top of the list (`scrollTop <= 12`), smoothly fading out (`opacity: 0`, `visibility: hidden`) upon scrolling down so it takes away zero space.
+    - Re-evaluates dynamically on list scroll, window resize, cloak addition/deletion, or panel opening via `updateFaviconScrollHint()`.
 
 ---
 
