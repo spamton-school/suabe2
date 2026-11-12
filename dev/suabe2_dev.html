@@ -651,6 +651,155 @@
             border-color: #ff6b6b;
             box-shadow: 0 0 8px rgba(255, 107, 107, 0.2);
         }
+
+        /* Settings Sections */
+        .settings-section {
+            margin-bottom: 18px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid #333;
+        }
+
+        .settings-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .settings-section-title {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #888;
+            margin-bottom: 12px;
+        }
+
+        /* Favicon Presets */
+        .favicon-section-title {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #888;
+            margin: 14px 0 8px 0;
+        }
+
+        .preset-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .preset-card {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 10px;
+            background: #252525;
+            border: 1px solid #404040;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+
+        .preset-card:hover {
+            background: #303030;
+            border-color: #9d4edd;
+        }
+
+        .preset-card.selected {
+            background: #322538;
+            border-color: #9d4edd;
+            box-shadow: 0 0 8px rgba(157, 78, 221, 0.3);
+        }
+
+        .preset-card img {
+            width: 16px;
+            height: 16px;
+            border-radius: 2px;
+            flex-shrink: 0;
+        }
+
+        .preset-card-title {
+            font-size: 11.5px;
+            color: #e0e0e0;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* History Star / Pin */
+        .history-item-star {
+            width: 22px;
+            height: 22px;
+            padding: 0;
+            background: none;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            transition: color 0.2s ease, transform 0.2s ease;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .history-item-star:hover {
+            color: #ffb703;
+            transform: scale(1.2);
+        }
+
+        .history-item-star.pinned {
+            color: #ffb703;
+        }
+
+        .history-item.pinned {
+            border-left: 3px solid #ffb703;
+            background: linear-gradient(135deg, #2b281f 0%, #201f1a 100%);
+        }
+
+        /* Drag & Drop Overlay */
+        .drag-drop-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(10, 10, 10, 0.88);
+            backdrop-filter: blur(4px);
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+
+        .drag-drop-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .drag-drop-box {
+            border: 2px dashed #00d9ff;
+            border-radius: 12px;
+            padding: 35px 50px;
+            text-align: center;
+            color: #00d9ff;
+            background: rgba(0, 217, 255, 0.06);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 8px 32px rgba(0, 217, 255, 0.15);
+        }
+
+        .drag-drop-box p {
+            font-size: 15px;
+            font-weight: 600;
+            color: #e0e0e0;
+        }
     </style>
 </head>
 <body>
@@ -685,7 +834,7 @@
         <div class="mode-content" data-mode="file">
             <div class="input-group">
                 <button class="file-button" id="fileButtonUI">Choose File</button>
-                <input type="file" id="fileInput" accept=".html,.htm,.css,.txt,.js,.json,.xml,.svg,.md,.csv,.log,.java,.py,.cpp,.c,.cs,.php,.rb,.go,.rs,.ts,.tsx,.jsx,.vue,.yaml,.yml,.sh,.bash,.sql">
+                <input type="file" id="fileInput" accept=".html,.htm,.swf,.css,.txt,.js,.json,.xml,.svg,.md,.csv,.log,.java,.py,.cpp,.c,.cs,.php,.rb,.go,.rs,.ts,.tsx,.jsx,.vue,.yaml,.yml,.sh,.bash,.sql">
             </div>
         </div>
 
@@ -696,41 +845,81 @@
         <div id="historyMenu"></div>
     </div>
 
+    <!-- Drag & Drop Overlay -->
+    <div id="dragDropOverlay" class="drag-drop-overlay">
+        <div class="drag-drop-box">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#00d9ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+            <p>Drop file to open immediately</p>
+        </div>
+    </div>
+
     <!-- Settings Panel -->
     <div class="settings-panel" id="settingsPanel">
         <h2>Settings</h2>
-        <div class="settings-group">
-            <label>
-                <input type="checkbox" id="replacePageCheckbox">
-                <span>Replace Current Page</span>
-            </label>
+        
+        <div class="settings-section">
+            <div class="settings-section-title">Cloaking & Tab Mode</div>
+            <div class="settings-group">
+                <label title="Replace current document instead of launching a new tab">
+                    <input type="checkbox" id="replacePageCheckbox">
+                    <span>Replace Current Page</span>
+                </label>
+            </div>
+            <div class="settings-group">
+                <label title="Open content in a blob URL instead of about:blank">
+                    <input type="checkbox" id="blobUrlCheckbox">
+                    <span>Open in Blob URL</span>
+                </label>
+            </div>
         </div>
-        <div class="settings-group">
-            <label title="Open content in a blob URL instead of about:blank">
-                <input type="checkbox" id="blobUrlCheckbox">
-                <span>Open in Blob URL</span>
-            </label>
+
+        <div class="settings-section">
+            <div class="settings-section-title">Viewer Navigation</div>
+            <div class="settings-group">
+                <label title="Show topbar with URL bar, maximize, and minimize in opened viewer">
+                    <input type="checkbox" id="topbarCheckbox">
+                    <span>Viewer Navigation Bar</span>
+                </label>
+            </div>
+            <div class="settings-group">
+                <label title="Automatically slide navigation bar away and reveal it when hovering top edge">
+                    <input type="checkbox" id="autoHideCheckbox">
+                    <span>Auto-Hide Navigation Bar</span>
+                </label>
+            </div>
+            <div class="settings-group">
+                <label title="Automatically search DuckDuckGo when entering search terms instead of a URL">
+                    <input type="checkbox" id="searchFallbackCheckbox">
+                    <span>DuckDuckGo Search Fallback</span>
+                </label>
+            </div>
         </div>
-        <div class="settings-group">
-            <label title="Show topbar with URL bar, maximize, and minimize in opened viewer">
-                <input type="checkbox" id="topbarCheckbox">
-                <span>Viewer Navigation Bar</span>
-            </label>
-        </div>
-        <div class="settings-buttons">
-            <!-- NOTE: Keep import/export buttons at the bottom of settings menu -->
-            <button class="export-import-btn" id="exportBtn">Export Data</button>
-            <button class="export-import-btn" id="importBtn">Import Data</button>
-            <input type="file" id="importFileInput" accept=".json">
+
+        <div class="settings-section">
+            <div class="settings-section-title">Data & Storage</div>
+            <div class="settings-buttons">
+                <!-- NOTE: Keep import/export buttons at the bottom of settings menu -->
+                <button class="export-import-btn" id="exportBtn">Export Data</button>
+                <button class="export-import-btn" id="importBtn">Import Data</button>
+                <input type="file" id="importFileInput" accept=".json">
+            </div>
         </div>
     </div>
 
     <!-- Favicon Panel -->
     <div class="favicon-panel active" id="faviconPanel">
-        <h2>Favicons</h2>
+        <h2>Favicons & Cloaks</h2>
+        <div class="favicon-section-title">Quick Presets</div>
+        <div class="preset-grid" id="presetFaviconGrid"></div>
+
+        <div class="favicon-section-title">Add Custom Favicon</div>
         <div class="favicon-input-group">
             <input type="text" id="faviconTitle" placeholder="Title (e.g., Google)">
-            <input type="text" id="faviconUrl" placeholder="Icon URL">
+            <input type="text" id="faviconUrl" placeholder="Icon URL (.ico)">
             <button class="favicon-add-btn" id="faviconAddBtn">Add Favicon</button>
         </div>
         <div class="favicon-list" id="faviconList"></div>
@@ -741,8 +930,117 @@
         const CONFIG = {
             closePrompt: 'Are you sure you want to close?',
             htmlLikeExtensions: ['html', 'htm', 'svg'],
-            maxFileSizeBytes: 5 * 1024 * 1024 // 5MB
+            flashExtensions: ['swf'],
+            maxFileSizeBytes: 5 * 1024 * 1024 // 5MB (localStorage limit, IndexedDB handles >5MB)
         };
+
+        // ========== IndexedDB File Cache (For Games & Files > 5MB) ==========
+        const IDBStorage = {
+            dbName: 'suabe2_files_db',
+            dbVersion: 1,
+            storeName: 'files',
+            _db: null,
+
+            async getDB() {
+                if (this._db) return this._db;
+                return new Promise((resolve) => {
+                    if (typeof indexedDB === 'undefined') {
+                        resolve(null);
+                        return;
+                    }
+                    try {
+                        const request = indexedDB.open(this.dbName, this.dbVersion);
+                        request.onupgradeneeded = (e) => {
+                            const db = e.target.result;
+                            if (!db.objectStoreNames.contains(this.storeName)) {
+                                db.createObjectStore(this.storeName, { keyPath: 'id' });
+                            }
+                        };
+                        request.onsuccess = (e) => {
+                            this._db = e.target.result;
+                            resolve(this._db);
+                        };
+                        request.onerror = () => resolve(null);
+                    } catch (e) {
+                        resolve(null);
+                    }
+                });
+            },
+
+            async saveFile(id, content, filename) {
+                try {
+                    const db = await this.getDB();
+                    if (!db) return false;
+                    return new Promise((resolve) => {
+                        const tx = db.transaction([this.storeName], 'readwrite');
+                        const store = tx.objectStore(this.storeName);
+                        store.put({ id, content, filename, timestamp: Date.now() });
+                        tx.oncomplete = () => resolve(true);
+                        tx.onerror = () => resolve(false);
+                    });
+                } catch (e) {
+                    return false;
+                }
+            },
+
+            async getFile(id) {
+                try {
+                    const db = await this.getDB();
+                    if (!db) return null;
+                    return new Promise((resolve) => {
+                        const tx = db.transaction([this.storeName], 'readonly');
+                        const store = tx.objectStore(this.storeName);
+                        const req = store.get(id);
+                        req.onsuccess = () => resolve(req.result ? req.result.content : null);
+                        req.onerror = () => resolve(null);
+                    });
+                } catch (e) {
+                    return null;
+                }
+            },
+
+            async deleteFile(id) {
+                try {
+                    const db = await this.getDB();
+                    if (!db) return false;
+                    return new Promise((resolve) => {
+                        const tx = db.transaction([this.storeName], 'readwrite');
+                        const store = tx.objectStore(this.storeName);
+                        store.delete(id);
+                        tx.oncomplete = () => resolve(true);
+                        tx.onerror = () => resolve(false);
+                    });
+                } catch (e) {
+                    return false;
+                }
+            },
+
+            async clearFiles() {
+                try {
+                    const db = await this.getDB();
+                    if (!db) return false;
+                    return new Promise((resolve) => {
+                        const tx = db.transaction([this.storeName], 'readwrite');
+                        const store = tx.objectStore(this.storeName);
+                        store.clear();
+                        tx.oncomplete = () => resolve(true);
+                        tx.onerror = () => resolve(false);
+                    });
+                } catch (e) {
+                    return false;
+                }
+            }
+        };
+
+        // ========== Preset Cloaks ==========
+        const PRESET_FAVICONS = [
+            { id: 'preset_google', title: 'Google', url: 'https://www.google.com/favicon.ico' },
+            { id: 'preset_classroom', title: 'Google Classroom', url: 'https://ssl.gstatic.com/classroom/favicon.png' },
+            { id: 'preset_drive', title: 'Google Drive', url: 'https://ssl.gstatic.com/images/branding/product/1x/drive_2020q4_32dp.png' },
+            { id: 'preset_docs', title: 'Google Docs', url: 'https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico' },
+            { id: 'preset_canvas', title: 'Canvas LMS', url: 'https://du11hjcvx0uqb.cloudfront.net/br/dist/images/favicon-e10d657a73.ico' },
+            { id: 'preset_wikipedia', title: 'Wikipedia', url: 'https://en.wikipedia.org/static/favicon/wikipedia.ico' }
+        ];
 
         // ========== State ==========
         let currentMode = 'url';
@@ -765,12 +1063,16 @@
         const replacePageCheckbox = document.getElementById('replacePageCheckbox');
         const blobUrlCheckbox = document.getElementById('blobUrlCheckbox');
         const topbarCheckbox = document.getElementById('topbarCheckbox');
+        const autoHideCheckbox = document.getElementById('autoHideCheckbox');
+        const searchFallbackCheckbox = document.getElementById('searchFallbackCheckbox');
         const faviconBtn = document.getElementById('faviconBtn');
         const faviconPanel = document.getElementById('faviconPanel');
         const faviconTitleInput = document.getElementById('faviconTitle');
         const faviconUrlInput = document.getElementById('faviconUrl');
         const faviconAddBtn = document.getElementById('faviconAddBtn');
         const faviconList = document.getElementById('faviconList');
+        const presetFaviconGrid = document.getElementById('presetFaviconGrid');
+        const dragDropOverlay = document.getElementById('dragDropOverlay');
         const exportBtn = document.getElementById('exportBtn');
         const importBtn = document.getElementById('importBtn');
         const importFileInput = document.getElementById('importFileInput');
@@ -799,6 +1101,21 @@
 
         function saveHistory(historyArray) {
             try {
+                // Keep only max 50 items, but preserve pinned items
+                while (historyArray.length > 50) {
+                    let removeIndex = -1;
+                    for (let i = historyArray.length - 1; i >= 0; i--) {
+                        if (!historyArray[i].isPinned) {
+                            removeIndex = i;
+                            break;
+                        }
+                    }
+                    if (removeIndex !== -1) {
+                        historyArray.splice(removeIndex, 1);
+                    } else {
+                        historyArray.pop();
+                    }
+                }
                 localStorage.setItem('suabe2_history', JSON.stringify(historyArray));
                 history = historyArray;
                 renderHistory();
@@ -811,10 +1128,22 @@
         function getSettings() {
             try {
                 const stored = localStorage.getItem('suabe2_settings');
-                return stored ? JSON.parse(stored) : { replaceCurrentPage: false, useBlobUrl: false, showViewerTopbar: true };
+                return stored ? JSON.parse(stored) : {
+                    replaceCurrentPage: false,
+                    useBlobUrl: false,
+                    showViewerTopbar: true,
+                    autoHideTopbar: false,
+                    searchFallback: true
+                };
             } catch (e) {
                 console.error('Error reading settings:', e);
-                return { replaceCurrentPage: false, useBlobUrl: false, showViewerTopbar: true };
+                return {
+                    replaceCurrentPage: false,
+                    useBlobUrl: false,
+                    showViewerTopbar: true,
+                    autoHideTopbar: false,
+                    searchFallback: true
+                };
             }
         }
 
@@ -831,6 +1160,9 @@
             if (key === 'showViewerTopbar') {
                 return settings[key] !== undefined ? settings[key] : true;
             }
+            if (key === 'searchFallback') {
+                return settings[key] !== undefined ? settings[key] : true;
+            }
             return settings[key] !== undefined ? settings[key] : false;
         }
 
@@ -844,6 +1176,8 @@
         replacePageCheckbox.checked = getSetting('replaceCurrentPage');
         blobUrlCheckbox.checked = getSetting('useBlobUrl');
         topbarCheckbox.checked = getSetting('showViewerTopbar');
+        autoHideCheckbox.checked = getSetting('autoHideTopbar');
+        searchFallbackCheckbox.checked = getSetting('searchFallback');
 
         // ========== Favicon Management ==========
         function getFavicons() {
@@ -903,11 +1237,52 @@
             saveFavicons(filtered);
         }
 
+        function renderPresets() {
+            if (!presetFaviconGrid) return;
+            presetFaviconGrid.innerHTML = '';
+            const lastSelected = getLastSelectedFavicon();
+
+            PRESET_FAVICONS.forEach(preset => {
+                const card = document.createElement('div');
+                card.className = 'preset-card';
+
+                const img = document.createElement('img');
+                img.src = preset.url;
+                img.alt = preset.title;
+                img.onerror = function() {
+                    this.style.opacity = '0.3';
+                };
+
+                const name = document.createElement('span');
+                name.textContent = preset.title;
+
+                card.appendChild(img);
+                card.appendChild(name);
+
+                if (lastSelected && (lastSelected.id === preset.id || (lastSelected.title === preset.title && lastSelected.url === preset.url))) {
+                    card.classList.add('selected');
+                    currentFavicon = preset;
+                }
+
+                card.addEventListener('click', () => {
+                    document.querySelectorAll('.preset-card').forEach(c => c.classList.remove('selected'));
+                    document.querySelectorAll('.favicon-item').forEach(c => c.classList.remove('selected'));
+                    card.classList.add('selected');
+                    currentFavicon = preset;
+                    saveLastSelectedFavicon(preset);
+                    showStatus('Selected ' + preset.title, 'success');
+                });
+
+                presetFaviconGrid.appendChild(card);
+            });
+        }
+
         function renderFavicons() {
+            renderPresets();
             const favicons = getFavicons();
             faviconList.innerHTML = '';
             const lastSelected = getLastSelectedFavicon();
-            let alreadySelected = false;
+            let alreadySelected = !!(lastSelected && PRESET_FAVICONS.some(p => p.id === lastSelected.id || (p.title === lastSelected.title && p.url === lastSelected.url)));
 
             favicons.forEach(favicon => {
                 const item = document.createElement('div');
@@ -947,18 +1322,15 @@
 
                 item.addEventListener('click', () => {
                     document.querySelectorAll('.favicon-item').forEach(el => el.classList.remove('selected'));
+                    document.querySelectorAll('.preset-card').forEach(el => el.classList.remove('selected'));
                     item.classList.add('selected');
                     currentFavicon = favicon;
                     saveLastSelectedFavicon(favicon);
                 });
 
-                // Highlight: prefer lastSelected, fallback to Google default (only select one)
+                // Highlight: prefer lastSelected
                 if (!alreadySelected) {
-                    if (lastSelected && lastSelected.id === favicon.id) {
-                        item.classList.add('selected');
-                        currentFavicon = favicon;
-                        alreadySelected = true;
-                    } else if (!lastSelected && favicon.title === 'Google') {
+                    if (lastSelected && (lastSelected.id === favicon.id || (lastSelected.title === favicon.title && lastSelected.url === favicon.url))) {
                         item.classList.add('selected');
                         currentFavicon = favicon;
                         alreadySelected = true;
@@ -982,36 +1354,53 @@
         function getLastSelectedFavicon() {
             try {
                 const stored = localStorage.getItem('suabe2_lastSelectedFavicon');
-                return stored ? JSON.parse(stored) : null;
+                return stored ? JSON.parse(stored) : PRESET_FAVICONS[0];
             } catch (e) {
                 console.error('Error reading last selected favicon:', e);
-                return null;
+                return PRESET_FAVICONS[0];
             }
         }
 
+        currentFavicon = getLastSelectedFavicon();
+
+        function togglePinHistory(id) {
+            const historyArray = getHistory();
+            const entry = historyArray.find(e => e.id === id);
+            if (entry) {
+                entry.isPinned = !entry.isPinned;
+                saveHistory(historyArray);
+            }
+        }
+
+        let historyIdCounter = 0;
         function addToHistory(type, data) {
             const historyArray = getHistory();
             
             // Check for duplicate entry
             let duplicateIndex = -1;
+            let wasPinned = false;
             if (type === 'url') {
                 duplicateIndex = historyArray.findIndex(entry => entry.type === 'url' && entry.url === data.url);
             } else if (type === 'file') {
                 duplicateIndex = historyArray.findIndex(entry => entry.type === 'file' && entry.filename === data.filename);
             }
             
-            // If duplicate found, remove it (we'll re-add it at the top)
+            // If duplicate found, remove it (preserving pinned status)
             if (duplicateIndex !== -1) {
+                wasPinned = !!historyArray[duplicateIndex].isPinned;
                 historyArray.splice(duplicateIndex, 1);
             }
             
             // Create history entry
             const entry = {
-                id: Date.now(),
+                id: data.id || (Date.now() * 1000 + (historyIdCounter++ % 1000)),
                 type: type, // 'url' or 'file'
                 timestamp: new Date().toLocaleString(),
-                isLargeFile: data.isLargeFile || false,
-                isSaved: data.isSaved || true
+                isLargeFile: !!data.isLargeFile,
+                isSaved: data.isSaved !== undefined ? data.isSaved : true,
+                isPinned: data.isPinned !== undefined ? data.isPinned : wasPinned,
+                inIndexedDB: !!data.inIndexedDB,
+                isFlash: !!data.isFlash
             };
 
             if (type === 'url') {
@@ -1020,19 +1409,13 @@
             } else {
                 entry.filename = data.filename;
                 entry.display = data.filename;
-                if (data.isSaved) {
+                if (data.isSaved && data.content) {
                     entry.content = data.content;
                 }
             }
 
             // Add to beginning of history
             historyArray.unshift(entry);
-            
-            // Keep only last 50 items
-            if (historyArray.length > 50) {
-                historyArray.pop();
-            }
-
             saveHistory(historyArray);
         }
 
@@ -1045,13 +1428,33 @@
                 return;
             }
 
-            historyArray.forEach(entry => {
+            // Pinned items rendered at top
+            const pinned = historyArray.filter(e => e.isPinned);
+            const unpinned = historyArray.filter(e => !e.isPinned);
+            const displayList = [...pinned, ...unpinned];
+
+            displayList.forEach(entry => {
                 const item = document.createElement('div');
                 item.className = 'history-item';
                 item.classList.add(entry.type);
+                if (entry.isPinned) {
+                    item.classList.add('pinned');
+                }
                 if (entry.isLargeFile) {
                     item.classList.add('large-file');
                 }
+
+                // Star / Pin button
+                const starBtn = document.createElement('button');
+                starBtn.className = 'history-item-star' + (entry.isPinned ? ' active' : '');
+                starBtn.title = entry.isPinned ? 'Unpin from top' : 'Pin to top';
+                starBtn.innerHTML = entry.isPinned
+                    ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="#ffd700" stroke="#ffd700" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>'
+                    : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#777" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
+                starBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    togglePinHistory(entry.id);
+                });
 
                 const text = document.createElement('div');
                 text.className = 'history-item-text';
@@ -1059,7 +1462,11 @@
 
                 const typeTag = document.createElement('div');
                 typeTag.className = 'history-item-type';
-                typeTag.textContent = entry.isLargeFile ? '⚠ ' + entry.type.toUpperCase() : entry.type.toUpperCase();
+                let tagText = entry.type.toUpperCase();
+                if (entry.isFlash) tagText = 'SWF';
+                if (entry.inIndexedDB) tagText = '💾 ' + tagText;
+                else if (entry.isLargeFile) tagText = '⚠ ' + tagText;
+                typeTag.textContent = tagText;
 
                 const deleteBtn = document.createElement('button');
                 deleteBtn.className = 'history-item-delete';
@@ -1069,6 +1476,7 @@
                     deleteHistoryItem(entry.id);
                 });
 
+                item.appendChild(starBtn);
                 item.appendChild(text);
                 item.appendChild(typeTag);
                 item.appendChild(deleteBtn);
@@ -1097,16 +1505,18 @@
         function deleteHistoryItem(id) {
             const historyArray = getHistory();
             const filtered = historyArray.filter(entry => entry.id !== id);
+            IDBStorage.deleteFile(id);
             saveHistory(filtered);
         }
 
         function clearAllHistory() {
             if (confirm('Are you sure you want to clear all history? This cannot be undone.')) {
+                IDBStorage.clearFiles();
                 saveHistory([]);
             }
         }
 
-        function loadHistoryItem(entry) {
+        async function loadHistoryItem(entry) {
             switchMode(entry.type);
             statusMsg.textContent = '';
             statusMsg.className = 'status';
@@ -1118,21 +1528,40 @@
                 urlInput.focus();
             } else {
                 // File entry
-                if (entry.isSaved && entry.content) {
-                    // Content is available in local storage
-                    const file = new File([entry.content], entry.filename);
-                    selectedFileObject = file;
+                let content = entry.content;
+                let isFlash = !!entry.isFlash;
+
+                if (entry.inIndexedDB && !content) {
+                    showStatus('Loading file from IndexedDB...', 'success');
+                    const cached = await IDBStorage.getFile(entry.id);
+                    if (cached && cached.data) {
+                        content = cached.data;
+                        isFlash = !!cached.isFlash;
+                    }
+                }
+
+                if (content) {
+                    if (isFlash) {
+                        selectedFileObject = {
+                            name: entry.filename,
+                            size: content.length,
+                            swfDataUrl: content,
+                            isFlash: true
+                        };
+                    } else {
+                        const file = new File([content], entry.filename);
+                        selectedFileObject = file;
+                    }
                     fileButtonUI.innerHTML = '<svg fill="#999999" width="20" height="20" viewBox="0 0 32 32" style="display: inline; margin-right: 4px; vertical-align: middle;"><path d="M16 3c-7.18 0-13 5.82-13 13s5.82 13 13 13 13-5.82 13-13-5.82-13-13-13zM23.258 12.307l-9.486 9.485c-0.238 0.237-0.623 0.237-0.861 0l-0.191-0.191-0.001 0.001-5.219-5.256c-0.238-0.238-0.238-0.624 0-0.862l1.294-1.293c0.238-0.238 0.624-0.238 0.862 0l3.689 3.716 7.756-7.756c0.238-0.238 0.624-0.238 0.862 0l1.294 1.294c0.239 0.237 0.239 0.623 0.001 0.862z"></path></svg>' + entry.filename;
                     originalValue = entry.filename;
+                    showStatus(isFlash ? 'Flash file loaded from cache' : 'File loaded from cache', 'success');
                 } else if (entry.isLargeFile) {
-                    // File was too large to save
                     fileButtonUI.textContent = 'Choose File';
-                    statusMsg.textContent = '⚠ This file was too large (>5MB) to save. Please re-upload it.';
+                    statusMsg.textContent = '⚠ Large file cache unavailable. Please re-upload it.';
                     statusMsg.className = 'status error';
                     originalValue = '';
                     selectedFileObject = null;
                 } else {
-                    // File was deleted or unavailable
                     fileButtonUI.textContent = 'Choose File';
                     statusMsg.textContent = '✗ File data unavailable.';
                     statusMsg.className = 'status error';
@@ -1209,6 +1638,10 @@
             return CONFIG.htmlLikeExtensions.includes(ext);
         }
 
+        function isSwf(filename) {
+            return getFileExtension(filename) === 'swf';
+        }
+
         function readFileAsText(file) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -1218,28 +1651,64 @@
             });
         }
 
+        function readFileAsDataUrl(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => resolve(e.target.result);
+                reader.onerror = (e) => reject(e);
+                reader.readAsDataURL(file);
+            });
+        }
+
         async function openFile(file) {
             try {
-                const content = await readFileAsText(file);
-                const isHtml = isHtmlLike(file.name);
-                const isSaved = file.size <= CONFIG.maxFileSizeBytes;
+                const filename = file.name;
+                const isFlash = isSwf(filename);
+                const isHtml = isHtmlLike(filename);
+                const isUnderLocalLimit = file.size <= CONFIG.maxFileSizeBytes;
+                let content = null;
+                let swfDataUrl = null;
+                let inIndexedDB = false;
+                const entryId = Date.now();
+
+                if (isFlash) {
+                    swfDataUrl = file.swfDataUrl ? file.swfDataUrl : await readFileAsDataUrl(file);
+                } else {
+                    content = await readFileAsText(file);
+                }
+
+                const dataToSave = isFlash ? swfDataUrl : content;
+
+                if (!isUnderLocalLimit) {
+                    const saved = await IDBStorage.saveFile(entryId, {
+                        name: filename,
+                        size: file.size,
+                        type: file.type,
+                        isFlash: isFlash,
+                        data: dataToSave
+                    });
+                    inIndexedDB = !!saved;
+                }
 
                 // Only add to history if not loaded from history unmodified
                 if (!loadedFromHistory) {
                     addToHistory('file', {
-                        filename: file.name,
-                        content: isSaved ? content : null,
-                        isSaved: isSaved,
-                        isLargeFile: !isSaved
+                        id: entryId,
+                        filename: filename,
+                        content: isUnderLocalLimit ? dataToSave : null,
+                        isSaved: isUnderLocalLimit || inIndexedDB,
+                        isLargeFile: !isUnderLocalLimit,
+                        inIndexedDB: inIndexedDB,
+                        isFlash: isFlash
                     });
                 }
 
-                if (isHtml) {
-                    // Open as HTML in iframe
-                    openFileAsHtml(content, file.name);
+                if (isFlash) {
+                    openFileAsSwf(swfDataUrl, filename);
+                } else if (isHtml) {
+                    openFileAsHtml(content, filename);
                 } else {
-                    // Open as plain text
-                    openFileAsText(content, file.name);
+                    openFileAsText(content, filename);
                 }
 
                 showStatus('Opened!', 'success');
@@ -1592,7 +2061,7 @@
             </button>
         </div>
         <div class="upload-container">
-            <input type="file" id="topUpload" style="display:none;" accept=".html,.htm,.css,.txt,.js,.json,.xml,.svg,.md,.csv,.log,.java,.py,.cpp,.c,.cs,.php,.rb,.go,.rs,.ts,.tsx,.jsx,.vue,.yaml,.yml,.sh,.bash,.sql">
+            <input type="file" id="topUpload" style="display:none;" accept=".swf,.html,.htm,.css,.txt,.js,.json,.xml,.svg,.md,.csv,.log,.java,.py,.cpp,.c,.cs,.php,.rb,.go,.rs,.ts,.tsx,.jsx,.vue,.yaml,.yml,.sh,.bash,.sql">
             <label for="topUpload" class="top-upload-btn" title="Upload File">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -1623,7 +2092,7 @@
         <span>Show Bar</span>
     </button>
     <div id="contentContainer">
-        <iframe id="contentIframe" src="${safeInitialUrl}"></iframe>
+        <iframe id="contentIframe" src="${safeInitialUrl}" allow="fullscreen; autoplay; gamepad; pointer-lock; clipboard-write;" allowfullscreen="true"></iframe>
     </div>
     <script>
         window.addEventListener('beforeunload', function(e) {
@@ -1643,6 +2112,9 @@
             const fullscreenBtn = document.getElementById('fullscreenBtn');
             const fullscreenIcon = document.getElementById('fullscreenIcon');
 
+            var autoHide = ${getSetting('autoHideTopbar')};
+            var searchFallback = ${getSetting('searchFallback')};
+
             const enterFsSvg = '<path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>';
             const exitFsSvg = '<path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/>';
 
@@ -1660,11 +2132,12 @@
                     }
                     if (dupIdx !== -1) historyArray.splice(dupIdx, 1);
                     var entry = {
-                        id: Date.now(),
+                        id: (data && data.id) || (Date.now() * 1000 + Math.floor(Math.random() * 1000)),
                         type: type,
                         timestamp: new Date().toLocaleString(),
                         isLargeFile: !!data.isLargeFile,
-                        isSaved: data.isSaved !== undefined ? data.isSaved : true
+                        isSaved: data.isSaved !== undefined ? data.isSaved : true,
+                        isFlash: !!data.isFlash
                     };
                     if (type === 'url') {
                         entry.url = data.url;
@@ -1685,12 +2158,29 @@
                 }
             }
 
-            function navigate(targetUrl) {
-                var url = (targetUrl || (navUrl ? navUrl.value : '')).trim();
-                if (!url) return;
-                if (!url.match(/^https?:\\/\\//i) && !url.startsWith('about:') && !url.startsWith('blob:') && !url.startsWith('data:')) {
-                    url = 'https://' + url;
+            function formatViewerUrl(input) {
+                var trimmed = (input || '').trim();
+                if (!trimmed) return '';
+                if (trimmed.match(/^(https?:\\/\\/|about:|blob:|data:)/i)) return trimmed;
+                if (/\\s/.test(trimmed)) {
+                    if (searchFallback) return 'https://duckduckgo.com/?q=' + encodeURIComponent(trimmed);
+                    return 'https://' + trimmed;
                 }
+                var domainPattern = /^([a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?\\.)+[a-zA-Z]{2,}(:\\d+)?(\\/.*)?$/;
+                var localhostPattern = /^(localhost|127\\.0\\.0\\.1)(:\\d+)?(\\/.*)?$/i;
+                var ipPattern = /^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}(:\\d+)?(\\/.*)?$/;
+                if (domainPattern.test(trimmed) || localhostPattern.test(trimmed) || ipPattern.test(trimmed) || trimmed.indexOf('.') !== -1) {
+                    return 'https://' + trimmed;
+                }
+                if (searchFallback) return 'https://duckduckgo.com/?q=' + encodeURIComponent(trimmed);
+                return 'https://' + trimmed;
+            }
+
+            function navigate(targetUrl) {
+                var raw = (targetUrl || (navUrl ? navUrl.value : '')).trim();
+                if (!raw) return;
+                var url = formatViewerUrl(raw);
+                if (!url) return;
                 if (navUrl) navUrl.value = url;
                 if (iframe) iframe.src = url;
                 addViewerHistory('url', { url: url });
@@ -1704,21 +2194,39 @@
             }
             if (goBtn) goBtn.addEventListener('click', function() { navigate(); });
 
-            if (topUpload) {
-                topUpload.addEventListener('change', function(e) {
-                    var files = e.target.files;
-                    if (!files || files.length === 0) return;
-                    var file = files[0];
-                    var ext = (file.name.split('.').pop() || '').toLowerCase();
-                    var isHtml = ['html', 'htm', 'svg'].indexOf(ext) !== -1;
-                    var isSaved = file.size <= 5 * 1024 * 1024;
+            function handleViewerFile(file) {
+                if (!file) return;
+                var ext = (file.name.split('.').pop() || '').toLowerCase();
+                var isFlash = ext === 'swf';
+                var isHtml = ['html', 'htm', 'svg'].indexOf(ext) !== -1;
+                var isSaved = file.size <= 5 * 1024 * 1024;
+
+                if (isFlash) {
+                    var reader = new FileReader();
+                    reader.onload = function(evt) {
+                        var swfDataUrl = evt.target.result;
+                        var ruffleHtml = '<!DOCTYPE html><html><head><meta charset="UTF-8"><style>* { margin:0; padding:0; box-sizing:border-box; } html, body { width:100%; height:100%; overflow:hidden; background:#000; } #ruffle-container { width:100%; height:100%; display:flex; align-items:center; justify-content:center; } ruffle-player { width:100%; height:100%; }<\\/style><script src="https://unpkg.com/@ruffle-rs/ruffle"><\\/script><\\/head><body><div id="ruffle-container"><\\/div><script>window.RufflePlayer = window.RufflePlayer || {}; window.addEventListener("DOMContentLoaded", function() { var ruffle = window.RufflePlayer.newest(); var player = ruffle.createPlayer(); var container = document.getElementById("ruffle-container"); if (container) { container.appendChild(player); player.load("' + swfDataUrl + '"); } });<\\/script><\\/body><\\/html>';
+                        var blob = new Blob([ruffleHtml], { type: 'text/html;charset=utf-8' });
+                        var blobUrl = URL.createObjectURL(blob);
+                        if (iframe) iframe.src = blobUrl;
+                        if (navUrl) navUrl.value = file.name;
+                        addViewerHistory('file', {
+                            filename: file.name,
+                            content: isSaved ? swfDataUrl : null,
+                            isSaved: isSaved,
+                            isLargeFile: !isSaved,
+                            isFlash: true
+                        });
+                    };
+                    reader.readAsDataURL(file);
+                } else {
                     var reader = new FileReader();
                     reader.onload = function(evt) {
                         var content = evt.target.result;
                         var blobContent = content;
                         if (!isHtml) {
                             var esc = content.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
-                            blobContent = '<!DOCTYPE html><html><head><meta charset="UTF-8"><style>* { margin:0; padding:0; box-sizing:border-box; } body { background:#1a1a1a; color:#e0e0e0; font-family:"Courier New", monospace; padding:20px; font-size:13px; line-height:1.6; } pre { white-space:pre-wrap; word-wrap:break-word; } .filename { color:#ff9d3d; margin-bottom:15px; font-weight:bold; }</style></head><body><div class="filename">📄 ' + file.name + '</div><pre>' + esc + '</pre></body></html>';
+                            blobContent = '<!DOCTYPE html><html><head><meta charset="UTF-8"><style>* { margin:0; padding:0; box-sizing:border-box; } body { background:#1a1a1a; color:#e0e0e0; font-family:"Courier New", monospace; padding:20px; font-size:13px; line-height:1.6; } pre { white-space:pre-wrap; word-wrap:break-word; } .filename { color:#ff9d3d; margin-bottom:15px; font-weight:bold; }<\\/style><\\/head><body><div class="filename">📄 ' + file.name + '<\\/div><pre>' + esc + '<\\/pre><\\/body><\\/html>';
                         }
                         var blob = new Blob([blobContent], { type: 'text/html;charset=utf-8' });
                         var blobUrl = URL.createObjectURL(blob);
@@ -1728,13 +2236,42 @@
                             filename: file.name,
                             content: isSaved ? content : null,
                             isSaved: isSaved,
-                            isLargeFile: !isSaved
+                            isLargeFile: !isSaved,
+                            isFlash: false
                         });
-                        topUpload.value = '';
                     };
                     reader.readAsText(file);
+                }
+            }
+
+            if (topUpload) {
+                topUpload.addEventListener('change', function(e) {
+                    var files = e.target.files;
+                    if (files && files.length > 0) {
+                        handleViewerFile(files[0]);
+                        topUpload.value = '';
+                    }
                 });
             }
+
+            window.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                if (e.dataTransfer) e.dataTransfer.dropEffect = 'copy';
+            });
+
+            window.addEventListener('drop', function(e) {
+                e.preventDefault();
+                if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                    handleViewerFile(e.dataTransfer.files[0]);
+                }
+            });
+
+            window.addEventListener('keydown', function(e) {
+                if (e.key === 'F5' || ((e.ctrlKey || e.metaKey) && (e.key === 'r' || e.key === 'R'))) {
+                    e.preventDefault();
+                    if (refreshBtn) refreshBtn.click();
+                }
+            });
 
             if (refreshBtn) {
                 refreshBtn.addEventListener('click', function() {
@@ -1757,6 +2294,24 @@
             if (restoreBarBtn) {
                 restoreBarBtn.addEventListener('click', function() {
                     document.body.classList.remove('topbar-minimized');
+                });
+            }
+
+            var hideTimer = null;
+            function resetHideTimer() {
+                if (!autoHide) return;
+                document.body.classList.remove('topbar-minimized');
+                clearTimeout(hideTimer);
+                hideTimer = setTimeout(function() {
+                    document.body.classList.add('topbar-minimized');
+                }, 2500);
+            }
+            if (autoHide) {
+                resetHideTimer();
+                window.addEventListener('mousemove', function(e) {
+                    if (e.clientY <= 35) {
+                        resetHideTimer();
+                    }
                 });
             }
 
@@ -1834,12 +2389,22 @@
     </style>
 </head>
 <body>
-    <iframe id="contentIframe" src="${safeUrl}"></iframe>
+    <iframe id="contentIframe" src="${safeUrl}" allow="fullscreen; autoplay; gamepad; pointer-lock; clipboard-write;" allowfullscreen="true"></iframe>
     <script>
         window.addEventListener('beforeunload', function(e) {
             e.preventDefault();
             e.returnValue = '${CONFIG.closePrompt}';
             return '${CONFIG.closePrompt}';
+        });
+
+        window.addEventListener('keydown', function(e) {
+            if (e.key === 'F5' || ((e.ctrlKey || e.metaKey) && (e.key === 'r' || e.key === 'R'))) {
+                e.preventDefault();
+                var ifr = document.getElementById('contentIframe');
+                if (ifr) {
+                    try { ifr.contentWindow.location.reload(); } catch (err) { ifr.src = ifr.src; }
+                }
+            }
         });
     <\/script>
 </body>
@@ -1989,19 +2554,105 @@
             }
         }
 
-        // ========== URL Validation ==========
+        function buildSwfPlayerHtml(swfDataUrl, filename) {
+            const pageTitle = currentFavicon ? currentFavicon.title : (filename || 'Flash Game');
+            const safeTitle = pageTitle.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+            const faviconLink = currentFavicon ? `<link rel="icon" type="image/x-icon" href="${currentFavicon.url}">` : '';
+
+            return `<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${safeTitle}</title>
+    ${faviconLink}
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { width: 100%; height: 100vh; overflow: hidden; background: #000; }
+        #ruffle-container { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
+        ruffle-player { width: 100%; height: 100%; }
+    </style>
+    <script src="https://unpkg.com/@ruffle-rs/ruffle"><\/script>
+</head>
+<body>
+    <div id="ruffle-container"></div>
+    <script>
+        window.RufflePlayer = window.RufflePlayer || {};
+        window.addEventListener('DOMContentLoaded', function() {
+            var ruffle = window.RufflePlayer.newest();
+            var player = ruffle.createPlayer();
+            var container = document.getElementById('ruffle-container');
+            if (container) {
+                container.appendChild(player);
+                player.load("${swfDataUrl}");
+            }
+        });
+    <\/script>
+</body>
+</html>`;
+        }
+
+        function openFileAsSwf(swfDataUrl, filename) {
+            const swfPlayerHtml = buildSwfPlayerHtml(swfDataUrl, filename);
+            const pageTitle = currentFavicon ? currentFavicon.title : (filename || 'Flash Game');
+
+            if (getSetting('showViewerTopbar')) {
+                const blob = new Blob([swfPlayerHtml], { type: 'text/html;charset=utf-8' });
+                const contentBlobUrl = URL.createObjectURL(blob);
+                const viewerHtml = buildViewerHtml({
+                    initialUrl: contentBlobUrl,
+                    displayUrl: filename || 'game.swf',
+                    pageTitle: pageTitle
+                });
+                openViewerDocument(viewerHtml);
+            } else {
+                openViewerDocument(swfPlayerHtml);
+            }
+        }
+
+        // ========== URL Validation & Search Fallback ==========
+        function formatUrlOrSearch(input, searchFallback = true) {
+            if (!input || !input.trim()) return null;
+            let trimmed = input.trim();
+
+            if (trimmed.match(/^(https?:\/\/|about:|blob:|data:)/i)) {
+                return trimmed;
+            }
+
+            if (/\s/.test(trimmed)) {
+                if (searchFallback) {
+                    return 'https://duckduckgo.com/?q=' + encodeURIComponent(trimmed);
+                }
+                return 'https://' + trimmed;
+            }
+
+            const domainPattern = /^([a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}(:\d+)?(\/.*)?$/;
+            const localhostPattern = /^(localhost|127\.0\.0\.1)(:\d+)?(\/.*)?$/i;
+            const ipPattern = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(:\d+)?(\/.*)?$/;
+
+            if (domainPattern.test(trimmed) || localhostPattern.test(trimmed) || ipPattern.test(trimmed) || trimmed.includes('.')) {
+                return 'https://' + trimmed;
+            }
+
+            if (searchFallback) {
+                return 'https://duckduckgo.com/?q=' + encodeURIComponent(trimmed);
+            }
+
+            return 'https://' + trimmed;
+        }
+
         function validateAndFormatUrl(urlString) {
-            if (!urlString.trim()) {
+            if (!urlString || !urlString.trim()) {
                 return null;
             }
 
-            if (!urlString.match(/^https?:\/\//i)) {
-                urlString = 'https://' + urlString;
-            }
+            const searchFallback = getSetting('searchFallback');
+            const formatted = formatUrlOrSearch(urlString, searchFallback);
+            if (!formatted) return null;
 
             try {
-                new URL(urlString);
-                return urlString;
+                new URL(formatted);
+                return formatted;
             } catch (e) {
                 return null;
             }
@@ -2109,6 +2760,8 @@
                         replacePageCheckbox.checked = mergedSettings.replaceCurrentPage || false;
                         blobUrlCheckbox.checked = mergedSettings.useBlobUrl || false;
                         topbarCheckbox.checked = mergedSettings.showViewerTopbar !== false;
+                        autoHideCheckbox.checked = mergedSettings.autoHideTopbar || false;
+                        searchFallbackCheckbox.checked = mergedSettings.searchFallback !== false;
                         
                         showStatus('Data imported!', 'success');
                     } catch (parseError) {
@@ -2170,7 +2823,11 @@
                 openInIframe(urlInput.value);
             } else if (currentMode === 'file') {
                 if (selectedFileObject) {
-                    openFile(selectedFileObject);
+                    if (selectedFileObject.isFlash && selectedFileObject.swfDataUrl) {
+                        openFileAsSwf(selectedFileObject.swfDataUrl, selectedFileObject.name);
+                    } else {
+                        openFile(selectedFileObject);
+                    }
                 } else {
                     showStatus('Please select a file', 'error');
                 }
@@ -2227,6 +2884,49 @@
 
         topbarCheckbox.addEventListener('change', () => {
             setSetting('showViewerTopbar', topbarCheckbox.checked);
+        });
+
+        autoHideCheckbox.addEventListener('change', () => {
+            setSetting('autoHideTopbar', autoHideCheckbox.checked);
+        });
+
+        searchFallbackCheckbox.addEventListener('change', () => {
+            setSetting('searchFallback', searchFallbackCheckbox.checked);
+        });
+
+        // Drag and drop handlers for main window
+        let dragCounter = 0;
+        window.addEventListener('dragenter', (e) => {
+            e.preventDefault();
+            dragCounter++;
+            if (dragDropOverlay) dragDropOverlay.classList.add('active');
+        });
+
+        window.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            if (e.dataTransfer) e.dataTransfer.dropEffect = 'copy';
+        });
+
+        window.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            dragCounter--;
+            if (dragCounter <= 0) {
+                dragCounter = 0;
+                if (dragDropOverlay) dragDropOverlay.classList.remove('active');
+            }
+        });
+
+        window.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dragCounter = 0;
+            if (dragDropOverlay) dragDropOverlay.classList.remove('active');
+            if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                const file = e.dataTransfer.files[0];
+                selectedFileObject = file;
+                switchMode('file');
+                fileButtonUI.innerHTML = '<svg fill="#999999" width="16" height="16" viewBox="0 0 32 32" style="display: inline; margin-right: 4px; vertical-align: middle;"><path d="M16 3c-7.18 0-13 5.82-13 13s5.82 13 13 13 13-5.82 13-13-5.82-13-13-13zM23.258 12.307l-9.486 9.485c-0.238 0.237-0.623 0.237-0.861 0l-0.191-0.191-0.001 0.001-5.219-5.256c-0.238-0.238-0.238-0.624 0-0.862l1.294-1.293c0.238-0.238 0.624-0.238 0.862 0l3.689 3.716 7.756-7.756c0.238-0.238 0.624-0.238 0.862 0l1.294 1.294c0.239 0.237 0.239 0.623 0.001 0.862z"></path></svg>' + file.name;
+                openFile(file);
+            }
         });
 
         // Export/Import handlers

@@ -67,16 +67,16 @@ The dev build contains experimental features and forward-looking additions.
    - **Behavior**:
      - When **enabled**, generates an in-memory `Blob([content], { type: 'text/html;charset=utf-8' })` and opens `URL.createObjectURL(blob)` in a new tab instead of `about:blank`.
      - Displays `blob:<origin>/<uuid>` in the address bar.
-     - Operates across all modes: URL iframe embed, HTML file view, and plain text file view.
+     - Operates across all modes: URL iframe embed, HTML file view, plain text file view, and Flash SWF view.
      - If both "Replace Current Page" and "Open in Blob URL" are checked, the current page navigates to the Blob URL via `window.location.replace(blobUrl)`.
      - When **disabled**, retains standard `about:blank` opening behavior.
    - **Storage & Sync**: Key `useBlobUrl` is saved to `suabe2_settings` and supported in JSON export/import.
 
 2. **Viewer Navigation Topbar (URL & File Modes)**:
-   - **Unified Interactive Topbar**: Injected into the opened content page when opening URLs (`openInIframe`) and files (`openFileAsHtml`, `openFileAsText`). Redesigned with zero external dependencies and matching SUABE 2's dark aesthetic.
+   - **Unified Interactive Topbar**: Injected into the opened content page when opening URLs (`openInIframe`) and files (`openFileAsHtml`, `openFileAsText`, `openFileAsSwf`). Redesigned with zero external dependencies and matching SUABE 2's dark aesthetic.
    - **Key Components**:
-     - **URL Bar (`#navUrl`)**: Displays current URL or loaded filename, allows in-page navigation (auto-prefixes `https://`), navigates on `Enter` or clicking the Go button (`#goBtn`).
-     - **Upload File Button (`#topUpload` / `.top-upload-btn`)**: Positioned next to the URL bar, allows uploading and switching files directly within the viewer. Supports HTML-like files and plain text/code files.
+     - **URL Bar (`#navUrl`)**: Displays current URL or loaded filename, allows in-page navigation (with protocol autocomplete and search fallback), navigates on `Enter` or clicking the Go button (`#goBtn`).
+     - **Upload File Button (`#topUpload` / `.top-upload-btn`)**: Positioned next to the URL bar, allows uploading and switching files directly within the viewer. Supports SWF Flash files, HTML-like files, and plain text/code files.
      - **Maximize (Fullscreen) (`#fullscreenBtn`)**: Toggles browser fullscreen via Fullscreen API (`requestFullscreen` / `exitFullscreen`). Automatically minimizes the navbar (`topbar-minimized`) upon entering fullscreen for an unobstructed full-screen view, and automatically restores the navbar upon exiting fullscreen. Dynamically swaps between expand and compress SVG icons on `fullscreenchange`.
      - **Minimize Topbar (`#minimizeBtn`)**: Collapses the topbar (`transform: translateY(-100%)`) and expands the iframe to full 100vh. Reveals a sleek floating restore pill (`#restoreBarBtn`, "Show Bar") at the top center to smoothly restore the bar.
      - **Reload Button (`#refreshBtn`)**: Refreshes the iframe (`contentWindow.location.reload()` with `iframe.src = iframe.src` cross-origin fallback) with a subtle spin animation.
@@ -90,11 +90,70 @@ The dev build contains experimental features and forward-looking additions.
      - If unchecked, falls back to the classic minimal full-screen iframe or direct file view without topbar.
    - **Storage & Sync**: Key `showViewerTopbar` is saved to `suabe2_settings` and supported in JSON export/import.
 
-3. **Visual DEV Indicator**:
-   - Features an amber/orange `DEV` tag (`.dev-badge`) alongside the header `SUABE 2` title to prevent confusion with the stable build.
+3. **One-Click Cloak Presets (`#presetFaviconGrid`)**:
+   - Quick cloaking preset cards in the Favicon / Cloaking panel for popular disguises:
+     - Google (`https://www.google.com/favicon.ico`)
+     - Google Classroom (`https://ssl.gstatic.com/classroom/favicon.png`)
+     - Google Drive (`https://ssl.gstatic.com/images/branding/product/1x/drive_2020q4_32dp.png`)
+     - Google Docs (`https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico`)
+     - Canvas LMS (`https://du11hjcvx0uqb.cloudfront.net/br/dist/images/favicon-e10d657a73.ico`)
+     - Wikipedia (`https://en.wikipedia.org/static/favicon/wikipedia.ico`)
+   - Clicking any preset applies the disguise immediately, updates `suabe2_lastSelectedFavicon`, and highlights the selected card.
 
-4. **Export Identifier**:
-   - Exports data with the filename format `suabe_dev_YYYY-MM-DD.json`.
+4. **Iframe Game Permissions**:
+   - Full permission policy injected into `contentIframe` across all viewer modes:
+     `allow="fullscreen; autoplay; gamepad; pointer-lock; clipboard-write;" allowfullscreen="true"`.
+   - Enables mouse capture (pointer lock) for 3D/FPS browser games, gamepad controller APIs, sound autoplay, and in-game full-screening.
+
+5. **Built-in Flash (`.swf`) Player via Ruffle**:
+   - Native support for Flash games (`.swf`) using the official Ruffle WebAssembly emulator from unpkg CDN (`https://unpkg.com/@ruffle-rs/ruffle`).
+   - `.swf` files uploaded on the home screen or inside the viewer are converted to data URLs and loaded into an isolated Ruffle player container.
+   - Seamlessly integrated with cloaking, topbar navigation, fullscreening, and history caching.
+
+6. **Drag-and-Drop Anywhere**:
+   - Users can drag and drop any supported file (SWF, HTML, text, code, images, SVG) directly onto the main page or into the viewer.
+   - Main page displays an animated glow drag overlay (`#dragDropOverlay`). Dropping automatically switches to file mode and opens the file.
+   - In-viewer drop handler automatically parses and displays the dropped file, refreshing the viewer without leaving cloaked mode.
+
+7. **Auto-Hiding / Hover Navigation Bar (`autoHideTopbar`)**:
+   - **Toggle in Settings**: "Auto-Hide Navigation Bar" (`#autoHideCheckbox`). Default: `off` (`false`).
+   - When enabled, the viewer topbar automatically slides away after 2.5 seconds of inactivity.
+   - Hovering the mouse near the top edge ($\le 35\text{px}$) smoothly reveals the navbar.
+   - Fullscreen mode continues to auto-minimize independently.
+
+8. **Starred / Pinned Favorites in History**:
+   - Each item in the history dropdown features a star / pin button (`.history-item-star`).
+   - Starred items are pinned to the top of the history list with a glowing amber badge.
+   - Pinned entries are protected from automatic FIFO trimming when the history exceeds 50 items.
+   - Toggling pin state updates `suabe2_history` in `localStorage` immediately.
+
+9. **Accidental Refresh Interception**:
+   - Intercepts `F5` and `Ctrl+R` / `Cmd+R` keystrokes inside the viewer window and simple iframe wrapper.
+   - Instead of refreshing the top-level tab and destroying the cloaked `about:blank` or Blob URL session, it triggers a reload of the inner iframe only.
+
+10. **IndexedDB Offline Cache (`IDBStorage` / `suabe2_files_db`)**:
+    - Overcomes `localStorage` 5MB quota limitations for large offline games and Flash ROMs.
+    - Files $\le 5\text{MB}$ are stored in `suabe2_history` in `localStorage`.
+    - Files $> 5\text{MB}$ are automatically saved into IndexedDB database `suabe2_files_db` (object store `files`).
+    - History items indicate cached large files with a `💾` indicator and can be reopened without re-uploading.
+    - Deleting history items or clearing history automatically purges corresponding files from IndexedDB.
+
+11. **URL Protocol Autocomplete & DuckDuckGo Search Fallback (`searchFallback`)**:
+    - **Toggle in Settings**: "DuckDuckGo Search Fallback" (`#searchFallbackCheckbox`). Default: `on` (`true`).
+    - Intelligently evaluates URL bar input:
+      - Explicit schemes (`https://`, `about:`, `blob:`, `data:`) are preserved.
+      - Recognizable domains (`example.com`, `game.io/play`, `localhost:8080`, IPs) are auto-prefixed with `https://`.
+      - Inputs containing spaces or non-domain keywords (e.g., `slope game`, `chess`) automatically route to `https://duckduckgo.com/?q=...`.
+
+12. **Organized Settings Menu**:
+    - Cleanly structured into three distinct categories:
+      - **Cloaking & Tab Mode**: *Replace Current Page*, *Open in Blob URL*.
+      - **Viewer Navigation**: *Viewer Navigation Bar*, *Auto-Hide Navigation Bar*, *DuckDuckGo Search Fallback*.
+      - **Data & Storage**: *Export Data*, *Import Data*.
+
+13. **Visual DEV Indicator & Export Identifier**:
+    - Amber `DEV` badge on header to differentiate from stable release.
+    - Exports data as `suabe_dev_YYYY-MM-DD.json`.
 
 ---
 
@@ -102,10 +161,13 @@ The dev build contains experimental features and forward-looking additions.
 
 - **Single-File Design**: Both `suabe2.html` and `suabe2_dev.html` are self-contained single-page applications (HTML + CSS in `<style>` + JS in `<script>`). Do not introduce external npm/build dependencies unless explicitly instructed.
 - **LocalStorage Schema**:
-  - `suabe2_settings`: JSON object `{ replaceCurrentPage: boolean, useBlobUrl?: boolean, showViewerTopbar?: boolean }`.
-  - `suabe2_history`: JSON array of entries `{ id, type, url, filename, display, timestamp, isSaved, isLargeFile, content }`.
+  - `suabe2_settings`: JSON object `{ replaceCurrentPage: boolean, useBlobUrl?: boolean, showViewerTopbar?: boolean, autoHideTopbar?: boolean, searchFallback?: boolean }`.
+  - `suabe2_history`: JSON array of entries `{ id, type, url, filename, display, timestamp, isSaved, isLargeFile, isPinned?: boolean, inIndexedDB?: boolean, isFlash?: boolean, content?: string }`.
   - `suabe2_favicons`: JSON array of `{ id, title, url }`.
   - `suabe2_lastSelectedFavicon`: JSON object `{ id, title, url }`.
+- **IndexedDB Schema**:
+  - Database: `suabe2_files_db` (version 1)
+  - Object Store: `files` (keyPath: `id`) -> `{ id, name, size, type, isFlash, data }`
 - **Popup Handling**: `window.open` calls must stay attached to direct user interaction events (`click`, `Enter` keypress) to avoid browser popup blockers.
 - **CDN Dependency for Loaders**: Ensure that the jsDelivr CDN endpoints in `stable/image.svg` and `dev/image.svg` point to the correct release paths in `spamton-school/suabe2`.
 
