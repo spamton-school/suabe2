@@ -1246,11 +1246,10 @@
             <label>Data URI Result</label>
             <textarea id="dataUriOutput" class="datauri-output" readonly placeholder="Click Generate to produce Data URI..." autocomplete="off"></textarea>
             <div class="datauri-actions">
-                <button class="datauri-action-btn" id="copyDataUriBtn" disabled>Copy</button>
-                <a class="datauri-action-btn disabled" id="openDataUriBtn" href="#" target="_blank" rel="noopener noreferrer" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box;">Open in New Tab</a>
+                <button class="datauri-action-btn" id="copyDataUriBtn" disabled>Copy Data URI</button>
             </div>
             <div class="datauri-hint" id="dataUriHint" style="margin-top: 10px; font-size: 11.5px; color: #888; line-height: 1.4; display: none;">
-                💡 <b>Chromium Note:</b> Chrome & Edge block pages from directly opening Data URIs in new tabs. If blocked, click <b>Copy</b>, open a new tab (<kbd style="background:#222;padding:1px 4px;border-radius:3px;border:1px solid #444;">Ctrl+T</kbd>), and paste into the address bar (<kbd style="background:#222;padding:1px 4px;border-radius:3px;border:1px solid #444;">Ctrl+V</kbd>).
+                💡 <b>How to use:</b> Click <b>Copy Data URI</b>, open a new tab (<kbd style="background:#222;padding:1px 4px;border-radius:3px;border:1px solid #444;">Ctrl+T</kbd>), and paste into the address bar (<kbd style="background:#222;padding:1px 4px;border-radius:3px;border:1px solid #444;">Ctrl+V</kbd>).
             </div>
         </div>
         <div class="datauri-cache-group">
@@ -1421,7 +1420,6 @@
         const generateDataUriBtn = document.getElementById('generateDataUriBtn');
         const dataUriOutput = document.getElementById('dataUriOutput');
         const copyDataUriBtn = document.getElementById('copyDataUriBtn');
-        const openDataUriBtn = document.getElementById('openDataUriBtn');
         const dataUriHint = document.getElementById('dataUriHint');
         const cacheDataUriCheckbox = document.getElementById('cacheDataUriCheckbox');
         const faviconBtn = document.getElementById('faviconBtn');
@@ -2130,12 +2128,6 @@
                     dataUriOutput.value = dataUri;
                 }
                 if (copyDataUriBtn) copyDataUriBtn.disabled = false;
-                if (openDataUriBtn) {
-                    openDataUriBtn.disabled = false;
-                    openDataUriBtn.classList.remove('disabled');
-                    if (openDataUriBtn.removeAttribute) openDataUriBtn.removeAttribute('disabled');
-                    openDataUriBtn.href = dataUri;
-                }
                 if (dataUriHint) dataUriHint.style.display = 'block';
 
                 if (cacheDataUriCheckbox && cacheDataUriCheckbox.checked) {
@@ -2173,12 +2165,6 @@
                     if (cachedDataUri && dataUriOutput) {
                         dataUriOutput.value = cachedDataUri;
                         if (copyDataUriBtn) copyDataUriBtn.disabled = false;
-                        if (openDataUriBtn) {
-                            openDataUriBtn.disabled = false;
-                            openDataUriBtn.classList.remove('disabled');
-                            if (openDataUriBtn.removeAttribute) openDataUriBtn.removeAttribute('disabled');
-                            openDataUriBtn.href = cachedDataUri;
-                        }
                         if (dataUriHint) dataUriHint.style.display = 'block';
                         if (generateDataUriBtn) generateDataUriBtn.textContent = 'Regenerate Data URI';
                     }
@@ -2192,12 +2178,6 @@
                     }
                     if (dataUriHint) dataUriHint.style.display = 'none';
                     if (copyDataUriBtn) copyDataUriBtn.disabled = true;
-                    if (openDataUriBtn) {
-                        openDataUriBtn.disabled = true;
-                        openDataUriBtn.classList.add('disabled');
-                        openDataUriBtn.setAttribute('disabled', 'true');
-                        openDataUriBtn.href = '#';
-                    }
                     if (generateDataUriBtn) generateDataUriBtn.textContent = 'Generate Data URI';
                 }
             } catch (e) {
@@ -3679,22 +3659,6 @@
             }
         });
 
-        openDataUriBtn.addEventListener('click', (e) => {
-            const dataUri = dataUriOutput ? dataUriOutput.value : '';
-            if (!dataUri || openDataUriBtn.disabled || openDataUriBtn.classList.contains('disabled') || dataUri.startsWith('Error')) {
-                if (e && e.preventDefault) e.preventDefault();
-                return;
-            }
-            openDataUriBtn.href = dataUri;
-            showStatus('Opening Data URI... (If blocked by Chrome: click Copy & paste in address bar)', 'success');
-            try {
-                // If triggered programmatically in environments where anchor navigation doesn't fire automatically
-                if (typeof window !== 'undefined' && window.open && (!e || !e.isTrusted)) {
-                    window.open(dataUri, '_blank');
-                }
-            } catch (err) {}
-        });
-
         cacheDataUriCheckbox.addEventListener('change', () => {
             try {
                 const isChecked = cacheDataUriCheckbox.checked;
@@ -3702,12 +3666,6 @@
                 if (isChecked) {
                     if (dataUriOutput.value && !dataUriOutput.value.startsWith('Error')) {
                         localStorage.setItem('suabe2_cached_data_uri', dataUriOutput.value);
-                    }
-                    if (openDataUriBtn && dataUriOutput.value && !dataUriOutput.value.startsWith('Error')) {
-                        openDataUriBtn.disabled = false;
-                        openDataUriBtn.classList.remove('disabled');
-                        if (openDataUriBtn.removeAttribute) openDataUriBtn.removeAttribute('disabled');
-                        openDataUriBtn.href = dataUriOutput.value;
                     }
                     if (dataUriHint && dataUriOutput.value && !dataUriOutput.value.startsWith('Error')) {
                         dataUriHint.style.display = 'block';
@@ -3719,12 +3677,6 @@
                     }
                     if (dataUriHint) dataUriHint.style.display = 'none';
                     if (copyDataUriBtn) copyDataUriBtn.disabled = true;
-                    if (openDataUriBtn) {
-                        openDataUriBtn.disabled = true;
-                        openDataUriBtn.classList.add('disabled');
-                        openDataUriBtn.setAttribute('disabled', 'true');
-                        openDataUriBtn.href = '#';
-                    }
                     if (generateDataUriBtn) generateDataUriBtn.textContent = 'Generate Data URI';
                 }
             } catch (e) {

@@ -165,8 +165,8 @@ The dev build contains experimental features and forward-looking additions.
     - Panel `#dataUriPanel` generates an HTML Data URI (`data:text/html;base64,...`) from `image.svg` embedded HTML content (compressed and base64-encoded).
     - Includes:
       - Selectable readonly output textbox (`#dataUriOutput`) with `autocomplete="off"`.
-      - "Copy" button (`#copyDataUriBtn`) with clipboard copy and visual feedback.
-      - "Open in New Tab" link button (`#openDataUriBtn`) configured as an anchor `<a>` (`target="_blank"`, `rel="noopener noreferrer"`) with `href` set to the generated Data URI, opening the true `data:text/html;base64,...` URL in a new tab without `about:blank` wrapping.
+      - "Copy Data URI" button (`#copyDataUriBtn`) with clipboard copy and visual feedback.
+      - Usage guide and hint (`#dataUriHint`) for pasting the copied Data URI directly into a new tab's omnibox (`Ctrl+T` / `Ctrl+V`).
       - "Cache Data URI in browser" toggle (`#cacheDataUriCheckbox`, default: `off`) inside the panel to persist the generated data URI in `localStorage` under `suabe2_cached_data_uri`. When unchecked, existing cache is purged and the output textarea is reset.
 
 14. **Organized Settings Menu**:
