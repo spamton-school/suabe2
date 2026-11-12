@@ -93,12 +93,13 @@ The dev build contains experimental features and forward-looking additions.
 3. **Unified Favicon Disguises (`DEFAULT_FAVICONS` in `#faviconList`)**:
    - Disguise presets are integrated directly into the main favicon list beneath the default "Google" entry without a separate grid section:
      - Google (`https://www.google.com/favicon.ico`)
+     - Canvas LMS (`https://du11hjcvx0uqb.cloudfront.net/br/dist/images/favicon-e10d657a73.ico`)
      - Google Classroom (`https://ssl.gstatic.com/classroom/favicon.png`)
      - Google Drive (`https://ssl.gstatic.com/images/branding/product/1x/drive_2020q4_32dp.png`)
      - Google Docs (`https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico`)
-     - Canvas LMS (`https://du11hjcvx0uqb.cloudfront.net/br/dist/images/favicon-e10d657a73.ico`)
      - Wikipedia (`https://en.wikipedia.org/static/favicon/wikipedia.ico`)
    - Clicking any item applies the disguise immediately, updates `suabe2_lastSelectedFavicon`, and highlights the selected row. Default disguises cannot be deleted; custom favicons display delete buttons.
+   - **Reordered Favicon Panel**: The selector (`#faviconList`) is positioned at the top of the panel, with the custom favicon input fields and add button below it separated by a clean top border.
 
 4. **Iframe Game Permissions**:
    - Full permission policy injected into `contentIframe` across all viewer modes:
@@ -112,7 +113,7 @@ The dev build contains experimental features and forward-looking additions.
 
 6. **Drag-and-Drop Anywhere**:
    - Users can drag and drop any supported file (SWF, HTML, text, code, images, SVG) directly onto the main page or into the viewer.
-   - Main page displays an animated glow drag overlay (`#dragDropOverlay`). Dropping automatically switches to file mode and opens the file.
+   - Main page displays an animated glow drag overlay (`#dragDropOverlay`) styled in orange/amber (`#ff9d3d`, `rgba(255, 157, 61, 0.08)`) matching the file mode theme. Dropping automatically switches to file mode and opens the file.
    - In-viewer drop handler automatically parses and displays the dropped file, refreshing the viewer without leaving cloaked mode.
 
 7. **Auto-Hiding / Hover Navigation Bar (`autoHideTopbar`)**:
@@ -150,17 +151,35 @@ The dev build contains experimental features and forward-looking additions.
       - Inputs containing spaces or non-domain keywords (e.g., `slope game`, `chess`) automatically route to `https://www.bing.com/search?q=...`.
       - Note: Replaced DuckDuckGo because DuckDuckGo transmits `X-Frame-Options: SAMEORIGIN` and blocks iframe embedding; Bing allows iframe embedding.
 
-12. **Organized Settings Menu**:
-    - Cleanly structured into three distinct categories:
+12. **Unified Mode Slider & Switch Animation (`classicSwitcher`)**:
+    - Replaced separate URL and File buttons with a single unified mode slider component (`#modeSlider`).
+    - Interactive sliding glider (`#sliderGlider`) smoothly shifts between URL (cyan accent `#00d9ff`) and File (amber accent `#ff9d3d`) using cubic-bezier easing.
+    - Added subtle fade and slide animation (`@keyframes modeFadeSlide`) when toggling between URL input and file chooser.
+    - Standardized `#urlInput` and `#fileButtonUI` to exact `height: 52px; box-sizing: border-box; line-height: 20px; font-family: inherit;` to eliminate any sizing differences between modes.
+    - **Toggle in Settings**: "Classic Mode Switcher" (`#classicSwitcherCheckbox`). Default: `off` (`false`). When enabled, restores the original two separate category buttons.
+    - **Storage & Sync**: Key `classicSwitcher` is saved to `suabe2_settings` and supported in JSON export/import.
+
+13. **HTML Data URI Generator (`#dataUriBtn` & `#dataUriPanel`)**:
+    - Dedicated Data URI button (`#dataUriBtn`) with link icon and green theme (`#00ff88`) placed to the left of the cloak disguises button (`#faviconBtn`).
+    - Panel `#dataUriPanel` generates an HTML Data URI (`data:text/html;base64,...`) from `image.svg` embedded HTML content (compressed and base64-encoded).
+    - Includes:
+      - Selectable readonly output textbox (`#dataUriOutput`).
+      - "Copy" button (`#copyDataUriBtn`) with clipboard copy and visual feedback.
+      - "Open in New Tab" button (`#openDataUriBtn`) that opens the raw data URI directly into a true new browser tab without `about:blank` wrapping.
+      - "Cache Data URI in browser" toggle (`#cacheDataUriCheckbox`, default: `off`) inside the panel to persist the generated data URI in `localStorage` under `suabe2_cached_data_uri`.
+
+14. **Organized Settings Menu**:
+    - Cleanly structured into four distinct categories:
       - **Cloaking & Tab Mode**: *Replace Current Page*, *Open in Blob URL*.
       - **Viewer Navigation**: *Viewer Navigation Bar*, *Auto-Hide Navigation Bar*, *Bing Search Fallback*.
-      - **Data & Storage**: *Export Data*, *Import Data* (seamless layout without unnecessary horizontal divider line).
+      - **Controls & Appearance**: *Classic Mode Switcher*.
+      - **Data & Storage**: *Export Data*, *Import Data* (seamless layout without divider line).
 
-13. **Action Row & Layout Shift Prevention**:
+15. **Action Row & Layout Shift Prevention**:
     - `#confirmBtn` and `#statusMsg` are encapsulated inside a shared `.action-row` with fixed vertical constraints (`48px` row height, `24px` line-height status text).
     - Prevents "opened" or "file loaded from cache" status messages from shifting input elements above or history items below.
 
-14. **Visual DEV Indicator & Export Identifier**:
+16. **Visual DEV Indicator & Export Identifier**:
     - Amber `DEV` badge on header to differentiate from stable release.
     - Exports data as `suabe_dev_YYYY-MM-DD.json`.
 
@@ -170,10 +189,12 @@ The dev build contains experimental features and forward-looking additions.
 
 - **Single-File Design**: Both `suabe2.html` and `suabe2_dev.html` are self-contained single-page applications (HTML + CSS in `<style>` + JS in `<script>`). Do not introduce external npm/build dependencies unless explicitly instructed.
 - **LocalStorage Schema**:
-  - `suabe2_settings`: JSON object `{ replaceCurrentPage: boolean, useBlobUrl?: boolean, showViewerTopbar?: boolean, autoHideTopbar?: boolean, searchFallback?: boolean }`.
+  - `suabe2_settings`: JSON object `{ replaceCurrentPage: boolean, useBlobUrl?: boolean, showViewerTopbar?: boolean, autoHideTopbar?: boolean, searchFallback?: boolean, classicSwitcher?: boolean }`.
   - `suabe2_history`: JSON array of entries `{ id, type, url, filename, display, timestamp, isSaved, isLargeFile, isPinned?: boolean, inIndexedDB?: boolean, isFlash?: boolean, content?: string }`.
   - `suabe2_favicons`: JSON array of `{ id, title, url }`.
   - `suabe2_lastSelectedFavicon`: JSON object `{ id, title, url }`.
+  - `suabe2_cached_data_uri`: Base64 string of the generated HTML Data URI.
+  - `suabe2_cache_data_uri_pref`: String (`'true'` / `'false'`) indicating whether to cache the generated Data URI.
 - **IndexedDB Schema**:
   - Database: `suabe2_files_db` (version 1)
   - Object Store: `files` (keyPath: `id`) -> `{ id, name, size, type, isFlash, data }`
