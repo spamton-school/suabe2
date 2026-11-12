@@ -90,15 +90,15 @@ The dev build contains experimental features and forward-looking additions.
      - If unchecked, falls back to the classic minimal full-screen iframe or direct file view without topbar.
    - **Storage & Sync**: Key `showViewerTopbar` is saved to `suabe2_settings` and supported in JSON export/import.
 
-3. **One-Click Cloak Presets (`#presetFaviconGrid`)**:
-   - Quick cloaking preset cards in the Favicon / Cloaking panel for popular disguises:
+3. **Unified Favicon Disguises (`DEFAULT_FAVICONS` in `#faviconList`)**:
+   - Disguise presets are integrated directly into the main favicon list beneath the default "Google" entry without a separate grid section:
      - Google (`https://www.google.com/favicon.ico`)
      - Google Classroom (`https://ssl.gstatic.com/classroom/favicon.png`)
      - Google Drive (`https://ssl.gstatic.com/images/branding/product/1x/drive_2020q4_32dp.png`)
      - Google Docs (`https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico`)
      - Canvas LMS (`https://du11hjcvx0uqb.cloudfront.net/br/dist/images/favicon-e10d657a73.ico`)
      - Wikipedia (`https://en.wikipedia.org/static/favicon/wikipedia.ico`)
-   - Clicking any preset applies the disguise immediately, updates `suabe2_lastSelectedFavicon`, and highlights the selected card.
+   - Clicking any item applies the disguise immediately, updates `suabe2_lastSelectedFavicon`, and highlights the selected row. Default disguises cannot be deleted; custom favicons display delete buttons.
 
 4. **Iframe Game Permissions**:
    - Full permission policy injected into `contentIframe` across all viewer modes:
@@ -118,14 +118,18 @@ The dev build contains experimental features and forward-looking additions.
 7. **Auto-Hiding / Hover Navigation Bar (`autoHideTopbar`)**:
    - **Toggle in Settings**: "Auto-Hide Navigation Bar" (`#autoHideCheckbox`). Default: `off` (`false`).
    - When enabled, the viewer topbar automatically slides away after 2.5 seconds of inactivity.
-   - Hovering the mouse near the top edge ($\le 35\text{px}$) smoothly reveals the navbar.
-   - Fullscreen mode continues to auto-minimize independently.
+   - Enhanced detection architecture:
+     - An invisible fixed sensor strip (`#topHoverZone`, 14px at top of viewport, z-index 9998) detects cursor movement even when over cross-origin iframes.
+     - Hovering the mouse near the top edge ($\le 25\text{px}$) smoothly reveals the navbar.
+     - Topbar stays visible while cursor is hovering over `#suabeTopBar` (`isMouseOverBar`) or when the URL input is focused (`isInputFocused`).
+     - Exiting fullscreen automatically restores the navbar cleanly.
 
 8. **Starred / Pinned Favorites in History**:
    - Each item in the history dropdown features a star / pin button (`.history-item-star`).
    - Starred items are pinned to the top of the history list with a glowing amber badge.
    - Pinned entries are protected from automatic FIFO trimming when the history exceeds 50 items.
    - Toggling pin state updates `suabe2_history` in `localStorage` immediately.
+   - Hover styling is isolated so star buttons never produce unwanted blue glow; on file items, the star glows with matching amber (`#ff9d3d`).
 
 9. **Accidental Refresh Interception**:
    - Intercepts `F5` and `Ctrl+R` / `Cmd+R` keystrokes inside the viewer window and simple iframe wrapper.
@@ -138,20 +142,25 @@ The dev build contains experimental features and forward-looking additions.
     - History items indicate cached large files with a `💾` indicator and can be reopened without re-uploading.
     - Deleting history items or clearing history automatically purges corresponding files from IndexedDB.
 
-11. **URL Protocol Autocomplete & DuckDuckGo Search Fallback (`searchFallback`)**:
-    - **Toggle in Settings**: "DuckDuckGo Search Fallback" (`#searchFallbackCheckbox`). Default: `on` (`true`).
+11. **URL Protocol Autocomplete & Bing Search Fallback (`searchFallback`)**:
+    - **Toggle in Settings**: "Bing Search Fallback" (`#searchFallbackCheckbox`). Default: `on` (`true`).
     - Intelligently evaluates URL bar input:
       - Explicit schemes (`https://`, `about:`, `blob:`, `data:`) are preserved.
       - Recognizable domains (`example.com`, `game.io/play`, `localhost:8080`, IPs) are auto-prefixed with `https://`.
-      - Inputs containing spaces or non-domain keywords (e.g., `slope game`, `chess`) automatically route to `https://duckduckgo.com/?q=...`.
+      - Inputs containing spaces or non-domain keywords (e.g., `slope game`, `chess`) automatically route to `https://www.bing.com/search?q=...`.
+      - Note: Replaced DuckDuckGo because DuckDuckGo transmits `X-Frame-Options: SAMEORIGIN` and blocks iframe embedding; Bing allows iframe embedding.
 
 12. **Organized Settings Menu**:
     - Cleanly structured into three distinct categories:
       - **Cloaking & Tab Mode**: *Replace Current Page*, *Open in Blob URL*.
-      - **Viewer Navigation**: *Viewer Navigation Bar*, *Auto-Hide Navigation Bar*, *DuckDuckGo Search Fallback*.
-      - **Data & Storage**: *Export Data*, *Import Data*.
+      - **Viewer Navigation**: *Viewer Navigation Bar*, *Auto-Hide Navigation Bar*, *Bing Search Fallback*.
+      - **Data & Storage**: *Export Data*, *Import Data* (seamless layout without unnecessary horizontal divider line).
 
-13. **Visual DEV Indicator & Export Identifier**:
+13. **Action Row & Layout Shift Prevention**:
+    - `#confirmBtn` and `#statusMsg` are encapsulated inside a shared `.action-row` with fixed vertical constraints (`48px` row height, `24px` line-height status text).
+    - Prevents "opened" or "file loaded from cache" status messages from shifting input elements above or history items below.
+
+14. **Visual DEV Indicator & Export Identifier**:
     - Amber `DEV` badge on header to differentiate from stable release.
     - Exports data as `suabe_dev_YYYY-MM-DD.json`.
 

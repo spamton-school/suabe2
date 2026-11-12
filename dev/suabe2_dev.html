@@ -169,9 +169,9 @@
             display: flex;
             flex-direction: column;
             gap: 8px;
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid #404040;
+            margin-top: 10px;
+            padding-top: 0;
+            border-top: none;
         }
 
         .export-import-btn {
@@ -418,10 +418,26 @@
             margin: 20px 0;
         }
 
+        .action-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            height: 48px;
+        }
+
         .status {
-            font-size: 12px;
+            font-size: 13px;
             color: #666;
-            min-height: 20px;
+            height: 24px;
+            line-height: 24px;
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            flex: 1;
+            min-width: 0;
         }
 
         .status.success {
@@ -674,63 +690,6 @@
             margin-bottom: 12px;
         }
 
-        /* Favicon Presets */
-        .favicon-section-title {
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: #888;
-            margin: 14px 0 8px 0;
-        }
-
-        .preset-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 8px;
-            margin-bottom: 16px;
-        }
-
-        .preset-card {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 10px;
-            background: #252525;
-            border: 1px solid #404040;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            user-select: none;
-        }
-
-        .preset-card:hover {
-            background: #303030;
-            border-color: #9d4edd;
-        }
-
-        .preset-card.selected {
-            background: #322538;
-            border-color: #9d4edd;
-            box-shadow: 0 0 8px rgba(157, 78, 221, 0.3);
-        }
-
-        .preset-card img {
-            width: 16px;
-            height: 16px;
-            border-radius: 2px;
-            flex-shrink: 0;
-        }
-
-        .preset-card-title {
-            font-size: 11.5px;
-            color: #e0e0e0;
-            font-weight: 500;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
         /* History Star / Pin */
         .history-item-star {
             width: 22px;
@@ -738,9 +697,10 @@
             padding: 0;
             background: none;
             border: none;
+            box-shadow: none !important;
             color: #666;
             cursor: pointer;
-            transition: color 0.2s ease, transform 0.2s ease;
+            transition: color 0.2s ease, transform 0.2s ease, filter 0.2s ease;
             flex-shrink: 0;
             display: flex;
             align-items: center;
@@ -748,8 +708,23 @@
         }
 
         .history-item-star:hover {
-            color: #ffb703;
+            background: none;
+            box-shadow: none !important;
             transform: scale(1.2);
+            color: #ffd700;
+            filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.6));
+        }
+
+        .history-item.file .history-item-star:hover {
+            box-shadow: none !important;
+            color: #ff9d3d;
+            filter: drop-shadow(0 0 5px rgba(255, 157, 61, 0.7));
+        }
+
+        .history-item.url .history-item-star:hover {
+            box-shadow: none !important;
+            color: #ffd700;
+            filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.6));
         }
 
         .history-item-star.pinned {
@@ -759,6 +734,10 @@
         .history-item.pinned {
             border-left: 3px solid #ffb703;
             background: linear-gradient(135deg, #2b281f 0%, #201f1a 100%);
+        }
+
+        .history-item-delete:hover {
+            box-shadow: none !important;
         }
 
         /* Drag & Drop Overlay */
@@ -838,8 +817,11 @@
             </div>
         </div>
 
-        <div class="status" id="statusMsg"></div>
-        <button id="confirmBtn">Open</button>
+        <!-- Action Row -->
+        <div class="action-row">
+            <button id="confirmBtn">Open</button>
+            <div class="status" id="statusMsg"></div>
+        </div>
 
         <!-- History Menu -->
         <div id="historyMenu"></div>
@@ -892,9 +874,9 @@
                 </label>
             </div>
             <div class="settings-group">
-                <label title="Automatically search DuckDuckGo when entering search terms instead of a URL">
+                <label title="Automatically search Bing when entering search terms instead of a URL">
                     <input type="checkbox" id="searchFallbackCheckbox">
-                    <span>DuckDuckGo Search Fallback</span>
+                    <span>Bing Search Fallback</span>
                 </label>
             </div>
         </div>
@@ -913,14 +895,10 @@
     <!-- Favicon Panel -->
     <div class="favicon-panel active" id="faviconPanel">
         <h2>Favicons & Cloaks</h2>
-        <div class="favicon-section-title">Quick Presets</div>
-        <div class="preset-grid" id="presetFaviconGrid"></div>
-
-        <div class="favicon-section-title">Add Custom Favicon</div>
         <div class="favicon-input-group">
             <input type="text" id="faviconTitle" placeholder="Title (e.g., Google)">
             <input type="text" id="faviconUrl" placeholder="Icon URL (.ico)">
-            <button class="favicon-add-btn" id="faviconAddBtn">Add Favicon</button>
+            <button class="favicon-add-btn" id="faviconAddBtn">Add Custom Favicon</button>
         </div>
         <div class="favicon-list" id="faviconList"></div>
     </div>
@@ -1032,14 +1010,14 @@
             }
         };
 
-        // ========== Preset Cloaks ==========
-        const PRESET_FAVICONS = [
-            { id: 'preset_google', title: 'Google', url: 'https://www.google.com/favicon.ico' },
-            { id: 'preset_classroom', title: 'Google Classroom', url: 'https://ssl.gstatic.com/classroom/favicon.png' },
-            { id: 'preset_drive', title: 'Google Drive', url: 'https://ssl.gstatic.com/images/branding/product/1x/drive_2020q4_32dp.png' },
-            { id: 'preset_docs', title: 'Google Docs', url: 'https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico' },
-            { id: 'preset_canvas', title: 'Canvas LMS', url: 'https://du11hjcvx0uqb.cloudfront.net/br/dist/images/favicon-e10d657a73.ico' },
-            { id: 'preset_wikipedia', title: 'Wikipedia', url: 'https://en.wikipedia.org/static/favicon/wikipedia.ico' }
+        // ========== Default / Built-in Favicons ==========
+        const DEFAULT_FAVICONS = [
+            { id: 'builtin_google', title: 'Google', url: 'https://www.google.com/favicon.ico', isDefault: true },
+            { id: 'builtin_classroom', title: 'Google Classroom', url: 'https://ssl.gstatic.com/classroom/favicon.png', isDefault: true },
+            { id: 'builtin_drive', title: 'Google Drive', url: 'https://ssl.gstatic.com/images/branding/product/1x/drive_2020q4_32dp.png', isDefault: true },
+            { id: 'builtin_docs', title: 'Google Docs', url: 'https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico', isDefault: true },
+            { id: 'builtin_canvas', title: 'Canvas LMS', url: 'https://du11hjcvx0uqb.cloudfront.net/br/dist/images/favicon-e10d657a73.ico', isDefault: true },
+            { id: 'builtin_wikipedia', title: 'Wikipedia', url: 'https://en.wikipedia.org/static/favicon/wikipedia.ico', isDefault: true }
         ];
 
         // ========== State ==========
@@ -1071,7 +1049,6 @@
         const faviconUrlInput = document.getElementById('faviconUrl');
         const faviconAddBtn = document.getElementById('faviconAddBtn');
         const faviconList = document.getElementById('faviconList');
-        const presetFaviconGrid = document.getElementById('presetFaviconGrid');
         const dragDropOverlay = document.getElementById('dragDropOverlay');
         const exportBtn = document.getElementById('exportBtn');
         const importBtn = document.getElementById('importBtn');
@@ -1192,15 +1169,23 @@
             }
         }
 
-        function getDefaultFavicons() {
-            return [
-                { id: Date.now(), title: 'Google', url: 'https://www.google.com/favicon.ico' }
-            ];
+        function getCustomFavicons() {
+            try {
+                const stored = localStorage.getItem('suabe2_favicons');
+                return stored ? JSON.parse(stored) : [];
+            } catch (e) {
+                console.error('Error reading favicons:', e);
+                return [];
+            }
         }
 
-        function saveFavicons(favicons) {
+        function getFavicons() {
+            return [...DEFAULT_FAVICONS, ...getCustomFavicons()];
+        }
+
+        function saveCustomFavicons(customFavicons) {
             try {
-                localStorage.setItem('suabe2_favicons', JSON.stringify(favicons));
+                localStorage.setItem('suabe2_favicons', JSON.stringify(customFavicons));
                 renderFavicons();
             } catch (e) {
                 console.error('Error saving favicons:', e);
@@ -1218,71 +1203,31 @@
                 return;
             }
 
-            const favicons = getFavicons();
-            favicons.unshift({
+            const custom = getCustomFavicons();
+            custom.unshift({
                 id: Date.now(),
                 title: title.trim(),
-                url: url.trim()
+                url: url.trim(),
+                isDefault: false
             });
 
-            saveFavicons(favicons);
+            saveCustomFavicons(custom);
             faviconTitleInput.value = '';
             faviconUrlInput.value = '';
             showStatus('Favicon added!', 'success');
         }
 
         function removeFavicon(id) {
-            const favicons = getFavicons();
-            const filtered = favicons.filter(f => f.id !== id);
-            saveFavicons(filtered);
-        }
-
-        function renderPresets() {
-            if (!presetFaviconGrid) return;
-            presetFaviconGrid.innerHTML = '';
-            const lastSelected = getLastSelectedFavicon();
-
-            PRESET_FAVICONS.forEach(preset => {
-                const card = document.createElement('div');
-                card.className = 'preset-card';
-
-                const img = document.createElement('img');
-                img.src = preset.url;
-                img.alt = preset.title;
-                img.onerror = function() {
-                    this.style.opacity = '0.3';
-                };
-
-                const name = document.createElement('span');
-                name.textContent = preset.title;
-
-                card.appendChild(img);
-                card.appendChild(name);
-
-                if (lastSelected && (lastSelected.id === preset.id || (lastSelected.title === preset.title && lastSelected.url === preset.url))) {
-                    card.classList.add('selected');
-                    currentFavicon = preset;
-                }
-
-                card.addEventListener('click', () => {
-                    document.querySelectorAll('.preset-card').forEach(c => c.classList.remove('selected'));
-                    document.querySelectorAll('.favicon-item').forEach(c => c.classList.remove('selected'));
-                    card.classList.add('selected');
-                    currentFavicon = preset;
-                    saveLastSelectedFavicon(preset);
-                    showStatus('Selected ' + preset.title, 'success');
-                });
-
-                presetFaviconGrid.appendChild(card);
-            });
+            const custom = getCustomFavicons();
+            const filtered = custom.filter(f => f.id !== id);
+            saveCustomFavicons(filtered);
         }
 
         function renderFavicons() {
-            renderPresets();
             const favicons = getFavicons();
             faviconList.innerHTML = '';
             const lastSelected = getLastSelectedFavicon();
-            let alreadySelected = !!(lastSelected && PRESET_FAVICONS.some(p => p.id === lastSelected.id || (p.title === lastSelected.title && p.url === lastSelected.url)));
+            let alreadySelected = false;
 
             favicons.forEach(favicon => {
                 const item = document.createElement('div');
@@ -1307,30 +1252,36 @@
 
                 textDiv.appendChild(title);
                 textDiv.appendChild(urlText);
-
-                const deleteBtn = document.createElement('button');
-                deleteBtn.className = 'favicon-item-delete';
-                deleteBtn.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M17 17L7 7.00002M17 7L7.00001 17" stroke="#999999" stroke-width="2" stroke-linecap="round"/></svg>';
-                deleteBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    removeFavicon(favicon.id);
-                });
-
                 item.appendChild(img);
                 item.appendChild(textDiv);
-                item.appendChild(deleteBtn);
+
+                // Only custom favicons can be deleted
+                if (!favicon.isDefault) {
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.className = 'favicon-item-delete';
+                    deleteBtn.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M17 17L7 7.00002M17 7L7.00001 17" stroke="#999999" stroke-width="2" stroke-linecap="round"/></svg>';
+                    deleteBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        removeFavicon(favicon.id);
+                    });
+                    item.appendChild(deleteBtn);
+                }
 
                 item.addEventListener('click', () => {
                     document.querySelectorAll('.favicon-item').forEach(el => el.classList.remove('selected'));
-                    document.querySelectorAll('.preset-card').forEach(el => el.classList.remove('selected'));
                     item.classList.add('selected');
                     currentFavicon = favicon;
                     saveLastSelectedFavicon(favicon);
+                    showStatus('Selected ' + favicon.title, 'success');
                 });
 
-                // Highlight: prefer lastSelected
+                // Highlight: prefer lastSelected, fallback to Google
                 if (!alreadySelected) {
                     if (lastSelected && (lastSelected.id === favicon.id || (lastSelected.title === favicon.title && lastSelected.url === favicon.url))) {
+                        item.classList.add('selected');
+                        currentFavicon = favicon;
+                        alreadySelected = true;
+                    } else if (!lastSelected && favicon.title === 'Google') {
                         item.classList.add('selected');
                         currentFavicon = favicon;
                         alreadySelected = true;
@@ -1354,10 +1305,10 @@
         function getLastSelectedFavicon() {
             try {
                 const stored = localStorage.getItem('suabe2_lastSelectedFavicon');
-                return stored ? JSON.parse(stored) : PRESET_FAVICONS[0];
+                return stored ? JSON.parse(stored) : DEFAULT_FAVICONS[0];
             } catch (e) {
                 console.error('Error reading last selected favicon:', e);
-                return PRESET_FAVICONS[0];
+                return DEFAULT_FAVICONS[0];
             }
         }
 
@@ -2028,6 +1979,19 @@
             color: var(--accent);
             border-color: var(--accent);
         }
+        #topHoverZone {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 14px;
+            z-index: 9998;
+            background: transparent;
+            display: none;
+        }
+        body.auto-hide-active #topHoverZone {
+            display: block;
+        }
         @keyframes spin {
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
@@ -2038,6 +2002,7 @@
     </style>
 </head>
 <body>
+    <div id="topHoverZone"></div>
     <div id="suabeTopBar">
         <div class="topbar-brand" title="SUABE 2 Viewer">SUABE</div>
         <button id="refreshBtn" class="bar-btn" title="Reload page">
@@ -2053,7 +2018,7 @@
                     <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
                 </svg>
             </span>
-            <input type="text" id="navUrl" class="url-input" value="${safeDisplayUrl}" placeholder="Enter URL (e.g. https://example.com)" autocomplete="off" spellcheck="false">
+            <input type="text" id="navUrl" class="url-input" value="${safeDisplayUrl}" placeholder="Enter URL or search Bing" autocomplete="off" spellcheck="false">
             <button id="goBtn" class="url-go-btn" title="Go">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                     <polyline points="9 18 15 12 9 6"></polyline>
@@ -2163,7 +2128,7 @@
                 if (!trimmed) return '';
                 if (trimmed.match(/^(https?:\\/\\/|about:|blob:|data:)/i)) return trimmed;
                 if (/\\s/.test(trimmed)) {
-                    if (searchFallback) return 'https://duckduckgo.com/?q=' + encodeURIComponent(trimmed);
+                    if (searchFallback) return 'https://www.bing.com/search?q=' + encodeURIComponent(trimmed);
                     return 'https://' + trimmed;
                 }
                 var domainPattern = /^([a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?\\.)+[a-zA-Z]{2,}(:\\d+)?(\\/.*)?$/;
@@ -2172,7 +2137,7 @@
                 if (domainPattern.test(trimmed) || localhostPattern.test(trimmed) || ipPattern.test(trimmed) || trimmed.indexOf('.') !== -1) {
                     return 'https://' + trimmed;
                 }
-                if (searchFallback) return 'https://duckduckgo.com/?q=' + encodeURIComponent(trimmed);
+                if (searchFallback) return 'https://www.bing.com/search?q=' + encodeURIComponent(trimmed);
                 return 'https://' + trimmed;
             }
 
@@ -2285,32 +2250,91 @@
                 });
             }
 
+            var hideTimer = null;
+            var isMouseOverBar = false;
+            var isInputFocused = false;
+            var isManuallyMinimized = false;
+
+            function showBar() {
+                isManuallyMinimized = false;
+                document.body.classList.remove('topbar-minimized');
+            }
+
+            function hideBar() {
+                var isFull = !!(document.fullscreenElement || document.webkitFullscreenElement);
+                if (!isFull && (isMouseOverBar || isInputFocused)) return;
+                document.body.classList.add('topbar-minimized');
+            }
+
+            function startHideCountdown() {
+                if (!autoHide) return;
+                clearTimeout(hideTimer);
+                var isFull = !!(document.fullscreenElement || document.webkitFullscreenElement);
+                if (isFull || isMouseOverBar || isInputFocused || isManuallyMinimized) return;
+                hideTimer = setTimeout(function() {
+                    hideBar();
+                }, 2500);
+            }
+
+            function cancelHideCountdown() {
+                clearTimeout(hideTimer);
+            }
+
             if (minimizeBtn) {
                 minimizeBtn.addEventListener('click', function() {
+                    isManuallyMinimized = true;
+                    cancelHideCountdown();
                     document.body.classList.add('topbar-minimized');
                 });
             }
 
             if (restoreBarBtn) {
                 restoreBarBtn.addEventListener('click', function() {
-                    document.body.classList.remove('topbar-minimized');
+                    showBar();
+                    startHideCountdown();
                 });
             }
 
-            var hideTimer = null;
-            function resetHideTimer() {
-                if (!autoHide) return;
-                document.body.classList.remove('topbar-minimized');
-                clearTimeout(hideTimer);
-                hideTimer = setTimeout(function() {
-                    document.body.classList.add('topbar-minimized');
-                }, 2500);
-            }
             if (autoHide) {
-                resetHideTimer();
+                document.body.classList.add('auto-hide-active');
+                startHideCountdown();
+
+                var topbarEl = document.getElementById('suabeTopBar');
+                var hoverZoneEl = document.getElementById('topHoverZone');
+
+                if (topbarEl) {
+                    topbarEl.addEventListener('mouseenter', function() {
+                        isMouseOverBar = true;
+                        cancelHideCountdown();
+                    });
+                    topbarEl.addEventListener('mouseleave', function() {
+                        isMouseOverBar = false;
+                        startHideCountdown();
+                    });
+                }
+
+                if (hoverZoneEl) {
+                    hoverZoneEl.addEventListener('mouseenter', function() {
+                        showBar();
+                        startHideCountdown();
+                    });
+                }
+
+                if (navUrl) {
+                    navUrl.addEventListener('focus', function() {
+                        isInputFocused = true;
+                        cancelHideCountdown();
+                    });
+                    navUrl.addEventListener('blur', function() {
+                        isInputFocused = false;
+                        startHideCountdown();
+                    });
+                }
+
                 window.addEventListener('mousemove', function(e) {
-                    if (e.clientY <= 35) {
-                        resetHideTimer();
+                    if (e.clientY <= 25) {
+                        showBar();
+                        startHideCountdown();
                     }
                 });
             }
@@ -2336,9 +2360,11 @@
             function onFullscreenChange() {
                 var isFull = !!(document.fullscreenElement || document.webkitFullscreenElement);
                 if (isFull) {
+                    cancelHideCountdown();
                     document.body.classList.add('topbar-minimized');
                 } else {
-                    document.body.classList.remove('topbar-minimized');
+                    showBar();
+                    startHideCountdown();
                 }
                 if (fullscreenBtn) {
                     fullscreenBtn.setAttribute('title', isFull ? 'Exit Fullscreen' : 'Maximize (Fullscreen)');
@@ -2621,7 +2647,7 @@
 
             if (/\s/.test(trimmed)) {
                 if (searchFallback) {
-                    return 'https://duckduckgo.com/?q=' + encodeURIComponent(trimmed);
+                    return 'https://www.bing.com/search?q=' + encodeURIComponent(trimmed);
                 }
                 return 'https://' + trimmed;
             }
@@ -2635,7 +2661,7 @@
             }
 
             if (searchFallback) {
-                return 'https://duckduckgo.com/?q=' + encodeURIComponent(trimmed);
+                return 'https://www.bing.com/search?q=' + encodeURIComponent(trimmed);
             }
 
             return 'https://' + trimmed;
