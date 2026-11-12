@@ -10,8 +10,8 @@ iframe.style.width = '100%';
 iframe.style.height = '100%';
 iframe.style.border = 'none';
 iframe.style.zIndex = '999999';
-const src = `https://cdn.jsdelivr.net/gh/spamton-school/suabe2@main/dev/suabe2_dev.html`;
-fetch(src)
+const src = `https://cdn.jsdelivr.net/gh/spamton-school/suabe2@main/dev/suabe2_dev.html?_=` + Date.now();
+fetch(src, { cache: 'no-cache' })
   .then(response => response.text())
   .then(html => {
     iframe.srcdoc = html;
