@@ -1249,6 +1249,9 @@
                 <button class="datauri-action-btn" id="copyDataUriBtn" disabled>Copy</button>
                 <a class="datauri-action-btn disabled" id="openDataUriBtn" href="#" target="_blank" rel="noopener noreferrer" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box;">Open in New Tab</a>
             </div>
+            <div class="datauri-hint" id="dataUriHint" style="margin-top: 10px; font-size: 11.5px; color: #888; line-height: 1.4; display: none;">
+                💡 <b>Chromium Note:</b> Chrome & Edge block pages from directly opening Data URIs in new tabs. If blocked, click <b>Copy</b>, open a new tab (<kbd style="background:#222;padding:1px 4px;border-radius:3px;border:1px solid #444;">Ctrl+T</kbd>), and paste into the address bar (<kbd style="background:#222;padding:1px 4px;border-radius:3px;border:1px solid #444;">Ctrl+V</kbd>).
+            </div>
         </div>
         <div class="datauri-cache-group">
             <label title="Cache generated Data URI in browser storage so it does not need to be regenerated">
@@ -1419,6 +1422,7 @@
         const dataUriOutput = document.getElementById('dataUriOutput');
         const copyDataUriBtn = document.getElementById('copyDataUriBtn');
         const openDataUriBtn = document.getElementById('openDataUriBtn');
+        const dataUriHint = document.getElementById('dataUriHint');
         const cacheDataUriCheckbox = document.getElementById('cacheDataUriCheckbox');
         const faviconBtn = document.getElementById('faviconBtn');
         const faviconPanel = document.getElementById('faviconPanel');
@@ -2132,6 +2136,7 @@
                     if (openDataUriBtn.removeAttribute) openDataUriBtn.removeAttribute('disabled');
                     openDataUriBtn.href = dataUri;
                 }
+                if (dataUriHint) dataUriHint.style.display = 'block';
 
                 if (cacheDataUriCheckbox && cacheDataUriCheckbox.checked) {
                     try {
@@ -2174,6 +2179,7 @@
                             if (openDataUriBtn.removeAttribute) openDataUriBtn.removeAttribute('disabled');
                             openDataUriBtn.href = cachedDataUri;
                         }
+                        if (dataUriHint) dataUriHint.style.display = 'block';
                         if (generateDataUriBtn) generateDataUriBtn.textContent = 'Regenerate Data URI';
                     }
                 } else {
@@ -2184,6 +2190,7 @@
                     if (dataUriOutput) {
                         dataUriOutput.value = '';
                     }
+                    if (dataUriHint) dataUriHint.style.display = 'none';
                     if (copyDataUriBtn) copyDataUriBtn.disabled = true;
                     if (openDataUriBtn) {
                         openDataUriBtn.disabled = true;
@@ -3679,6 +3686,7 @@
                 return;
             }
             openDataUriBtn.href = dataUri;
+            showStatus('Opening Data URI... (If blocked by Chrome: click Copy & paste in address bar)', 'success');
             try {
                 // If triggered programmatically in environments where anchor navigation doesn't fire automatically
                 if (typeof window !== 'undefined' && window.open && (!e || !e.isTrusted)) {
@@ -3701,11 +3709,15 @@
                         if (openDataUriBtn.removeAttribute) openDataUriBtn.removeAttribute('disabled');
                         openDataUriBtn.href = dataUriOutput.value;
                     }
+                    if (dataUriHint && dataUriOutput.value && !dataUriOutput.value.startsWith('Error')) {
+                        dataUriHint.style.display = 'block';
+                    }
                 } else {
                     localStorage.removeItem('suabe2_cached_data_uri');
                     if (dataUriOutput) {
                         dataUriOutput.value = '';
                     }
+                    if (dataUriHint) dataUriHint.style.display = 'none';
                     if (copyDataUriBtn) copyDataUriBtn.disabled = true;
                     if (openDataUriBtn) {
                         openDataUriBtn.disabled = true;
@@ -3720,21 +3732,35 @@
             }
         });
 
+        function isExternalFileDrag(e) {
+            if (isDraggingFavicon) return false;
+            if (!e || !e.dataTransfer) return false;
+            const types = e.dataTransfer.types;
+            if (!types) return false;
+            for (let i = 0; i < types.length; i++) {
+                if (types[i] === 'Files') return true;
+            }
+            return false;
+        }
+
         // Drag and drop handlers for main window
         let dragCounter = 0;
         window.addEventListener('dragenter', (e) => {
-            e.preventDefault();
+            if (!isExternalFileDrag(e)) return;
+            if (e && e.preventDefault) e.preventDefault();
             dragCounter++;
             if (dragDropOverlay) dragDropOverlay.classList.add('active');
         });
 
         window.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            if (e.dataTransfer) e.dataTransfer.dropEffect = 'copy';
+            if (!isExternalFileDrag(e)) return;
+            if (e && e.preventDefault) e.preventDefault();
+            if (e && e.dataTransfer) e.dataTransfer.dropEffect = 'copy';
         });
 
         window.addEventListener('dragleave', (e) => {
-            e.preventDefault();
+            if (isDraggingFavicon) return;
+            if (e && e.preventDefault) e.preventDefault();
             dragCounter--;
             if (dragCounter <= 0) {
                 dragCounter = 0;
@@ -3743,7 +3769,12 @@
         });
 
         window.addEventListener('drop', (e) => {
-            e.preventDefault();
+            if (isDraggingFavicon) return;
+            if (!isExternalFileDrag(e)) {
+                if (dragDropOverlay) dragDropOverlay.classList.remove('active');
+                return;
+            }
+            if (e && e.preventDefault) e.preventDefault();
             dragCounter = 0;
             if (dragDropOverlay) dragDropOverlay.classList.remove('active');
             if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {

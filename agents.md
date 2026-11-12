@@ -188,6 +188,7 @@ The dev build contains experimental features and forward-looking additions.
     - Cloak items in `#faviconList` can be freely dragged and reordered.
     - Each row includes a subtle 6-dot grip icon (`.favicon-item-grip`) and responsive drag styling (`.dragging`, `.drag-over-top`, `.drag-over-bottom`).
     - The custom order of both default disguises and user custom cloaks is persisted in `localStorage` under `suabe2_cloak_order` (array of IDs) and synced in JSON export/import.
+    - Segregated drag events (`isExternalFileDrag`) ensure dragging cloaks inside `#faviconList` never triggers the full-screen file drop overlay (`#dragDropOverlay`).
 
 18. **Persistent Submenu State Across Reloads (`suabe2_active_submenu`)**:
     - Remembers which panel was open last (*Settings*, *Cloaks*, or *Data URI*) under `suabe2_active_submenu`.
