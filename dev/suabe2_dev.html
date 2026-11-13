@@ -1694,6 +1694,7 @@
     </div>
 
     <script>
+    (function() { /* suabe-scope */
         // ========== Configuration ==========
         const CONFIG = {
             closePrompt: 'Are you sure you want to close?',
@@ -3019,8 +3020,23 @@
                 return;
             }
 
-            document.open();
-            document.write(html);
+            function prepareBuildHtml(rawHtml) {
+                if (!rawHtml) return rawHtml;
+                if (rawHtml.indexOf('/* suabe-scope */') !== -1) return rawHtml;
+                const lastScriptClose = rawHtml.lastIndexOf('<\x2fscript>');
+                if (lastScriptClose === -1) return rawHtml;
+                const scriptOpenIdx = rawHtml.indexOf('<script>');
+                if (scriptOpenIdx === -1) return rawHtml;
+                const beforeScript = rawHtml.substring(0, scriptOpenIdx + 8);
+                const scriptBody = rawHtml.substring(scriptOpenIdx + 8, lastScriptClose);
+                const afterScript = rawHtml.substring(lastScriptClose);
+                return beforeScript + '\n(function() { /* suabe-scope */\n' + scriptBody + '\n})();\n' + afterScript;
+            }
+
+            try { window.stop(); } catch(e) {}
+            if (document.body) document.body.innerHTML = '';
+            document.open('text/html', 'replace');
+            document.write(prepareBuildHtml(html));
             document.close();
         }
 
@@ -4675,8 +4691,39 @@
         }
         window.addEventListener('resize', updateFaviconScrollHint);
 
-        // Expose renderHistory and listen to storage events for viewer tabs
+        // Expose functions on window
         window.renderHistory = renderHistory;
+        window.renderFavicons = renderFavicons;
+        window.renderBuildsList = renderBuildsList;
+        window.checkForBuildUpdates = checkForBuildUpdates;
+        window.isBuildCached = isBuildCached;
+        window.getBuildStorageKey = getBuildStorageKey;
+        window.removeBuildCache = removeBuildCache;
+        window.DEFAULT_BUILDS = DEFAULT_BUILDS;
+        window.DEFAULT_FAVICONS = DEFAULT_FAVICONS;
+        window.IDBStorage = IDBStorage;
+        window.switchMode = switchMode;
+        window.updateSwitcherUI = updateSwitcherUI;
+        window.generateDataUri = generateDataUri;
+        window.compressHtml = compressHtml;
+        window.initDataUriCache = initDataUriCache;
+        window.openPanel = openPanel;
+        window.restoreActiveSubmenu = restoreActiveSubmenu;
+        window.getCloakOrder = getCloakOrder;
+        window.saveCloakOrder = saveCloakOrder;
+        window.addFavicon = addFavicon;
+        window.removeFavicon = removeFavicon;
+        window.addToHistory = addToHistory;
+        window.togglePinHistory = togglePinHistory;
+        window.getHistory = getHistory;
+        window.saveHistory = saveHistory;
+        window.getFavicons = getFavicons;
+        window.isSwf = isSwf;
+        window.openFileAsHtml = openFileAsHtml;
+        window.openFileAsText = openFileAsText;
+        window.openFileAsSwf = openFileAsSwf;
+        window.formatUrlOrSearch = formatUrlOrSearch;
+        window.validateAndFormatUrl = validateAndFormatUrl;
         window.addEventListener('storage', (e) => {
             if (e.key === 'suabe2_history') {
                 renderHistory();
@@ -4695,6 +4742,7 @@
 
         // Focus input on load
         urlInput.focus();
+    })();
     </script>
 </body>
 </html>

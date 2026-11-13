@@ -222,16 +222,17 @@ The dev build contains experimental features and forward-looking additions.
       - Updates are **never automatically installed**; users are notified and choose when to update.
     - **Primary Loaders (`dev/suabe2_loader_dev.html` & `dev/suabe2_loader_dev.svg`)**:
       - `suabe2_loader_dev.html` is the primary entrypoint loader.
-      - Checks `localStorage` for cached build (`suabe2_cached_build_dev`).
-      - If cached, instantly loads the cached version using in-place document replacement (`document.open(); document.write(html); document.close();`) without iframes.
-      - If not cached or offline without cache, displays a dark themed loader with spinner and "Loading SUABE 2..." / "Downloading SUABE 2..." status text, fetches the build from jsDelivr CDN, caches it locally, and launches it.
-      - `dev/suabe2_loader_dev.svg` is kept in sync with identical offline caching and document replacement logic.
+      - Checks `localStorage` in `<head>` for cached build (`suabe2_cached_build_dev`) before any DOM elements are parsed, preventing the loading screen from appearing or sticking when cached.
+      - If cached, halts the loader parser via `window.stop()` and cleanly streams the cached version in-place via `document.open('text/html', 'replace')` without speculative parsing conflicts or iframes.
+      - If not cached or offline without cache, displays a dark themed loader with spinner and "Downloading SUABE 2..." status text, fetches the build from jsDelivr CDN, caches it locally, and launches it.
+      - Automatically wraps incoming script contents in an IIFE scope (`/* suabe-scope */`) to eliminate `SyntaxError: redeclaration of let/const` collisions when switching builds in the same window.
+      - `dev/suabe2_loader_dev.svg` is kept in sync with identical offline caching, scoping, and document replacement logic.
 
 ---
 
 ## 🛠️ Technical Details & Architecture for Future Agents
 
-- **Single-File Design**: Both `suabe2.html` and `suabe2_dev.html` are self-contained single-page applications (HTML + CSS in `<style>` + JS in `<script>`). Do not introduce external npm/build dependencies unless explicitly instructed.
+- **Single-File Design & Lexical Scope Protection**: Both `suabe2.html` and `suabe2_dev.html` are self-contained single-page applications. The main `<script>` blocks are encapsulated inside an IIFE `(function() { /* suabe-scope */ ... })();` to ensure that document replacements or build switches in the same window never trigger `SyntaxError: redeclaration of let/const` on top-level bindings. Public APIs required by external viewers (such as `renderHistory`) are explicitly assigned to `window`. Do not introduce external npm/build dependencies unless explicitly instructed.
 - **LocalStorage Schema**:
   - `suabe2_settings`: JSON object `{ replaceCurrentPage: boolean, useBlobUrl?: boolean, showViewerTopbar?: boolean, autoHideTopbar?: boolean, searchFallback?: boolean, classicSwitcher?: boolean }`.
   - `suabe2_history`: JSON array of entries `{ id, type, url, filename, display, timestamp, isSaved, isLargeFile, isPinned?: boolean, inIndexedDB?: boolean, isFlash?: boolean, content?: string }`.

@@ -5,6 +5,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Google</title>
     <link rel="icon" href="https://www.google.com/favicon.ico">
+    <script>
+        (function() {
+            var CACHE_KEY = 'suabe2_cached_build_dev';
+            function prepare(html) {
+                if (!html) return html;
+                if (html.indexOf('/* suabe-scope */') !== -1) return html;
+                var lastScriptClose = html.lastIndexOf('<\x2fscript>');
+                if (lastScriptClose === -1) return html;
+                var scriptOpenIdx = html.indexOf('<script>');
+                if (scriptOpenIdx === -1) return html;
+                var beforeScript = html.substring(0, scriptOpenIdx + 8);
+                var scriptBody = html.substring(scriptOpenIdx + 8, lastScriptClose);
+                var afterScript = html.substring(lastScriptClose);
+                return beforeScript + '\n(function() { /* suabe-scope */\n' + scriptBody + '\n})();\n' + afterScript;
+            }
+            try {
+                var cached = localStorage.getItem(CACHE_KEY);
+                if (cached && cached.indexOf('<!DOCTYPE html>') !== -1) {
+                    try { window.stop(); } catch(e) {}
+                    document.open('text/html', 'replace');
+                    document.write(prepare(cached));
+                    document.close();
+                }
+            } catch(e) {}
+        })();
+    </script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -63,73 +89,87 @@
 <body>
     <div class="loader-box">
         <div class="spinner" id="spinner"></div>
-        <div class="loading-text" id="statusText">Loading SUABE 2...</div>
+        <div class="loading-text" id="statusText">Downloading SUABE 2...</div>
         <div class="error-msg" id="errorMsg">Failed to fetch SUABE 2 and no offline cache found. Connect to internet and retry.</div>
-        <button class="retry-btn" id="retryBtn" onclick="loadSuabe()">Retry</button>
+        <button class="retry-btn" id="retryBtn">Retry</button>
     </div>
     <script>
-        const CACHE_KEY = 'suabe2_cached_build_dev';
-        const CDN_URL = 'https://cdn.jsdelivr.net/gh/spamton-school/suabe2@main/dev/suabe2_dev.html';
+        (function() {
+            var CACHE_KEY = 'suabe2_cached_build_dev';
+            var CDN_URL = 'https://cdn.jsdelivr.net/gh/spamton-school/suabe2@main/dev/suabe2_dev.html';
 
-        function launch(html) {
-            document.open();
-            document.write(html);
-            document.close();
-        }
+            function prepare(html) {
+                if (!html) return html;
+                if (html.indexOf('/* suabe-scope */') !== -1) return html;
+                var lastScriptClose = html.lastIndexOf('<\x2fscript>');
+                if (lastScriptClose === -1) return html;
+                var scriptOpenIdx = html.indexOf('<script>');
+                if (scriptOpenIdx === -1) return html;
+                var beforeScript = html.substring(0, scriptOpenIdx + 8);
+                var scriptBody = html.substring(scriptOpenIdx + 8, lastScriptClose);
+                var afterScript = html.substring(lastScriptClose);
+                return beforeScript + '\n(function() { /* suabe-scope */\n' + scriptBody + '\n})();\n' + afterScript;
+            }
 
-        function loadSuabe() {
-            const statusText = document.getElementById('statusText');
-            const spinner = document.getElementById('spinner');
-            const errorMsg = document.getElementById('errorMsg');
-            const retryBtn = document.getElementById('retryBtn');
+            function launch(html) {
+                try { window.stop(); } catch(e) {}
+                if (document.body) document.body.innerHTML = '';
+                document.open('text/html', 'replace');
+                document.write(prepare(html));
+                document.close();
+            }
 
-            // 1. Check local cache first
-            try {
-                const cached = localStorage.getItem(CACHE_KEY);
-                if (cached && cached.includes('<!DOCTYPE html>')) {
-                    launch(cached);
-                    return;
+            function loadSuabe() {
+                var statusText = document.getElementById('statusText');
+                var spinner = document.getElementById('spinner');
+                var errorMsg = document.getElementById('errorMsg');
+                var retryBtn = document.getElementById('retryBtn');
+
+                // Check local cache
+                try {
+                    var cached = localStorage.getItem(CACHE_KEY);
+                    if (cached && cached.indexOf('<!DOCTYPE html>') !== -1) {
+                        launch(cached);
+                        return;
+                    }
+                } catch (e) {}
+
+                if (statusText) {
+                    statusText.style.display = 'block';
+                    statusText.textContent = 'Downloading SUABE 2...';
                 }
-            } catch (e) {
-                console.warn('Storage read error:', e);
+                if (spinner) spinner.style.display = 'block';
+                if (errorMsg) errorMsg.style.display = 'none';
+                if (retryBtn) retryBtn.style.display = 'none';
+
+                fetch(CDN_URL + '?_=' + Date.now(), { cache: 'no-cache' })
+                    .then(function(res) {
+                        if (!res.ok) throw new Error('HTTP ' + res.status);
+                        return res.text();
+                    })
+                    .then(function(html) {
+                        if (!html || html.indexOf('<!DOCTYPE html>') === -1) {
+                            throw new Error('Invalid HTML received');
+                        }
+                        try {
+                            localStorage.setItem(CACHE_KEY, html);
+                            localStorage.setItem('suabe2_cached_build_dev_time', String(Date.now()));
+                        } catch (e) {}
+                        launch(html);
+                    })
+                    .catch(function(err) {
+                        if (spinner) spinner.style.display = 'none';
+                        if (statusText) statusText.style.display = 'none';
+                        if (errorMsg) errorMsg.style.display = 'block';
+                        if (retryBtn) retryBtn.style.display = 'inline-block';
+                    });
             }
 
-            // 2. Fetch from jsDelivr if not cached
-            if (statusText) {
-                statusText.style.display = 'block';
-                statusText.textContent = 'Downloading SUABE 2...';
-            }
-            if (spinner) spinner.style.display = 'block';
-            if (errorMsg) errorMsg.style.display = 'none';
-            if (retryBtn) retryBtn.style.display = 'none';
+            var retryBtn = document.getElementById('retryBtn');
+            if (retryBtn) retryBtn.addEventListener('click', loadSuabe);
 
-            fetch(CDN_URL + '?_=' + Date.now(), { cache: 'no-cache' })
-                .then(res => {
-                    if (!res.ok) throw new Error('HTTP ' + res.status);
-                    return res.text();
-                })
-                .then(html => {
-                    if (!html || !html.includes('<!DOCTYPE html>')) {
-                        throw new Error('Invalid HTML received');
-                    }
-                    try {
-                        localStorage.setItem(CACHE_KEY, html);
-                        localStorage.setItem('suabe2_cached_build_dev_time', String(Date.now()));
-                    } catch (e) {
-                        console.warn('Failed to cache build:', e);
-                    }
-                    launch(html);
-                })
-                .catch(err => {
-                    console.error('Fetch error:', err);
-                    if (spinner) spinner.style.display = 'none';
-                    if (statusText) statusText.style.display = 'none';
-                    if (errorMsg) errorMsg.style.display = 'block';
-                    if (retryBtn) retryBtn.style.display = 'inline-block';
-                });
-        }
-
-        loadSuabe();
+            loadSuabe();
+        })();
     </script>
 </body>
 </html>
