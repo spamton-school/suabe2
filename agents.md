@@ -8,13 +8,18 @@ This document provides context, technical architecture, and feature specificatio
 
 ```text
 suabe2/
-├── agents.md            # Project reference and instructions for AI agents
+├── agents.md                  # Project reference and instructions for AI agents
+├── releases.json              # Version catalog and metadata for downloadable builds
 ├── dev/
-│   ├── image.svg        # SVG foreignObject CDN loader (pulls dev)
-│   └── suabe2_dev.html  # Experimental development fork
+│   ├── suabe2_dev.html        # Experimental development fork
+│   ├── suabe2_loader_dev.html # Primary HTML offline-capable loader for dev
+│   └── suabe2_loader_dev.svg  # SVG foreignObject CDN loader (pulls dev)
+├── releases/
+│   ├── suabe2.html            # Production release mirror (v2.0)
+│   └── suabe2_v2.0.html       # Archived release build v2.0
 └── stable/
-    ├── image.svg        # SVG foreignObject CDN loader (pulls stable)
-    └── suabe2.html      # Production release build
+    ├── image.svg              # SVG foreignObject CDN loader (pulls stable)
+    └── suabe2.html            # Production release build
 ```
 
 ---
@@ -205,6 +210,23 @@ The dev build contains experimental features and forward-looking additions.
     - The indicator is only visible when at the top of the list (`scrollTop <= 12`), smoothly fading out (`opacity: 0`, `visibility: hidden`) upon scrolling down so it takes away zero space.
     - Re-evaluates dynamically on list scroll, window resize, cloak addition/deletion, or panel opening via `updateFaviconScrollHint()`.
 
+20. **Network & Offline Build Manager (`#networkBtn` & `#networkPanel`)**:
+    - Dedicated Network button (`#networkBtn`) styled in cyan/blue theme (`#00d9ff`) positioned immediately to the left of `#dataUriBtn`.
+    - Includes an animated notification dot (`#networkUpdateBadge`) and pulsing ring animation (`@keyframes updatePulse`) that triggers when updates to cached builds are detected.
+    - Network Panel (`#networkPanel`) features:
+      - Live connection indicator displaying online/offline state via `navigator.onLine` and `online`/`offline` window events.
+      - Update detection notification banner (`#networkUpdateBanner`) informing the user of available build updates.
+      - "Check for Updates" manual trigger button.
+      - Downloadable builds list (`#buildsList`) populated dynamically from `releases.json`.
+      - Build action cards allowing users to download builds for offline use (`Download`), launch cached builds (`Launch`), or remove them from local storage (`Delete`).
+      - Updates are **never automatically installed**; users are notified and choose when to update.
+    - **Primary Loaders (`dev/suabe2_loader_dev.html` & `dev/suabe2_loader_dev.svg`)**:
+      - `suabe2_loader_dev.html` is the primary entrypoint loader.
+      - Checks `localStorage` for cached build (`suabe2_cached_build_dev`).
+      - If cached, instantly loads the cached version using in-place document replacement (`document.open(); document.write(html); document.close();`) without iframes.
+      - If not cached or offline without cache, displays a dark themed loader with spinner and "Loading SUABE 2..." / "Downloading SUABE 2..." status text, fetches the build from jsDelivr CDN, caches it locally, and launches it.
+      - `dev/suabe2_loader_dev.svg` is kept in sync with identical offline caching and document replacement logic.
+
 ---
 
 ## 🛠️ Technical Details & Architecture for Future Agents
@@ -215,10 +237,13 @@ The dev build contains experimental features and forward-looking additions.
   - `suabe2_history`: JSON array of entries `{ id, type, url, filename, display, timestamp, isSaved, isLargeFile, isPinned?: boolean, inIndexedDB?: boolean, isFlash?: boolean, content?: string }`.
   - `suabe2_favicons`: JSON array of `{ id, title, url }`.
   - `suabe2_cloak_order`: JSON array of string IDs representing custom cloak order.
-  - `suabe2_active_submenu`: String (`'settings'`, `'favicon'`, `'dataUri'`) or null indicating the last open submenu.
+  - `suabe2_active_submenu`: String (`'settings'`, `'favicon'`, `'dataUri'`, `'network'`) or null indicating the last open submenu.
   - `suabe2_lastSelectedFavicon`: JSON object `{ id, title, url }`.
   - `suabe2_cached_data_uri`: Base64 string of the generated HTML Data URI.
   - `suabe2_cache_data_uri_pref`: String (`'true'` / `'false'`) indicating whether to cache the generated Data URI.
+  - `suabe2_cached_build_<id>`: HTML string of build `<id>` cached locally in browser for offline loading (e.g. `suabe2_cached_build_dev`, `suabe2_cached_build_v2.0`).
+  - `suabe2_cached_build_<id>_meta`: JSON metadata `{ id, version, cachedAt }` for version comparison.
+  - `suabe2_releases_cache`: Cached copy of `releases.json` data for offline build listings.
 - **IndexedDB Schema**:
   - Database: `suabe2_files_db` (version 1)
   - Object Store: `files` (keyPath: `id`) -> `{ id, name, size, type, isFlash, data }`

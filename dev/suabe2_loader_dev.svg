@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" style="position: fixed; inset: 0; background: #141414;">
+    <foreignObject x="0" y="0" width="100%" height="100%">
+        <div xmlns="http://www.w3.org/1999/xhtml" id="content" style="height: 100%; display: flex; align-items: center; justify-content: center; font-family: sans-serif; color: #aaa;">
+            <div id="loaderStatus" style="font-size: 15px; font-weight: 500;">Loading SUABE 2...</div>
+            <script>
+            (function() {
+                var CACHE_KEY = 'suabe2_cached_build_dev';
+                var CDN_URL = 'https://cdn.jsdelivr.net/gh/spamton-school/suabe2@main/dev/suabe2_dev.html';
+
+                function launch(html) {
+                    try {
+                        document.open();
+                        document.write(html);
+                        document.close();
+                    } catch(e) {
+                        var iframe = document.createElementNS('http://www.w3.org/1999/xhtml', 'iframe');
+                        iframe.style.position = 'fixed';
+                        iframe.style.top = '0';
+                        iframe.style.left = '0';
+                        iframe.style.width = '100%';
+                        iframe.style.height = '100%';
+                        iframe.style.border = 'none';
+                        iframe.style.zIndex = '999999';
+                        iframe.srcdoc = html;
+                        var content = document.getElementById('content');
+                        if (content) {
+                            content.innerHTML = '';
+                            content.appendChild(iframe);
+                        } else {
+                            document.documentElement.appendChild(iframe);
+                        }
+                    }
+                }
+
+                try {
+                    var cached = localStorage.getItem(CACHE_KEY);
+                    if (cached &amp;&amp; cached.indexOf('&lt;!DOCTYPE html&gt;') !== -1) {
+                        launch(cached);
+                        return;
+                    }
+                } catch(e) {}
+
+                var status = document.getElementById('loaderStatus');
+                if (status) status.textContent = 'Downloading SUABE 2...';
+
+                fetch(CDN_URL + '?_=' + Date.now(), { cache: 'no-cache' })
+                    .then(function(res) { return res.text(); })
+                    .then(function(html) {
+                        if (html &amp;&amp; html.indexOf('&lt;!DOCTYPE html&gt;') !== -1) {
+                            try {
+                                localStorage.setItem(CACHE_KEY, html);
+                                localStorage.setItem('suabe2_cached_build_dev_time', String(Date.now()));
+                            } catch(e) {}
+                            launch(html);
+                        }
+                    })
+                    .catch(function() {
+                        if (status) status.textContent = 'Offline: Connect to internet to download SUABE 2.';
+                    });
+            })();
+            </script>
+        </div>
+    </foreignObject>
+</svg>

@@ -1,0 +1,30 @@
+{
+  "latest": {
+    "stable": "v2.0",
+    "dev": "dev"
+  },
+  "builds": [
+    {
+      "id": "dev",
+      "name": "SUABE 2.1 (Dev)",
+      "version": "2.1-dev",
+      "channel": "dev",
+      "description": "Experimental development build with network loader, offline build manager, and latest tools.",
+      "path": "dev/suabe2_dev.html",
+      "url": "https://cdn.jsdelivr.net/gh/spamton-school/suabe2@main/dev/suabe2_dev.html",
+      "rawUrl": "https://raw.githubusercontent.com/spamton-school/suabe2/main/dev/suabe2_dev.html",
+      "updatedAt": "2026-11-12T18:50:00Z"
+    },
+    {
+      "id": "v2.0",
+      "name": "SUABE 2.0 (Stable)",
+      "version": "2.0",
+      "channel": "stable",
+      "description": "Production release build with tab cloaking and offline file viewer.",
+      "path": "stable/suabe2.html",
+      "url": "https://cdn.jsdelivr.net/gh/spamton-school/suabe2@main/stable/suabe2.html",
+      "rawUrl": "https://raw.githubusercontent.com/spamton-school/suabe2/main/stable/suabe2.html",
+      "updatedAt": "2026-10-28T00:00:00Z"
+    }
+  ]
+}

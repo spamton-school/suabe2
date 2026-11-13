@@ -87,6 +87,72 @@
             box-shadow: 0 0 10px rgba(0, 217, 255, 0.2);
         }
 
+        .network-btn {
+            background: none;
+            border: 2px solid #404040;
+            color: #999;
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .network-btn:hover {
+            border-color: #00d9ff;
+            color: #00d9ff;
+            box-shadow: 0 0 10px rgba(0, 217, 255, 0.25);
+            transform: translateY(-2px);
+        }
+
+        .network-btn:hover svg path,
+        .network-btn:hover svg line {
+            stroke: #00d9ff;
+        }
+
+        .network-btn.has-update {
+            border-color: #ff9d3d !important;
+            box-shadow: 0 0 12px rgba(255, 157, 61, 0.5) !important;
+            animation: updatePulse 2s infinite;
+        }
+
+        .network-btn.has-update svg path,
+        .network-btn.has-update svg line {
+            stroke: #ff9d3d !important;
+        }
+
+        .network-badge {
+            display: none;
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            width: 9px;
+            height: 9px;
+            background: #ff9d3d;
+            border-radius: 50%;
+            box-shadow: 0 0 6px #ff9d3d;
+            border: 1.5px solid #1a1a1a;
+        }
+
+        .network-badge.visible {
+            display: block;
+        }
+
+        @keyframes updatePulse {
+            0%, 100% {
+                box-shadow: 0 0 8px rgba(255, 157, 61, 0.4);
+            }
+            50% {
+                box-shadow: 0 0 16px rgba(255, 157, 61, 0.85);
+            }
+        }
+
         .datauri-btn {
             background: none;
             border: 2px solid #404040;
@@ -286,6 +352,251 @@
             height: 16px;
             cursor: pointer;
             accent-color: #00ff88;
+        }
+
+        .network-panel {
+            position: fixed;
+            top: 30px;
+            max-height: calc(100vh - 54px);
+            left: 590px;
+            width: 340px;
+            background: #1a1a1a;
+            border: 2px solid #404040;
+            border-radius: 8px;
+            padding: 20px;
+            z-index: 1000;
+            opacity: 0;
+            transform: translateX(-20px);
+            pointer-events: none;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+
+        .network-panel.active {
+            opacity: 1;
+            transform: translateX(0);
+            pointer-events: auto;
+        }
+
+        .network-panel h2 {
+            font-size: 18px;
+            margin-bottom: 12px;
+            color: #e0e0e0;
+            flex-shrink: 0;
+        }
+
+        .network-status-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #222;
+            border: 1px solid #333;
+            border-radius: 6px;
+            padding: 8px 12px;
+            margin-bottom: 12px;
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+
+        .network-indicator {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 600;
+            color: #ccc;
+        }
+
+        .network-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #00ff88;
+            box-shadow: 0 0 6px rgba(0, 255, 136, 0.6);
+        }
+
+        .network-dot.offline {
+            background: #ff5555;
+            box-shadow: 0 0 6px rgba(255, 85, 85, 0.6);
+        }
+
+        .network-check-btn {
+            background: #2c2c2c;
+            color: #00d9ff;
+            border: 1px solid #404040;
+            border-radius: 4px;
+            padding: 4px 10px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .network-check-btn:hover {
+            border-color: #00d9ff;
+            background: #383838;
+            box-shadow: 0 0 8px rgba(0, 217, 255, 0.2);
+        }
+
+        .network-update-banner {
+            background: rgba(255, 157, 61, 0.12);
+            border: 1px solid #ff9d3d;
+            border-radius: 6px;
+            padding: 10px;
+            margin-bottom: 12px;
+            font-size: 12px;
+            color: #ff9d3d;
+            line-height: 1.4;
+            display: none;
+            flex-shrink: 0;
+        }
+
+        .builds-list {
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+            overscroll-behavior: contain;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding-right: 2px;
+            scrollbar-width: thin;
+            scrollbar-color: #404040 #1a1a1a;
+        }
+
+        .build-card {
+            background: #252525;
+            border: 1px solid #383838;
+            border-radius: 6px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .build-card.has-update {
+            border-color: #ff9d3d;
+            box-shadow: 0 0 8px rgba(255, 157, 61, 0.2);
+        }
+
+        .build-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .build-card-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #e0e0e0;
+        }
+
+        .build-badge {
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .build-badge.cached {
+            background: rgba(0, 255, 136, 0.15);
+            color: #00ff88;
+            border: 1px solid #00ff88;
+        }
+
+        .build-badge.not-cached {
+            background: rgba(150, 150, 150, 0.15);
+            color: #888;
+            border: 1px solid #555;
+        }
+
+        .build-badge.update {
+            background: rgba(255, 157, 61, 0.2);
+            color: #ff9d3d;
+            border: 1px solid #ff9d3d;
+            animation: updatePulse 2s infinite;
+        }
+
+        .build-card-desc {
+            font-size: 11px;
+            color: #888;
+            line-height: 1.4;
+        }
+
+        .build-card-actions {
+            display: flex;
+            gap: 6px;
+            margin-top: 4px;
+        }
+
+        .build-btn {
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid #404040;
+            background: #2e2e2e;
+            color: #e0e0e0;
+            transition: all 0.2s ease;
+            flex: 1;
+            text-align: center;
+        }
+
+        .build-btn:hover {
+            border-color: #00d9ff;
+            color: #00d9ff;
+        }
+
+        .build-btn.download-btn {
+            background: linear-gradient(135deg, #00d9ff 0%, #0099cc 100%);
+            border: none;
+            color: #141414;
+        }
+
+        .build-btn.download-btn:hover {
+            box-shadow: 0 2px 8px rgba(0, 217, 255, 0.4);
+            transform: translateY(-1px);
+        }
+
+        .build-btn.update-btn {
+            background: linear-gradient(135deg, #ff9d3d 0%, #e67e22 100%);
+            border: none;
+            color: #141414;
+        }
+
+        .build-btn.update-btn:hover {
+            box-shadow: 0 2px 8px rgba(255, 157, 61, 0.4);
+            transform: translateY(-1px);
+        }
+
+        .build-btn.remove-btn {
+            color: #ff6666;
+            border-color: #662222;
+            background: rgba(255, 80, 80, 0.08);
+            flex: 0 0 auto;
+            padding: 6px 8px;
+        }
+
+        .build-btn.remove-btn:hover {
+            border-color: #ff5555;
+            background: rgba(255, 80, 80, 0.2);
+            color: #ff7777;
+        }
+
+        .build-btn.launch-btn {
+            background: #2a2a2a;
+            border-color: #9d4edd;
+            color: #c77dff;
+        }
+
+        .build-btn.launch-btn:hover {
+            background: #9d4edd;
+            color: #fff;
         }
 
         .settings-panel {
@@ -1188,6 +1499,15 @@
         <div class="header">
             <h1>SUABE 2 <span class="dev-badge">DEV</span></h1>
             <div class="button-group">
+                <button class="network-btn" id="networkBtn" title="Offline Builds & Updates">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#999999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: block;">
+                        <path d="M5 12.55a11 11 0 0 1 14.08 0"></path>
+                        <path d="M1.42 9a16 16 0 0 1 21.16 0"></path>
+                        <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
+                        <line x1="12" y1="20" x2="12.01" y2="20"></line>
+                    </svg>
+                    <span class="network-badge" id="networkUpdateBadge"></span>
+                </button>
                 <button class="datauri-btn" id="dataUriBtn" title="HTML Data URI Generator"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#999999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: block;"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></button>
                 <button class="favicon-btn" id="faviconBtn"><svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" style="display: block;"><path stroke="#999999" stroke-width="2" d="M10 15.5a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0Zm9 0a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0Z"/><path stroke="#999999" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m10 15 .211-.106a4 4 0 0 1 3.578 0L14 15m3-6-1.65-4.125a1 1 0 0 0-1.245-.577l-1.473.491a2 2 0 0 1-1.264 0L9.894 4.3a1 1 0 0 0-1.245.576L7 9m-4 1c7.5-1 11-1 18 0"/></svg></button>
                 <button class="settings-btn" id="settingsBtn"><svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none"><path d="M19.4,13c0-0.3,0.1-0.7,0.1-1s0-0.7-0.1-1l2.1-1.5c0.2-0.1,0.3-0.4,0.1-0.7l-2-3.5C19.5,5,19.2,4.9,19,5l-2.4,1.1c-0.5-0.4-1.2-0.8-1.8-1l-0.3-2.6C14.5,2.2,14.3,2,14,2h-4C9.7,2,9.5,2.2,9.5,2.5L9.2,5C8.5,5.3,7.9,5.6,7.4,6L5,5C4.8,4.9,4.5,5,4.4,5.2l-2,3.5C2.2,9,2.2,9.3,2.5,9.4L4.6,11c0,0.3-0.1,0.7-0.1,1s0,0.7,0.1,1l-2.1,1.5c-0.2,0.1-0.3,0.4-0.1,0.7l2,3.5C4.5,19,4.8,19.1,5,19l2.4-1.1c0.5,0.4,1.2,0.8,1.8,1l0.3,2.6c0,0.3,0.2,0.5,0.5,0.5h4c0.3,0,0.5-0.2,0.5-0.5l0.3-2.6c0.7-0.3,1.3-0.6,1.8-1L19,19c0.2,0.1,0.5,0,0.6-0.2l2-3.5c0.1-0.2,0.1-0.5-0.1-0.7L19.4,13z M12,16c-2.2,0-4-1.8-4-4s1.8-4,4-4s4,1.8,4,4S14.2,16,12,16z" fill="#999999"/></svg></button>
@@ -1312,6 +1632,22 @@
                 <input type="file" id="importFileInput" accept=".json">
             </div>
         </div>
+    </div>
+
+    <!-- Network & Offline Builds Panel -->
+    <div class="network-panel" id="networkPanel">
+        <h2>Offline Builds & Updates</h2>
+        <div class="network-status-bar">
+            <div class="network-indicator">
+                <span class="network-dot" id="networkDot"></span>
+                <span id="networkStatusText">Online</span>
+            </div>
+            <button class="network-check-btn" id="networkCheckUpdatesBtn">Check Updates</button>
+        </div>
+        <div class="network-update-banner" id="networkUpdateBanner">
+            ⚡ <b>Update available for SUABE 2!</b> An updated build is ready. Click "Update" on the build below to download it offline.
+        </div>
+        <div class="builds-list" id="buildsList"></div>
     </div>
 
     <!-- Data URI Panel -->
@@ -1519,6 +1855,14 @@
         const exportBtn = document.getElementById('exportBtn');
         const importBtn = document.getElementById('importBtn');
         const importFileInput = document.getElementById('importFileInput');
+        const networkBtn = document.getElementById('networkBtn');
+        const networkPanel = document.getElementById('networkPanel');
+        const networkDot = document.getElementById('networkDot');
+        const networkStatusText = document.getElementById('networkStatusText');
+        const networkCheckUpdatesBtn = document.getElementById('networkCheckUpdatesBtn');
+        const networkUpdateBanner = document.getElementById('networkUpdateBanner');
+        const networkUpdateBadge = document.getElementById('networkUpdateBadge');
+        const buildsList = document.getElementById('buildsList');
 
         // ========== Panel Management ==========
         function openPanel(panelToOpen) {
@@ -1526,6 +1870,7 @@
             settingsPanel.classList.remove('active');
             faviconPanel.classList.remove('active');
             dataUriPanel.classList.remove('active');
+            if (networkPanel) networkPanel.classList.remove('active');
             // Open the specified panel
             if (panelToOpen === 'settings') {
                 settingsPanel.classList.add('active');
@@ -1538,6 +1883,11 @@
             } else if (panelToOpen === 'dataUri') {
                 dataUriPanel.classList.add('active');
                 try { localStorage.setItem('suabe2_active_submenu', 'dataUri'); } catch (e) {}
+            } else if (panelToOpen === 'network') {
+                if (networkPanel) networkPanel.classList.add('active');
+                try { localStorage.setItem('suabe2_active_submenu', 'network'); } catch (e) {}
+                renderBuildsList();
+                updateNetworkIndicator();
             } else {
                 try { localStorage.removeItem('suabe2_active_submenu'); } catch (e) {}
             }
@@ -2322,9 +2672,12 @@
             try {
                 let htmlContent = '';
 
-                // Try fetching image.svg first
+                // Try fetching suabe2_loader_dev.svg or image.svg first
                 try {
-                    const response = await fetch('image.svg?_=' + Date.now(), { cache: 'no-cache' });
+                    let response = await fetch('suabe2_loader_dev.svg?_=' + Date.now(), { cache: 'no-cache' });
+                    if (!response.ok) {
+                        response = await fetch('image.svg?_=' + Date.now(), { cache: 'no-cache' });
+                    }
                     if (response.ok) {
                         const svgText = await response.text();
                         const foMatch = svgText.match(/<foreignObject[^>]*>([\s\S]*?)<\/foreignObject>/i);
@@ -2344,7 +2697,7 @@
                         }
                     }
                 } catch (fetchErr) {
-                    console.warn('Could not fetch image.svg directly:', fetchErr);
+                    console.warn('Could not fetch loader SVG directly:', fetchErr);
                 }
 
                 if (!htmlContent) {
@@ -2413,6 +2766,315 @@
                 }
             } catch (e) {
                 console.warn('Could not read Data URI cache from localStorage:', e);
+            }
+        }
+
+        // ========== Offline Builds & Network Manager ==========
+        const DEFAULT_BUILDS = [
+            {
+                id: 'dev',
+                name: 'SUABE 2.1 (Dev)',
+                version: '2.1-dev',
+                channel: 'dev',
+                description: 'Experimental development build with network loader and offline build manager.',
+                url: 'https://cdn.jsdelivr.net/gh/spamton-school/suabe2@main/dev/suabe2_dev.html',
+                rawUrl: 'https://raw.githubusercontent.com/spamton-school/suabe2/main/dev/suabe2_dev.html'
+            },
+            {
+                id: 'v2.0',
+                name: 'SUABE 2.0 (Stable)',
+                version: '2.0',
+                channel: 'stable',
+                description: 'Production release build with tab cloaking and offline file viewer.',
+                url: 'https://cdn.jsdelivr.net/gh/spamton-school/suabe2@main/stable/suabe2.html',
+                rawUrl: 'https://raw.githubusercontent.com/spamton-school/suabe2/main/stable/suabe2.html'
+            }
+        ];
+
+        let cachedReleasesData = null;
+        let updateAvailableBuilds = new Set();
+
+        function getBuildStorageKey(buildId) {
+            return 'suabe2_cached_build_' + buildId;
+        }
+
+        function isBuildCached(buildId) {
+            try {
+                const content = localStorage.getItem(getBuildStorageKey(buildId));
+                return !!(content && content.includes('<!DOCTYPE html>'));
+            } catch (e) {
+                return false;
+            }
+        }
+
+        function getBuildMeta(buildId) {
+            try {
+                const meta = localStorage.getItem(getBuildStorageKey(buildId) + '_meta');
+                return meta ? JSON.parse(meta) : null;
+            } catch (e) {
+                return null;
+            }
+        }
+
+        function updateNetworkIndicator() {
+            if (!networkDot || !networkStatusText) return;
+            if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+                networkDot.className = 'network-dot offline';
+                networkStatusText.textContent = 'Offline';
+            } else {
+                networkDot.className = 'network-dot';
+                networkStatusText.textContent = 'Online';
+            }
+        }
+
+        async function fetchReleasesList() {
+            try {
+                const res = await fetch('https://cdn.jsdelivr.net/gh/spamton-school/suabe2@main/releases.json?_=' + Date.now(), { cache: 'no-cache' });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data && data.builds) {
+                        cachedReleasesData = data;
+                        try { localStorage.setItem('suabe2_releases_cache', JSON.stringify(data)); } catch (e) {}
+                        return data.builds;
+                    }
+                }
+            } catch (e) {
+                // Offline fallback
+            }
+
+            // Fallback to locally cached releases metadata
+            try {
+                const stored = localStorage.getItem('suabe2_releases_cache');
+                if (stored) {
+                    const data = JSON.parse(stored);
+                    if (data && data.builds) return data.builds;
+                }
+            } catch (e) {}
+
+            return DEFAULT_BUILDS;
+        }
+
+        async function renderBuildsList() {
+            if (!buildsList) return;
+            buildsList.innerHTML = '<div style="color:#888;font-size:12px;padding:8px;text-align:center;">Loading builds...</div>';
+
+            const builds = (cachedReleasesData && cachedReleasesData.builds) ? cachedReleasesData.builds : await fetchReleasesList();
+            buildsList.innerHTML = '';
+
+            builds.forEach(build => {
+                const card = document.createElement('div');
+                card.className = 'build-card';
+                const cached = isBuildCached(build.id);
+                const hasUpdate = updateAvailableBuilds.has(build.id);
+                if (hasUpdate) card.classList.add('has-update');
+
+                // Header with title and badge
+                const header = document.createElement('div');
+                header.className = 'build-card-header';
+
+                const title = document.createElement('div');
+                title.className = 'build-card-title';
+                title.textContent = build.name;
+
+                const badge = document.createElement('span');
+                badge.className = 'build-badge';
+                if (hasUpdate) {
+                    badge.classList.add('update');
+                    badge.textContent = '⚡ UPDATE';
+                } else if (cached) {
+                    badge.classList.add('cached');
+                    let sizeStr = '';
+                    try {
+                        const raw = localStorage.getItem(getBuildStorageKey(build.id));
+                        if (raw) sizeStr = ' (' + Math.round(raw.length / 1024) + ' KB)';
+                    } catch(e) {}
+                    badge.textContent = '✓ CACHED' + sizeStr;
+                } else {
+                    badge.classList.add('not-cached');
+                    badge.textContent = 'NOT CACHED';
+                }
+
+                header.appendChild(title);
+                header.appendChild(badge);
+                card.appendChild(header);
+
+                // Description
+                const desc = document.createElement('div');
+                desc.className = 'build-card-desc';
+                desc.textContent = build.description || '';
+                card.appendChild(desc);
+
+                // Actions row
+                const actions = document.createElement('div');
+                actions.className = 'build-card-actions';
+
+                if (hasUpdate) {
+                    const updateBtn = document.createElement('button');
+                    updateBtn.className = 'build-btn update-btn';
+                    updateBtn.textContent = 'Update to Latest';
+                    updateBtn.addEventListener('click', () => cacheBuildLocally(build, true));
+                    actions.appendChild(updateBtn);
+                } else if (!cached) {
+                    const downloadBtn = document.createElement('button');
+                    downloadBtn.className = 'build-btn download-btn';
+                    downloadBtn.textContent = 'Download Offline';
+                    downloadBtn.addEventListener('click', () => cacheBuildLocally(build, false));
+                    actions.appendChild(downloadBtn);
+                }
+
+                if (cached) {
+                    const launchBtn = document.createElement('button');
+                    launchBtn.className = 'build-btn launch-btn';
+                    launchBtn.textContent = 'Launch';
+                    launchBtn.addEventListener('click', () => launchBuild(build));
+                    actions.appendChild(launchBtn);
+
+                    const removeBtn = document.createElement('button');
+                    removeBtn.className = 'build-btn remove-btn';
+                    removeBtn.title = 'Remove cached version';
+                    removeBtn.textContent = 'Remove';
+                    removeBtn.addEventListener('click', () => removeBuildCache(build.id));
+                    actions.appendChild(removeBtn);
+                } else {
+                    const launchOnlineBtn = document.createElement('button');
+                    launchOnlineBtn.className = 'build-btn';
+                    launchOnlineBtn.textContent = 'Launch Online';
+                    launchOnlineBtn.addEventListener('click', () => launchBuild(build));
+                    actions.appendChild(launchOnlineBtn);
+                }
+
+                card.appendChild(actions);
+                buildsList.appendChild(card);
+            });
+        }
+
+        async function cacheBuildLocally(build, isUpdate = false) {
+            showStatus('Downloading ' + build.name + '...', 'info');
+            try {
+                let html = '';
+                try {
+                    const res = await fetch(build.url + '?_=' + Date.now(), { cache: 'no-cache' });
+                    if (res.ok) html = await res.text();
+                } catch(e) {}
+
+                if (!html && build.rawUrl) {
+                    try {
+                        const res2 = await fetch(build.rawUrl + '?_=' + Date.now(), { cache: 'no-cache' });
+                        if (res2.ok) html = await res2.text();
+                    } catch(e) {}
+                }
+
+                if (!html || !html.includes('<!DOCTYPE html>')) {
+                    throw new Error('Failed to retrieve valid build HTML');
+                }
+
+                const key = getBuildStorageKey(build.id);
+                localStorage.setItem(key, html);
+                const meta = {
+                    id: build.id,
+                    version: build.version,
+                    updatedAt: build.updatedAt || new Date().toISOString(),
+                    cachedAt: Date.now()
+                };
+                localStorage.setItem(key + '_meta', JSON.stringify(meta));
+
+                updateAvailableBuilds.delete(build.id);
+                checkUpdateBadgeState();
+                renderBuildsList();
+                showStatus((isUpdate ? 'Updated ' : 'Downloaded ') + build.name + ' for offline use!', 'success');
+            } catch (err) {
+                console.error('Error caching build:', err);
+                showStatus('Download failed: ' + err.message, 'error');
+            }
+        }
+
+        function removeBuildCache(buildId) {
+            try {
+                localStorage.removeItem(getBuildStorageKey(buildId));
+                localStorage.removeItem(getBuildStorageKey(buildId) + '_meta');
+                renderBuildsList();
+                showStatus('Removed offline cache for ' + buildId, 'info');
+            } catch(e) {
+                showStatus('Failed to remove cache', 'error');
+            }
+        }
+
+        async function launchBuild(build) {
+            let html = '';
+            const key = getBuildStorageKey(build.id);
+            try {
+                html = localStorage.getItem(key) || '';
+            } catch(e) {}
+
+            if (!html || !html.includes('<!DOCTYPE html>')) {
+                showStatus('Fetching ' + build.name + '...', 'info');
+                try {
+                    const res = await fetch(build.url + '?_=' + Date.now());
+                    if (res.ok) html = await res.text();
+                } catch(e) {}
+            }
+
+            if (!html || !html.includes('<!DOCTYPE html>')) {
+                showStatus('Could not launch build: not cached and fetch failed', 'error');
+                return;
+            }
+
+            document.open();
+            document.write(html);
+            document.close();
+        }
+
+        function checkUpdateBadgeState() {
+            const hasAny = updateAvailableBuilds.size > 0;
+            if (networkBtn) {
+                if (hasAny) {
+                    networkBtn.classList.add('has-update');
+                } else {
+                    networkBtn.classList.remove('has-update');
+                }
+            }
+            if (networkUpdateBadge) {
+                if (hasAny) {
+                    networkUpdateBadge.classList.add('visible');
+                } else {
+                    networkUpdateBadge.classList.remove('visible');
+                }
+            }
+            if (networkUpdateBanner) {
+                networkUpdateBanner.style.display = hasAny ? 'block' : 'none';
+            }
+        }
+
+        async function checkForBuildUpdates(manual = false) {
+            if (manual) showStatus('Checking for updates...', 'info');
+            try {
+                const builds = await fetchReleasesList();
+                let foundNewUpdate = false;
+
+                builds.forEach(build => {
+                    if (isBuildCached(build.id)) {
+                        const localMeta = getBuildMeta(build.id);
+                        if (localMeta && build.updatedAt) {
+                            const localTime = new Date(localMeta.updatedAt).getTime();
+                            const remoteTime = new Date(build.updatedAt).getTime();
+                            if (remoteTime > localTime) {
+                                updateAvailableBuilds.add(build.id);
+                                foundNewUpdate = true;
+                            }
+                        }
+                    }
+                });
+
+                checkUpdateBadgeState();
+                renderBuildsList();
+
+                if (foundNewUpdate) {
+                    showStatus('⚡ An update for SUABE 2 is available! Open the Network panel.', 'info');
+                } else if (manual) {
+                    showStatus('All cached builds are up to date!', 'success');
+                }
+            } catch(e) {
+                if (manual) showStatus('Could not check updates (offline)', 'error');
             }
         }
 
@@ -3984,6 +4646,22 @@
             }
         });
 
+        // Network button and offline builds handlers
+        if (networkBtn) {
+            networkBtn.addEventListener('click', () => {
+                if (networkPanel && networkPanel.classList.contains('active')) {
+                    openPanel(null);
+                } else {
+                    openPanel('network');
+                }
+            });
+        }
+        if (networkCheckUpdatesBtn) {
+            networkCheckUpdatesBtn.addEventListener('click', () => checkForBuildUpdates(true));
+        }
+        window.addEventListener('online', updateNetworkIndicator);
+        window.addEventListener('offline', updateNetworkIndicator);
+
         // Favicon list container drag and scroll hint listeners
         if (faviconList) {
             faviconList.addEventListener('dragover', handleFaviconDragOver);
@@ -4011,6 +4689,9 @@
         initDataUriCache();
         updateSwitcherUI();
         restoreActiveSubmenu();
+        updateNetworkIndicator();
+        renderBuildsList();
+        setTimeout(() => checkForBuildUpdates(false), 1500);
 
         // Focus input on load
         urlInput.focus();

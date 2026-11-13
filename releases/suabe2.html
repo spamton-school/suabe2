@@ -1,0 +1,1725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Open</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%);
+            color: #e0e0e0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            padding: 0;
+        }
+
+        .container {
+            position: fixed;
+            top: 30px;
+            left: 30px;
+            width: 500px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            background: linear-gradient(135deg, #00d9ff 0%, #0099cc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .settings-btn {
+            background: none;
+            border: 2px solid #404040;
+            color: #999;
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .settings-btn:hover {
+            border-color: #00d9ff;
+            color: #00d9ff;
+            box-shadow: 0 0 10px rgba(0, 217, 255, 0.2);
+        }
+
+        .favicon-btn {
+            background: none;
+            border: 2px solid #404040;
+            color: #999;
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .favicon-btn:hover {
+            border-color: #9d4edd;
+            color: #9d4edd;
+            box-shadow: 0 0 10px rgba(157, 78, 221, 0.2);
+        }
+
+        .settings-panel {
+            position: fixed;
+            top: 30px;
+            left: 590px;
+            width: 300px;
+            background: #1a1a1a;
+            border: 2px solid #404040;
+            border-radius: 8px;
+            padding: 20px;
+            max-height: calc(100vh - 60px);
+            overflow-y: auto;
+            z-index: 1000;
+            opacity: 0;
+            transform: translateX(-20px);
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+
+        .settings-panel.active {
+            display: block;
+            opacity: 1;
+            transform: translateX(0);
+            pointer-events: auto;
+        }
+
+        .settings-panel h2 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #e0e0e0;
+        }
+
+        .settings-group {
+            margin-bottom: 20px;
+        }
+
+        .settings-group label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            color: #e0e0e0;
+            font-size: 14px;
+            transition: color 0.2s ease;
+        }
+
+        .settings-group label:hover {
+            color: #00d9ff;
+        }
+
+        .settings-group input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: #00d9ff;
+        }
+
+        .settings-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #404040;
+        }
+
+        .export-import-btn {
+            padding: 8px 12px;
+            background: linear-gradient(135deg, #00d9ff 0%, #0099cc 100%);
+            color: #0f0f0f;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .export-import-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 217, 255, 0.3);
+        }
+
+        #importFileInput {
+            display: none;
+        }
+
+        .favicon-panel {
+            position: fixed;
+            top: 30px;
+            left: 590px;
+            width: 300px;
+            background: #1a1a1a;
+            border: 2px solid #404040;
+            border-radius: 8px;
+            padding: 20px;
+            max-height: calc(100vh - 60px);
+            overflow-y: auto;
+            z-index: 1000;
+            opacity: 0;
+            transform: translateX(-20px);
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+
+        .favicon-panel.active {
+            opacity: 1;
+            transform: translateX(0);
+            pointer-events: auto;
+        }
+
+        .favicon-panel h2 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #e0e0e0;
+        }
+
+        .favicon-input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .favicon-input-group input {
+            padding: 10px;
+            background: #2a2a2a;
+            border: 1px solid #404040;
+            color: #e0e0e0;
+            border-radius: 6px;
+            font-size: 13px;
+            outline: none;
+        }
+
+        .favicon-input-group input:focus {
+            border-color: #9d4edd;
+            box-shadow: 0 0 8px rgba(157, 78, 221, 0.2);
+        }
+
+        .favicon-add-btn {
+            padding: 8px 16px;
+            background: linear-gradient(135deg, #9d4edd 0%, #7b2cbf 100%);
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 15px;
+        }
+
+        .favicon-add-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(157, 78, 221, 0.3);
+        }
+
+        .favicon-list {
+            max-height: 250px;
+            overflow-y: auto;
+        }
+
+        .favicon-item {
+            padding: 10px 12px;
+            background: #2a2a2a;
+            border: 1px solid #404040;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .favicon-item:hover {
+            background: #333;
+            border-color: #9d4edd;
+        }
+
+        .favicon-item.selected {
+            background: #333;
+            border-color: #00d9ff;
+            box-shadow: 0 0 8px rgba(0, 217, 255, 0.3);
+        }
+
+        .favicon-item img {
+            width: 20px;
+            height: 20px;
+            border-radius: 2px;
+            flex-shrink: 0;
+        }
+
+        .favicon-item-text {
+            flex: 1;
+            min-width: 0;
+            font-size: 13px;
+        }
+
+        .favicon-item-title {
+            color: #e0e0e0;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .favicon-item-url {
+            color: #666;
+            font-size: 11px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .favicon-item-delete {
+            width: 20px;
+            height: 20px;
+            padding: 0;
+            background: none;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            font-size: 14px;
+            transition: color 0.2s ease;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .favicon-item-delete:hover {
+            color: #ff6b6b;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 14px 18px;
+            background: #2a2a2a;
+            border: 2px solid #404040;
+            color: #e0e0e0;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        input[type="text"]::placeholder {
+            color: #666;
+        }
+
+        input[type="text"]:focus {
+            border-color: #00d9ff;
+            background: #333;
+            box-shadow: 0 0 10px rgba(0, 217, 255, 0.1);
+        }
+
+        button {
+            padding: 14px 20px;
+            background: linear-gradient(135deg, #00d9ff 0%, #0099cc 100%);
+            color: #0f0f0f;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            letter-spacing: 0.5px;
+        }
+
+        #confirmBtn {
+            width:125px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 217, 255, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .category-btn[data-mode="file"]:hover:not(.active) {
+            box-shadow: 0 8px 20px rgba(255, 157, 61, 0.2);
+        }
+
+        .category-btn[data-mode="file"].active:hover {
+            box-shadow: 0 8px 20px rgba(255, 157, 61, 0.3);
+        }
+
+        .file-button:hover {
+            border-color: #ff9d3d;
+            background: #333;
+            color: #ff9d3d;
+            box-shadow: 0 8px 20px rgba(255, 157, 61, 0.2);
+        }
+
+        .divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #404040, transparent);
+            margin: 20px 0;
+        }
+
+        .status {
+            font-size: 12px;
+            color: #666;
+            min-height: 20px;
+        }
+
+        .status.success {
+            color: #00d9ff;
+        }
+
+        .status.error {
+            color: #ff6b6b;
+        }
+
+        .category-buttons {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .category-btn {
+            flex: 1;
+            padding: 12px 18px;
+            background: #2a2a2a;
+            color: #999;
+            border: 2px solid #404040;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            letter-spacing: 0.5px;
+        }
+
+        .category-btn.active {
+            background: linear-gradient(135deg, #00d9ff 0%, #0099cc 100%);
+            color: #0f0f0f;
+            border-color: #00d9ff;
+        }
+
+        .category-btn[data-mode="file"].active {
+            background: linear-gradient(135deg, #ff9d3d 0%, #ff6b3d 100%);
+            border-color: #ff9d3d;
+        }
+
+        .category-btn:hover:not(.active) {
+            border-color: #505050;
+            background: #333;
+        }
+
+        .mode-content {
+            display: none;
+        }
+
+        .mode-content.active {
+            display: block;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .file-button {
+            width: 100%;
+            padding: 14px 18px;
+            background: #2a2a2a;
+            border: 2px dashed #404040;
+            color: #999;
+            border-radius: 8px;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        #historyMenu {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #404040;
+            max-height: calc(100vh - 350px);
+            overflow-y: auto;
+            min-height: 0;
+        }
+
+        .history-item {
+            padding: 12px 16px;
+            background: #2a2a2a;
+            border: 1px solid #404040;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 13px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .history-item-delete {
+            width: 20px;
+            height: 20px;
+            padding: 0;
+            background: none;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            font-size: 14px;
+            transition: color 0.2s ease;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .history-item-delete:hover {
+            color: #ff6b6b;
+        }
+
+        .history-item.url {
+            border-color: #1a4d5c;
+            background: linear-gradient(135deg, #1a2a35 0%, #1a2a35 100%);
+        }
+
+        .history-item.file {
+            border-color: #5c3a1a;
+            background: linear-gradient(135deg, #352a1a 0%, #352a1a 100%);
+        }
+
+        .history-item:hover {
+            background: #333;
+            border-color: #00d9ff;
+        }
+
+        .history-item.url:hover {
+            border-color: #00d9ff;
+            background: #2a3a45;
+        }
+
+        .history-item.file:hover {
+            border-color: #ff9d3d;
+            background: #453a2a;
+        }
+
+        .history-item-text {
+            flex: 1;
+            min-width: 0;
+            word-break: break-word;
+            white-space: normal;
+        }
+
+        .history-item-type {
+            font-size: 11px;
+            color: #666;
+            padding: 4px 8px;
+            background: #1a1a1a;
+            border-radius: 4px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .history-item.url .history-item-type {
+            color: #00d9ff;
+            background: rgba(0, 217, 255, 0.1);
+        }
+
+        .history-item.file .history-item-type {
+            color: #ff9d3d;
+            background: rgba(255, 157, 61, 0.1);
+        }
+
+        .history-item.large-file .history-item-type {
+            color: #ff6b6b;
+            background: rgba(255, 107, 107, 0.1);
+        }
+
+        .history-empty {
+            text-align: center;
+            color: #666;
+            font-size: 13px;
+            padding: 20px 10px;
+        }
+
+        #historyMenu::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #historyMenu::-webkit-scrollbar-track {
+            background: #1a1a1a;
+            border-radius: 3px;
+        }
+
+        #historyMenu::-webkit-scrollbar-thumb {
+            background: #404040;
+            border-radius: 3px;
+        }
+
+        #historyMenu::-webkit-scrollbar-thumb:hover {
+            background: #505050;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #404040;
+        }
+
+        .history-header h3 {
+            font-size: 14px;
+            color: #e0e0e0;
+            font-weight: 600;
+        }
+
+        .clear-history-btn {
+            padding: 6px 12px;
+            margin-right: 8px;
+            background: #404040;
+            color: #ff6b6b;
+            border: 1px solid #555;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .clear-history-btn:hover {
+            background: #555;
+            border-color: #ff6b6b;
+            box-shadow: 0 0 8px rgba(255, 107, 107, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>SUABE 2</h1>
+            <div class="button-group">
+                <button class="favicon-btn" id="faviconBtn"><svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" style="display: block;"><path stroke="#999999" stroke-width="2" d="M10 15.5a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0Zm9 0a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0Z"/><path stroke="#999999" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m10 15 .211-.106a4 4 0 0 1 3.578 0L14 15m3-6-1.65-4.125a1 1 0 0 0-1.245-.577l-1.473.491a2 2 0 0 1-1.264 0L9.894 4.3a1 1 0 0 0-1.245.576L7 9m-4 1c7.5-1 11-1 18 0"/></svg></button>
+                <button class="settings-btn" id="settingsBtn"><svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none"><path d="M19.4,13c0-0.3,0.1-0.7,0.1-1s0-0.7-0.1-1l2.1-1.5c0.2-0.1,0.3-0.4,0.1-0.7l-2-3.5C19.5,5,19.2,4.9,19,5l-2.4,1.1c-0.5-0.4-1.2-0.8-1.8-1l-0.3-2.6C14.5,2.2,14.3,2,14,2h-4C9.7,2,9.5,2.2,9.5,2.5L9.2,5C8.5,5.3,7.9,5.6,7.4,6L5,5C4.8,4.9,4.5,5,4.4,5.2l-2,3.5C2.2,9,2.2,9.3,2.5,9.4L4.6,11c0,0.3-0.1,0.7-0.1,1s0,0.7,0.1,1l-2.1,1.5c-0.2,0.1-0.3,0.4-0.1,0.7l2,3.5C4.5,19,4.8,19.1,5,19l2.4-1.1c0.5,0.4,1.2,0.8,1.8,1l0.3,2.6c0,0.3,0.2,0.5,0.5,0.5h4c0.3,0,0.5-0.2,0.5-0.5l0.3-2.6c0.7-0.3,1.3-0.6,1.8-1L19,19c0.2,0.1,0.5,0,0.6-0.2l2-3.5c0.1-0.2,0.1-0.5-0.1-0.7L19.4,13z M12,16c-2.2,0-4-1.8-4-4s1.8-4,4-4s4,1.8,4,4S14.2,16,12,16z" fill="#999999"/></svg></button>
+            </div>
+        </div>
+
+        <!-- Category Buttons -->
+        <div class="category-buttons">
+            <button class="category-btn active" data-mode="url">URL</button>
+            <button class="category-btn" data-mode="file">File</button>
+        </div>
+
+        <!-- URL Mode -->
+        <div class="mode-content active" data-mode="url">
+            <div class="input-group">
+                <input 
+                    type="text" 
+                    id="urlInput" 
+                    placeholder="Enter URL (e.g., https://example.com)"
+                    autocomplete="off"
+                >
+            </div>
+        </div>
+
+        <!-- File Mode -->
+        <div class="mode-content" data-mode="file">
+            <div class="input-group">
+                <button class="file-button" id="fileButtonUI">Choose File</button>
+                <input type="file" id="fileInput" accept=".html,.htm,.css,.txt,.js,.json,.xml,.svg,.md,.csv,.log,.java,.py,.cpp,.c,.cs,.php,.rb,.go,.rs,.ts,.tsx,.jsx,.vue,.yaml,.yml,.sh,.bash,.sql">
+            </div>
+        </div>
+
+        <div class="status" id="statusMsg"></div>
+        <button id="confirmBtn">Open</button>
+
+        <!-- History Menu -->
+        <div id="historyMenu"></div>
+    </div>
+
+    <!-- Settings Panel -->
+    <div class="settings-panel" id="settingsPanel">
+        <h2>Settings</h2>
+        <div class="settings-group">
+            <label>
+                <input type="checkbox" id="replacePageCheckbox">
+                <span>Replace Current Page</span>
+            </label>
+        </div>
+        <div class="settings-buttons">
+            <!-- NOTE: Keep import/export buttons at the bottom of settings menu -->
+            <button class="export-import-btn" id="exportBtn">Export Data</button>
+            <button class="export-import-btn" id="importBtn">Import Data</button>
+            <input type="file" id="importFileInput" accept=".json">
+        </div>
+    </div>
+
+    <!-- Favicon Panel -->
+    <div class="favicon-panel active" id="faviconPanel">
+        <h2>Favicons</h2>
+        <div class="favicon-input-group">
+            <input type="text" id="faviconTitle" placeholder="Title (e.g., Google)">
+            <input type="text" id="faviconUrl" placeholder="Icon URL">
+            <button class="favicon-add-btn" id="faviconAddBtn">Add Favicon</button>
+        </div>
+        <div class="favicon-list" id="faviconList"></div>
+    </div>
+
+    <script>
+        // ========== Configuration ==========
+        const CONFIG = {
+            closePrompt: 'Are you sure you want to close?',
+            htmlLikeExtensions: ['html', 'htm', 'svg'],
+            maxFileSizeBytes: 5 * 1024 * 1024 // 5MB
+        };
+
+        // ========== State ==========
+        let currentMode = 'url';
+        let selectedFileObject = null; // For storing currently selected file
+        let history = []; // Cache for history
+        let loadedFromHistory = false; // Track if current item was loaded from history
+        let originalValue = ''; // Track original URL/file for change detection
+
+        // ========== DOM Elements ==========
+        const urlInput = document.getElementById('urlInput');
+        const fileInput = document.getElementById('fileInput');
+        const fileButtonUI = document.getElementById('fileButtonUI');
+        const confirmBtn = document.getElementById('confirmBtn');
+        const statusMsg = document.getElementById('statusMsg');
+        const categoryBtns = document.querySelectorAll('.category-btn');
+        const modeContents = document.querySelectorAll('.mode-content');
+        const historyMenu = document.getElementById('historyMenu');
+        const settingsBtn = document.getElementById('settingsBtn');
+        const settingsPanel = document.getElementById('settingsPanel');
+        const replacePageCheckbox = document.getElementById('replacePageCheckbox');
+        const faviconBtn = document.getElementById('faviconBtn');
+        const faviconPanel = document.getElementById('faviconPanel');
+        const faviconTitleInput = document.getElementById('faviconTitle');
+        const faviconUrlInput = document.getElementById('faviconUrl');
+        const faviconAddBtn = document.getElementById('faviconAddBtn');
+        const faviconList = document.getElementById('faviconList');
+        const exportBtn = document.getElementById('exportBtn');
+        const importBtn = document.getElementById('importBtn');
+        const importFileInput = document.getElementById('importFileInput');
+
+        // ========== Panel Management ==========
+        function openPanel(panelToOpen) {
+            // Close all panels
+            settingsPanel.classList.remove('active');
+            faviconPanel.classList.remove('active');
+            // Open the specified panel
+            if (panelToOpen === 'settings') {
+                settingsPanel.classList.add('active');
+            } else if (panelToOpen === 'favicon') {
+                faviconPanel.classList.add('active');
+            }
+        }
+        function getHistory() {
+            try {
+                const stored = localStorage.getItem('suabe2_history');
+                return stored ? JSON.parse(stored) : [];
+            } catch (e) {
+                console.error('Error reading history:', e);
+                return [];
+            }
+        }
+
+        function saveHistory(historyArray) {
+            try {
+                localStorage.setItem('suabe2_history', JSON.stringify(historyArray));
+                history = historyArray;
+                renderHistory();
+            } catch (e) {
+                console.error('Error saving history:', e);
+            }
+        }
+
+        // ========== Settings Management ==========
+        function getSettings() {
+            try {
+                const stored = localStorage.getItem('suabe2_settings');
+                return stored ? JSON.parse(stored) : { replaceCurrentPage: false };
+            } catch (e) {
+                console.error('Error reading settings:', e);
+                return { replaceCurrentPage: false };
+            }
+        }
+
+        function saveSettings(settings) {
+            try {
+                localStorage.setItem('suabe2_settings', JSON.stringify(settings));
+            } catch (e) {
+                console.error('Error saving settings:', e);
+            }
+        }
+
+        function getSetting(key) {
+            return getSettings()[key] || false;
+        }
+
+        function setSetting(key, value) {
+            const settings = getSettings();
+            settings[key] = value;
+            saveSettings(settings);
+        }
+
+        // Initialize settings UI
+        replacePageCheckbox.checked = getSetting('replaceCurrentPage');
+
+        // ========== Favicon Management ==========
+        function getFavicons() {
+            try {
+                const stored = localStorage.getItem('suabe2_favicons');
+                const favicons = stored ? JSON.parse(stored) : [];
+                // Return favicons or default if empty
+                return favicons.length > 0 ? favicons : getDefaultFavicons();
+            } catch (e) {
+                console.error('Error reading favicons:', e);
+                return getDefaultFavicons();
+            }
+        }
+
+        function getDefaultFavicons() {
+            return [
+                { id: Date.now(), title: 'Google', url: 'https://www.google.com/favicon.ico' }
+            ];
+        }
+
+        function saveFavicons(favicons) {
+            try {
+                localStorage.setItem('suabe2_favicons', JSON.stringify(favicons));
+                renderFavicons();
+            } catch (e) {
+                console.error('Error saving favicons:', e);
+            }
+        }
+
+        function addFavicon(title, url) {
+            if (!title.trim() || !url.trim()) {
+                showStatus('Please enter both title and URL', 'error');
+                return;
+            }
+
+            if (!url.toLowerCase().includes('.ico')) {
+                showStatus('URL must contain ".ico" extension', 'error');
+                return;
+            }
+
+            const favicons = getFavicons();
+            favicons.unshift({
+                id: Date.now(),
+                title: title.trim(),
+                url: url.trim()
+            });
+
+            saveFavicons(favicons);
+            faviconTitleInput.value = '';
+            faviconUrlInput.value = '';
+            showStatus('Favicon added!', 'success');
+        }
+
+        function removeFavicon(id) {
+            const favicons = getFavicons();
+            const filtered = favicons.filter(f => f.id !== id);
+            saveFavicons(filtered);
+        }
+
+        function renderFavicons() {
+            const favicons = getFavicons();
+            faviconList.innerHTML = '';
+            const lastSelected = getLastSelectedFavicon();
+            let alreadySelected = false;
+
+            favicons.forEach(favicon => {
+                const item = document.createElement('div');
+                item.className = 'favicon-item';
+
+                const img = document.createElement('img');
+                img.src = favicon.url;
+                img.onerror = function() {
+                    this.style.display = 'none';
+                };
+
+                const textDiv = document.createElement('div');
+                textDiv.className = 'favicon-item-text';
+
+                const title = document.createElement('div');
+                title.className = 'favicon-item-title';
+                title.textContent = favicon.title;
+
+                const urlText = document.createElement('div');
+                urlText.className = 'favicon-item-url';
+                urlText.textContent = favicon.url;
+
+                textDiv.appendChild(title);
+                textDiv.appendChild(urlText);
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'favicon-item-delete';
+                deleteBtn.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M17 17L7 7.00002M17 7L7.00001 17" stroke="#999999" stroke-width="2" stroke-linecap="round"/></svg>';
+                deleteBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    removeFavicon(favicon.id);
+                });
+
+                item.appendChild(img);
+                item.appendChild(textDiv);
+                item.appendChild(deleteBtn);
+
+                item.addEventListener('click', () => {
+                    document.querySelectorAll('.favicon-item').forEach(el => el.classList.remove('selected'));
+                    item.classList.add('selected');
+                    currentFavicon = favicon;
+                    saveLastSelectedFavicon(favicon);
+                });
+
+                // Highlight: prefer lastSelected, fallback to Google default (only select one)
+                if (!alreadySelected) {
+                    if (lastSelected && lastSelected.id === favicon.id) {
+                        item.classList.add('selected');
+                        currentFavicon = favicon;
+                        alreadySelected = true;
+                    } else if (!lastSelected && favicon.title === 'Google') {
+                        item.classList.add('selected');
+                        currentFavicon = favicon;
+                        alreadySelected = true;
+                    }
+                }
+
+                faviconList.appendChild(item);
+            });
+        }
+
+        let currentFavicon = null;
+
+        function saveLastSelectedFavicon(favicon) {
+            try {
+                localStorage.setItem('suabe2_lastSelectedFavicon', JSON.stringify(favicon));
+            } catch (e) {
+                console.error('Error saving last selected favicon:', e);
+            }
+        }
+
+        function getLastSelectedFavicon() {
+            try {
+                const stored = localStorage.getItem('suabe2_lastSelectedFavicon');
+                return stored ? JSON.parse(stored) : null;
+            } catch (e) {
+                console.error('Error reading last selected favicon:', e);
+                return null;
+            }
+        }
+
+        function addToHistory(type, data) {
+            const historyArray = getHistory();
+            
+            // Check for duplicate entry
+            let duplicateIndex = -1;
+            if (type === 'url') {
+                duplicateIndex = historyArray.findIndex(entry => entry.type === 'url' && entry.url === data.url);
+            } else if (type === 'file') {
+                duplicateIndex = historyArray.findIndex(entry => entry.type === 'file' && entry.filename === data.filename);
+            }
+            
+            // If duplicate found, remove it (we'll re-add it at the top)
+            if (duplicateIndex !== -1) {
+                historyArray.splice(duplicateIndex, 1);
+            }
+            
+            // Create history entry
+            const entry = {
+                id: Date.now(),
+                type: type, // 'url' or 'file'
+                timestamp: new Date().toLocaleString(),
+                isLargeFile: data.isLargeFile || false,
+                isSaved: data.isSaved || true
+            };
+
+            if (type === 'url') {
+                entry.url = data.url;
+                entry.display = data.url;
+            } else {
+                entry.filename = data.filename;
+                entry.display = data.filename;
+                if (data.isSaved) {
+                    entry.content = data.content;
+                }
+            }
+
+            // Add to beginning of history
+            historyArray.unshift(entry);
+            
+            // Keep only last 50 items
+            if (historyArray.length > 50) {
+                historyArray.pop();
+            }
+
+            saveHistory(historyArray);
+        }
+
+        function renderHistory() {
+            const historyArray = getHistory();
+            historyMenu.innerHTML = '';
+
+            if (historyArray.length === 0) {
+                historyMenu.innerHTML = '<div class="history-empty">No history yet</div>';
+                return;
+            }
+
+            historyArray.forEach(entry => {
+                const item = document.createElement('div');
+                item.className = 'history-item';
+                item.classList.add(entry.type);
+                if (entry.isLargeFile) {
+                    item.classList.add('large-file');
+                }
+
+                const text = document.createElement('div');
+                text.className = 'history-item-text';
+                text.textContent = entry.display;
+
+                const typeTag = document.createElement('div');
+                typeTag.className = 'history-item-type';
+                typeTag.textContent = entry.isLargeFile ? '⚠ ' + entry.type.toUpperCase() : entry.type.toUpperCase();
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'history-item-delete';
+                deleteBtn.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M17 17L7 7.00002M17 7L7.00001 17" stroke="#999999" stroke-width="2" stroke-linecap="round"/></svg>';
+                deleteBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    deleteHistoryItem(entry.id);
+                });
+
+                item.appendChild(text);
+                item.appendChild(typeTag);
+                item.appendChild(deleteBtn);
+
+                item.addEventListener('click', () => {
+                    loadHistoryItem(entry);
+                });
+
+                historyMenu.appendChild(item);
+            });
+            
+            // Add header with clear button
+            const header = document.createElement('div');
+            header.className = 'history-header';
+            const title = document.createElement('h3');
+            title.textContent = 'History';
+            const clearBtn = document.createElement('button');
+            clearBtn.className = 'clear-history-btn';
+            clearBtn.textContent = 'Clear';
+            clearBtn.addEventListener('click', clearAllHistory);
+            header.appendChild(title);
+            header.appendChild(clearBtn);
+            historyMenu.insertBefore(header, historyMenu.firstChild);
+        }
+
+        function deleteHistoryItem(id) {
+            const historyArray = getHistory();
+            const filtered = historyArray.filter(entry => entry.id !== id);
+            saveHistory(filtered);
+        }
+
+        function clearAllHistory() {
+            if (confirm('Are you sure you want to clear all history? This cannot be undone.')) {
+                saveHistory([]);
+            }
+        }
+
+        function loadHistoryItem(entry) {
+            switchMode(entry.type);
+            statusMsg.textContent = '';
+            statusMsg.className = 'status';
+            loadedFromHistory = true;
+
+            if (entry.type === 'url') {
+                urlInput.value = entry.url;
+                originalValue = entry.url;
+                urlInput.focus();
+            } else {
+                // File entry
+                if (entry.isSaved && entry.content) {
+                    // Content is available in local storage
+                    const file = new File([entry.content], entry.filename);
+                    selectedFileObject = file;
+                    fileButtonUI.innerHTML = '<svg fill="#999999" width="20" height="20" viewBox="0 0 32 32" style="display: inline; margin-right: 4px; vertical-align: middle;"><path d="M16 3c-7.18 0-13 5.82-13 13s5.82 13 13 13 13-5.82 13-13-5.82-13-13-13zM23.258 12.307l-9.486 9.485c-0.238 0.237-0.623 0.237-0.861 0l-0.191-0.191-0.001 0.001-5.219-5.256c-0.238-0.238-0.238-0.624 0-0.862l1.294-1.293c0.238-0.238 0.624-0.238 0.862 0l3.689 3.716 7.756-7.756c0.238-0.238 0.624-0.238 0.862 0l1.294 1.294c0.239 0.237 0.239 0.623 0.001 0.862z"></path></svg>' + entry.filename;
+                    originalValue = entry.filename;
+                } else if (entry.isLargeFile) {
+                    // File was too large to save
+                    fileButtonUI.textContent = 'Choose File';
+                    statusMsg.textContent = '⚠ This file was too large (>5MB) to save. Please re-upload it.';
+                    statusMsg.className = 'status error';
+                    originalValue = '';
+                    selectedFileObject = null;
+                } else {
+                    // File was deleted or unavailable
+                    fileButtonUI.textContent = 'Choose File';
+                    statusMsg.textContent = '✗ File data unavailable.';
+                    statusMsg.className = 'status error';
+                    originalValue = '';
+                    selectedFileObject = null;
+                }
+            }
+        }
+
+        // ========== Mode Management ==========
+        function switchMode(mode) {
+            currentMode = mode;
+            loadedFromHistory = false; // Reset flag when switching modes
+            originalValue = '';
+
+            // Update category buttons
+            categoryBtns.forEach(btn => {
+                if (btn.dataset.mode === mode) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+
+            // Update mode content
+            modeContents.forEach(content => {
+                if (content.dataset.mode === mode) {
+                    content.classList.add('active');
+                } else {
+                    content.classList.remove('active');
+                }
+            });
+
+            // Focus appropriate input
+            if (mode === 'url') {
+                urlInput.focus();
+            }
+        }
+
+        categoryBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                switchMode(btn.dataset.mode);
+            });
+        });
+
+        // ========== File Handling ==========
+        fileButtonUI.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                const file = e.target.files[0];
+                selectedFileObject = file;
+                fileButtonUI.innerHTML = '<svg fill="#999999" width="16" height="16" viewBox="0 0 32 32" style="display: inline; margin-right: 4px; vertical-align: middle;"><path d="M16 3c-7.18 0-13 5.82-13 13s5.82 13 13 13 13-5.82 13-13-5.82-13-13-13zM23.258 12.307l-9.486 9.485c-0.238 0.237-0.623 0.237-0.861 0l-0.191-0.191-0.001 0.001-5.219-5.256c-0.238-0.238-0.238-0.624 0-0.862l1.294-1.293c0.238-0.238 0.624-0.238 0.862 0l3.689 3.716 7.756-7.756c0.238-0.238 0.624-0.238 0.862 0l1.294 1.294c0.239 0.237 0.239 0.623 0.001 0.862z"></path></svg>' + file.name;
+                loadedFromHistory = false; // User selected a new file
+                originalValue = '';
+            }
+        });
+
+        // Track URL changes
+        urlInput.addEventListener('input', () => {
+            if (loadedFromHistory && urlInput.value !== originalValue) {
+                loadedFromHistory = false; // User modified the URL
+            }
+        });
+
+        function getFileExtension(filename) {
+            return filename.split('.').pop().toLowerCase();
+        }
+
+        function isHtmlLike(filename) {
+            const ext = getFileExtension(filename);
+            return CONFIG.htmlLikeExtensions.includes(ext);
+        }
+
+        function readFileAsText(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => resolve(e.target.result);
+                reader.onerror = (e) => reject(e);
+                reader.readAsText(file);
+            });
+        }
+
+        async function openFile(file) {
+            try {
+                const content = await readFileAsText(file);
+                const isHtml = isHtmlLike(file.name);
+                const isSaved = file.size <= CONFIG.maxFileSizeBytes;
+
+                // Only add to history if not loaded from history unmodified
+                if (!loadedFromHistory) {
+                    addToHistory('file', {
+                        filename: file.name,
+                        content: isSaved ? content : null,
+                        isSaved: isSaved,
+                        isLargeFile: !isSaved
+                    });
+                }
+
+                if (isHtml) {
+                    // Open as HTML in iframe
+                    openFileAsHtml(content);
+                } else {
+                    // Open as plain text
+                    openFileAsText(content, file.name);
+                }
+
+                showStatus('Opened!', 'success');
+                // Clear the file input so user can select the same file again if needed
+                fileInput.value = '';
+                // Keep selectedFileObject for display purposes
+                loadedFromHistory = false;
+                originalValue = '';
+            } catch (e) {
+                showStatus('Error reading file', 'error');
+                console.error(e);
+            }
+        }
+
+        function openFileAsHtml(htmlContent) {
+            // Inject favicon and title into the HTML if one is selected
+            let modifiedContent = htmlContent;
+            if (currentFavicon) {
+                const faviconLink = `<link rel="icon" type="image/x-icon" href="${currentFavicon.url}">`;
+                // Try to insert after <head> tag
+                modifiedContent = htmlContent.replace(/<head[^>]*>/i, (match) => {
+                    return match + '\n' + faviconLink;
+                });
+                // If no head tag, prepend to html
+                if (modifiedContent === htmlContent) {
+                    modifiedContent = htmlContent.replace(/<html[^>]*>/i, (match) => {
+                        return match + '\n<head>' + faviconLink + '</head>';
+                    });
+                }
+            }
+            
+            // Set title if favicon selected
+            if (currentFavicon) {
+                const titleTag = `<title>${currentFavicon.title}</title>`;
+                // Try to replace existing title
+                if (modifiedContent.match(/<title[^>]*>[^<]*<\/title>/i)) {
+                    modifiedContent = modifiedContent.replace(/<title[^>]*>[^<]*<\/title>/i, titleTag);
+                } else {
+                    // Add title after head tag if it doesn't exist
+                    modifiedContent = modifiedContent.replace(/<head[^>]*>/i, (match) => {
+                        return match + '\n' + titleTag;
+                    });
+                }
+            }
+
+            if (getSetting('replaceCurrentPage')) {
+                // Replace current page
+                document.open();
+                document.write(modifiedContent);
+                document.close();
+                
+                // Set favicon and title for current page
+                if (currentFavicon) {
+                    document.title = currentFavicon.title;
+                    let link = document.querySelector("link[rel*='icon']");
+                    if (!link) {
+                        link = document.createElement('link');
+                        link.rel = 'icon';
+                        document.head.appendChild(link);
+                    }
+                    link.href = currentFavicon.url;
+                }
+            } else {
+                // Open in new tab
+                const newWindow = window.open('about:blank', '_blank');
+                
+                if (!newWindow) {
+                    showStatus('Popup blocked. Please allow popups.', 'error');
+                    return;
+                }
+
+                newWindow.document.write(modifiedContent);
+                newWindow.document.close();
+                
+                // Set favicon and title after document is ready
+                setTimeout(() => {
+                    if (currentFavicon) {
+                        newWindow.document.title = currentFavicon.title;
+                        let link = newWindow.document.querySelector("link[rel*='icon']");
+                        if (!link) {
+                            link = newWindow.document.createElement('link');
+                            link.rel = 'icon';
+                            newWindow.document.head.appendChild(link);
+                        }
+                        link.href = currentFavicon.url + '?t=' + Date.now();
+                        link.type = 'image/x-icon';
+                    }
+                }, 100);
+            }
+        }
+
+        function openFileAsText(textContent, filename) {
+            const escapedContent = textContent
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+
+            const faviconLink = currentFavicon ? `<link rel="icon" type="image/x-icon" href="${currentFavicon.url}">` : '';
+            const faviconScript = '';
+            const pageTitle = currentFavicon ? currentFavicon.title : filename;
+
+            const htmlContent = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>${pageTitle}</title>
+                    ${faviconLink}
+                    <script>
+                        (function() {
+                            if ('${currentFavicon ? currentFavicon.url : ''}') {
+                                // Force favicon to load with cache buster
+                                const link = document.querySelector("link[rel*='icon']") || (() => {
+                                    const l = document.createElement('link');
+                                    l.rel = 'icon';
+                                    document.head.appendChild(l);
+                                    return l;
+                                })();
+                                link.href = '${currentFavicon ? currentFavicon.url : ''}' + '?t=' + Date.now();
+                                link.type = 'image/x-icon';
+                            }
+                        })();
+                    <\/script>
+                    <style>
+                        * { margin: 0; padding: 0; box-sizing: border-box; }
+                        body { 
+                            background: #1a1a1a; 
+                            color: #e0e0e0; 
+                            font-family: 'Courier New', monospace;
+                            padding: 20px;
+                            font-size: 13px;
+                            line-height: 1.6;
+                        }
+                        pre { 
+                            white-space: pre-wrap;
+                            word-wrap: break-word;
+                            overflow-x: auto;
+                        }
+                        .filename {
+                            color: #00d9ff;
+                            margin-bottom: 15px;
+                            font-weight: bold;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="filename">📄 ${filename}</div>
+                    <pre>${escapedContent}</pre>
+                    <script>
+                        window.addEventListener('beforeunload', function(e) {
+                            e.preventDefault();
+                            e.returnValue = '${CONFIG.closePrompt}';
+                            return '${CONFIG.closePrompt}';
+                        });
+                    <\/script>
+                </body>
+                </html>
+            `;
+
+            if (getSetting('replaceCurrentPage')) {
+                // Replace current page
+                document.open();
+                document.write(htmlContent);
+                document.close();
+                
+                // Set favicon and title for current page
+                if (currentFavicon) {
+                    document.title = currentFavicon.title;
+                    let link = document.querySelector("link[rel*='icon']");
+                    if (!link) {
+                        link = document.createElement('link');
+                        link.rel = 'icon';
+                        document.head.appendChild(link);
+                    }
+                    link.href = currentFavicon.url;
+                }
+            } else {
+                // Open in new tab
+                const newWindow = window.open('about:blank', '_blank');
+                
+                if (!newWindow) {
+                    showStatus('Popup blocked. Please allow popups.', 'error');
+                    return;
+                }
+
+                newWindow.document.write(htmlContent);
+                newWindow.document.close();
+                
+                // Force favicon to load with cache buster
+                setTimeout(() => {
+                    if (currentFavicon) {
+                        let link = newWindow.document.querySelector("link[rel*='icon']");
+                        if (link) {
+                            link.href = currentFavicon.url + '?t=' + Date.now();
+                        }
+                    }
+                }, 50);
+            }
+        }
+
+        // ========== URL Validation ==========
+        function validateAndFormatUrl(urlString) {
+            if (!urlString.trim()) {
+                return null;
+            }
+
+            if (!urlString.match(/^https?:\/\//i)) {
+                urlString = 'https://' + urlString;
+            }
+
+            try {
+                new URL(urlString);
+                return urlString;
+            } catch (e) {
+                return null;
+            }
+        }
+
+        function showStatus(message, type = 'error') {
+            statusMsg.textContent = message;
+            statusMsg.className = 'status ' + type;
+            
+            if (type === 'success') {
+                setTimeout(() => {
+                    statusMsg.textContent = '';
+                    statusMsg.className = 'status';
+                }, 2000);
+            }
+        }
+
+        // ========== Export/Import Data ==========
+        function exportData() {
+            try {
+                const historyArray = getHistory();
+                const favicons = getFavicons();
+                const settings = getSettings();
+                
+                // Get up to 30 most recent logs
+                const recentHistory = historyArray.slice(0, 30);
+                
+                const exportData = {
+                    version: 1,
+                    timestamp: new Date().toISOString(),
+                    history: recentHistory,
+                    favicons: favicons,
+                    settings: settings
+                };
+                
+                // Create and download the file
+                const dataStr = JSON.stringify(exportData, null, 2);
+                const dataBlob = new Blob([dataStr], { type: 'application/json' });
+                const url = URL.createObjectURL(dataBlob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `suabe_${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+                
+                showStatus('Data exported!', 'success');
+            } catch (e) {
+                console.error('Export error:', e);
+                showStatus('Export failed', 'error');
+            }
+        }
+
+        function importData(file) {
+            try {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const importedData = JSON.parse(e.target.result);
+                        
+                        if (!importedData.history || !importedData.favicons || !importedData.settings) {
+                            showStatus('Invalid file format', 'error');
+                            return;
+                        }
+                        
+                        // Merge history - replace duplicates
+                        let currentHistory = getHistory();
+                        const newHistory = [...importedData.history];
+                        
+                        // Remove duplicates from current history that match imported history
+                        newHistory.forEach(importedEntry => {
+                            currentHistory = currentHistory.filter(entry => {
+                                if (importedEntry.type === 'url') {
+                                    return !(entry.type === 'url' && entry.url === importedEntry.url);
+                                } else if (importedEntry.type === 'file') {
+                                    return !(entry.type === 'file' && entry.filename === importedEntry.filename);
+                                }
+                                return true;
+                            });
+                        });
+                        
+                        // Add imported entries at the top
+                        const mergedHistory = [...newHistory, ...currentHistory].slice(0, 50);
+                        saveHistory(mergedHistory);
+                        
+                        // Merge favicons - skip duplicates
+                        const currentFavicons = getFavicons();
+                        const mergedFavicons = [...currentFavicons];
+                        
+                        importedData.favicons.forEach(importedFavicon => {
+                            const isDuplicate = mergedFavicons.some(
+                                fav => fav.title === importedFavicon.title && fav.url === importedFavicon.url
+                            );
+                            if (!isDuplicate) {
+                                mergedFavicons.unshift(importedFavicon);
+                            }
+                        });
+                        
+                        saveFavicons(mergedFavicons);
+                        
+                        // Merge settings
+                        const mergedSettings = Object.assign({}, getSettings(), importedData.settings);
+                        saveSettings(mergedSettings);
+                        replacePageCheckbox.checked = mergedSettings.replaceCurrentPage;
+                        
+                        showStatus('Data imported!', 'success');
+                    } catch (parseError) {
+                        console.error('Parse error:', parseError);
+                        showStatus('Failed to parse file', 'error');
+                    }
+                };
+                reader.readAsText(file);
+            } catch (e) {
+                console.error('Import error:', e);
+                showStatus('Import failed', 'error');
+            }
+        }
+
+        // ========== Open URL in New Window ==========
+        function openInIframe(url) {
+            const validUrl = validateAndFormatUrl(url);
+            
+            if (!validUrl) {
+                showStatus('Invalid URL', 'error');
+                return;
+            }
+
+            try {
+                // Only add to history if not loaded from history unmodified
+                if (!loadedFromHistory) {
+                    addToHistory('url', {
+                        url: validUrl
+                    });
+                }
+
+                const faviconLink = currentFavicon ? `<link rel="icon" type="image/x-icon" href="${currentFavicon.url}">` : '';
+                const pageTitle = currentFavicon ? currentFavicon.title : 'Viewer';
+
+                const iframeContent = `
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <meta charset="UTF-8">
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                        <title>${pageTitle}</title>
+                        ${faviconLink}
+                        <script>
+                            (function() {
+                                if ('${currentFavicon ? currentFavicon.url : ''}') {
+                                    // Force favicon to load with cache buster
+                                    const link = document.querySelector("link[rel*='icon']") || (() => {
+                                        const l = document.createElement('link');
+                                        l.rel = 'icon';
+                                        document.head.appendChild(l);
+                                        return l;
+                                    })();
+                                    link.href = '${currentFavicon ? currentFavicon.url : ''}' + '?t=' + Date.now();
+                                    // Force browser recognition
+                                    link.type = 'image/x-icon';
+                                }
+                            })();
+                        <\/script>
+                        <style>
+                            * { margin: 0; padding: 0; box-sizing: border-box; }
+                            body { width: 100%; height: 100vh; }
+                            iframe { width: 100%; height: 100%; border: none; }
+                        </style>
+                    </head>
+                    <body>
+                        <iframe src="${validUrl}"></iframe>
+                        <script>
+                            window.addEventListener('beforeunload', function(e) {
+                                e.preventDefault();
+                                e.returnValue = '${CONFIG.closePrompt}';
+                                return '${CONFIG.closePrompt}';
+                            });
+                        <\/script>
+                    </body>
+                    </html>
+                `;
+
+                if (getSetting('replaceCurrentPage')) {
+                    // Replace current page
+                    document.open();
+                    document.write(iframeContent);
+                    document.close();
+                    
+                    // Set favicon and title for current page
+                    if (currentFavicon) {
+                        document.title = currentFavicon.title;
+                        let link = document.querySelector("link[rel*='icon']");
+                        if (!link) {
+                            link = document.createElement('link');
+                            link.rel = 'icon';
+                            document.head.appendChild(link);
+                        }
+                        link.href = currentFavicon.url;
+                    }
+                } else {
+                    // Open in new tab
+                    const iframeWindow = window.open('about:blank', '_blank');
+                    
+                    if (!iframeWindow) {
+                        showStatus('Popup blocked. Please allow popups.', 'error');
+                        return;
+                    }
+
+                    iframeWindow.document.write(iframeContent);
+                    iframeWindow.document.close();
+                }
+                
+                showStatus('Opened!', 'success');
+                // Don't clear input - let user decide when to clear
+                loadedFromHistory = false;
+                originalValue = '';
+            } catch (e) {
+                showStatus('Error opening URL', 'error');
+                console.error(e);
+            }
+        }
+
+        // ========== Event Listeners ==========
+        confirmBtn.addEventListener('click', () => {
+            if (currentMode === 'url') {
+                openInIframe(urlInput.value);
+            } else if (currentMode === 'file') {
+                if (selectedFileObject) {
+                    openFile(selectedFileObject);
+                } else {
+                    showStatus('Please select a file', 'error');
+                }
+            }
+        });
+
+        urlInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && currentMode === 'url') {
+                openInIframe(urlInput.value);
+            }
+        });
+
+        // Settings handlers
+        settingsBtn.addEventListener('click', () => {
+            if (settingsPanel.classList.contains('active')) {
+                settingsPanel.classList.remove('active');
+            } else {
+                openPanel('settings');
+            }
+        });
+
+        // Favicon handlers
+        faviconBtn.addEventListener('click', () => {
+            if (faviconPanel.classList.contains('active')) {
+                faviconPanel.classList.remove('active');
+            } else {
+                openPanel('favicon');
+            }
+        });
+
+        faviconAddBtn.addEventListener('click', () => {
+            addFavicon(faviconTitleInput.value, faviconUrlInput.value);
+        });
+
+        faviconTitleInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                addFavicon(faviconTitleInput.value, faviconUrlInput.value);
+            }
+        });
+
+        faviconUrlInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                addFavicon(faviconTitleInput.value, faviconUrlInput.value);
+            }
+        });
+
+        replacePageCheckbox.addEventListener('change', () => {
+            setSetting('replaceCurrentPage', replacePageCheckbox.checked);
+        });
+
+        // Export/Import handlers
+        exportBtn.addEventListener('click', exportData);
+
+        importBtn.addEventListener('click', () => {
+            importFileInput.click();
+        });
+
+        importFileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                importData(e.target.files[0]);
+                // Reset the input so the same file can be imported again
+                importFileInput.value = '';
+            }
+        });
+
+        // Load history on page load
+        renderHistory();
+        renderFavicons();
+
+        // Focus input on load
+        urlInput.focus();
+    </script>
+</body>
+</html>
