@@ -8,8 +8,11 @@ This document provides context, technical architecture, and feature specificatio
 
 ```text
 suabe2/
+├── .nojekyll                  # Bypasses Jekyll on GitHub Pages for static file serving
 ├── agents.md                  # Project reference and instructions for AI agents
+├── index.html                 # Root GitHub Pages entrypoint & offline loader
 ├── releases.json              # Version catalog and metadata for downloadable builds
+├── sw.js                      # Root Service Worker for offline PWA caching & DNS bypass
 ├── dev/
 │   ├── suabe2_dev.html        # Experimental development fork
 │   ├── suabe2_loader_dev.html # Primary HTML offline-capable loader for dev
@@ -220,6 +223,16 @@ The dev build contains experimental features and forward-looking additions.
       - Downloadable builds list (`#buildsList`) populated dynamically from `releases.json`.
       - Build action cards allowing users to download builds for offline use (`Download`), launch cached builds (`Launch`), or remove them from local storage (`Delete`).
       - Updates are **never automatically installed**; users are notified and choose when to update.
+      - **Live Service Worker Visual Indicator (`#swStatusBar`)**:
+        - Displays live status of the Service Worker:
+          - **Active & Offline-Ready** (`.sw-dot.active`, glowing green): Confirms the Service Worker is controlling the page and caching requests so navigating to the site works with zero network/Wi-Fi connection. Includes a "Check SW" button.
+          - **Installing** (`.sw-dot.installing`, amber): Indicates active installation of the Service Worker cache.
+          - **Inactive** (`.sw-dot.inactive`, red): Prompts with a "Register" button to activate the worker.
+          - **Unavailable on file://** (`.sw-dot.unsupported`, gray): Explains that Service Workers require HTTPS (e.g. GitHub Pages) or localhost.
+    - **GitHub Pages & PWA Service Worker (`sw.js` & `index.html`)**:
+      - Root `index.html` provides the primary landing page and PWA entrypoint for GitHub Pages (`https://<username>.github.io/<repo>/`).
+      - Root `sw.js` implements a Stale-While-Revalidate caching strategy with an offline navigation fallback to `index.html` or `dev/suabe2_loader_dev.html`.
+      - `.nojekyll` in repository root bypasses Jekyll preprocessing to serve all static assets cleanly.
     - **Primary Loaders (`dev/suabe2_loader_dev.html` & `dev/suabe2_loader_dev.svg`)**:
       - `suabe2_loader_dev.html` is the primary entrypoint loader.
       - Checks `localStorage` in `<head>` for cached build (`suabe2_cached_build_dev`) before any DOM elements are parsed, preventing the loading screen from appearing or sticking when cached.

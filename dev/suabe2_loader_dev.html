@@ -7,6 +7,9 @@
     <link rel="icon" href="https://www.google.com/favicon.ico">
     <script>
         (function() {
+            if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+                navigator.serviceWorker.register('../sw.js', { scope: '../' }).catch(function() {});
+            }
             var CACHE_KEY = 'suabe2_cached_build_dev';
             function prepare(html) {
                 if (!html) return html;
@@ -95,6 +98,9 @@
     </div>
     <script>
         (function() {
+            if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+                navigator.serviceWorker.register('../sw.js', { scope: '../' }).catch(function() {});
+            }
             var CACHE_KEY = 'suabe2_cached_build_dev';
             var CDN_URL = 'https://cdn.jsdelivr.net/gh/spamton-school/suabe2@main/dev/suabe2_dev.html';
 

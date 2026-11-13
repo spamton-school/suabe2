@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google</title>
+    <link rel="icon" href="https://www.google.com/favicon.ico">
+    <script>
+        (function() {
+            // Register Service Worker for offline PWA support
+            if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+                navigator.serviceWorker.register('sw.js', { scope: './' }).catch(function(err) {
+                    console.warn('[SW] Registration failed:', err);
+                });
+            }
+
+            var CACHE_KEY = 'suabe2_cached_build_dev';
+            function prepare(html) {
+                if (!html) return html;
+                if (html.indexOf('/* suabe-scope */') !== -1) return html;
+                var lastScriptClose = html.lastIndexOf('<\x2fscript>');
+                if (lastScriptClose === -1) return html;
+                var scriptOpenIdx = html.indexOf('<script>');
+                if (scriptOpenIdx === -1) return html;
+                var beforeScript = html.substring(0, scriptOpenIdx + 8);
+                var scriptBody = html.substring(scriptOpenIdx + 8, lastScriptClose);
+                var afterScript = html.substring(lastScriptClose);
+                return beforeScript + '\n(function() { /* suabe-scope */\n' + scriptBody + '\n})();\n' + afterScript;
+            }
+
+            try {
+                var cached = localStorage.getItem(CACHE_KEY);
+                if (cached && cached.indexOf('<!DOCTYPE html>') !== -1) {
+                    try { window.stop(); } catch(e) {}
+                    document.open('text/html', 'replace');
+                    document.write(prepare(cached));
+                    document.close();
+                }
+            } catch(e) {}
+        })();
+    </script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #141414;
+            color: #e0e0e0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .loader-box {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+        }
+        .spinner {
+            width: 36px;
+            height: 36px;
+            border: 3px solid #333;
+            border-top-color: #00d9ff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        .loading-text {
+            font-size: 15px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            color: #aaa;
+        }
+        .error-msg {
+            display: none;
+            color: #ff5555;
+            font-size: 14px;
+            max-width: 320px;
+            line-height: 1.5;
+        }
+        .retry-btn {
+            display: none;
+            padding: 8px 16px;
+            background: #2a2a2a;
+            color: #00d9ff;
+            border: 1px solid #00d9ff;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        .retry-btn:hover { background: #00d9ff; color: #141414; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <div class="loader-box">
+        <div class="spinner" id="spinner"></div>
+        <div class="loading-text" id="statusText">Loading SUABE 2...</div>
+        <div class="error-msg" id="errorMsg">Failed to load SUABE 2 and no offline cache found. Connect to internet and retry.</div>
+        <button class="retry-btn" id="retryBtn">Retry</button>
+    </div>
+    <script>
+        (function() {
+            var CACHE_KEY = 'suabe2_cached_build_dev';
+            var DEV_BUILD_URL = 'dev/suabe2_dev.html';
+
+            function prepare(html) {
+                if (!html) return html;
+                if (html.indexOf('/* suabe-scope */') !== -1) return html;
+                var lastScriptClose = html.lastIndexOf('<\x2fscript>');
+                if (lastScriptClose === -1) return html;
+                var scriptOpenIdx = html.indexOf('<script>');
+                if (scriptOpenIdx === -1) return html;
+                var beforeScript = html.substring(0, scriptOpenIdx + 8);
+                var scriptBody = html.substring(scriptOpenIdx + 8, lastScriptClose);
+                var afterScript = html.substring(lastScriptClose);
+                return beforeScript + '\n(function() { /* suabe-scope */\n' + scriptBody + '\n})();\n' + afterScript;
+            }
+
+            function launch(html) {
+                try { window.stop(); } catch(e) {}
+                if (document.body) document.body.innerHTML = '';
+                document.open('text/html', 'replace');
+                document.write(prepare(html));
+                document.close();
+            }
+
+            function loadSuabe() {
+                var statusText = document.getElementById('statusText');
+                var spinner = document.getElementById('spinner');
+                var errorMsg = document.getElementById('errorMsg');
+                var retryBtn = document.getElementById('retryBtn');
+
+                // Check local cache
+                try {
+                    var cached = localStorage.getItem(CACHE_KEY);
+                    if (cached && cached.indexOf('<!DOCTYPE html>') !== -1) {
+                        launch(cached);
+                        return;
+                    }
+                } catch (e) {}
+
+                if (statusText) {
+                    statusText.style.display = 'block';
+                    statusText.textContent = 'Loading SUABE 2...';
+                }
+                if (spinner) spinner.style.display = 'block';
+                if (errorMsg) errorMsg.style.display = 'none';
+                if (retryBtn) retryBtn.style.display = 'none';
+
+                fetch(DEV_BUILD_URL + '?_=' + Date.now(), { cache: 'no-cache' })
+                    .then(function(res) {
+                        if (!res.ok) throw new Error('HTTP ' + res.status);
+                        return res.text();
+                    })
+                    .then(function(html) {
+                        if (!html || html.indexOf('<!DOCTYPE html>') === -1) {
+                            throw new Error('Invalid HTML received');
+                        }
+                        try {
+                            localStorage.setItem(CACHE_KEY, html);
+                            localStorage.setItem('suabe2_cached_build_dev_time', String(Date.now()));
+                        } catch (e) {}
+                        launch(html);
+                    })
+                    .catch(function(err) {
+                        if (spinner) spinner.style.display = 'none';
+                        if (statusText) statusText.style.display = 'none';
+                        if (errorMsg) errorMsg.style.display = 'block';
+                        if (retryBtn) retryBtn.style.display = 'inline-block';
+                    });
+            }
+
+            var retryBtn = document.getElementById('retryBtn');
+            if (retryBtn) retryBtn.addEventListener('click', loadSuabe);
+
+            loadSuabe();
+        })();
+    </script>
+</body>
+</html>

@@ -440,6 +440,81 @@
             box-shadow: 0 0 8px rgba(0, 217, 255, 0.2);
         }
 
+        .sw-status-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #1c1c1c;
+            border: 1px solid #333;
+            border-radius: 6px;
+            padding: 8px 12px;
+            margin-bottom: 12px;
+            font-size: 11px;
+            flex-shrink: 0;
+            transition: all 0.2s ease;
+        }
+
+        .sw-indicator {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            color: #ccc;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .sw-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #666;
+            flex-shrink: 0;
+            transition: all 0.3s ease;
+        }
+
+        .sw-dot.active {
+            background: #00ff88;
+            box-shadow: 0 0 8px rgba(0, 255, 136, 0.7);
+        }
+
+        .sw-dot.installing {
+            background: #ff9d3d;
+            box-shadow: 0 0 8px rgba(255, 157, 61, 0.7);
+        }
+
+        .sw-dot.inactive {
+            background: #ff5555;
+            box-shadow: 0 0 6px rgba(255, 85, 85, 0.5);
+        }
+
+        .sw-dot.unsupported {
+            background: #555;
+        }
+
+        .sw-status-label {
+            font-weight: 500;
+        }
+
+        .sw-action-btn {
+            background: #282828;
+            color: #00d9ff;
+            border: 1px solid #444;
+            border-radius: 4px;
+            padding: 3px 8px;
+            font-size: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .sw-action-btn:hover {
+            border-color: #00d9ff;
+            background: #333;
+            box-shadow: 0 0 6px rgba(0, 217, 255, 0.25);
+        }
+
         .network-update-banner {
             background: rgba(255, 157, 61, 0.12);
             border: 1px solid #ff9d3d;
@@ -1644,6 +1719,13 @@
             </div>
             <button class="network-check-btn" id="networkCheckUpdatesBtn">Check Updates</button>
         </div>
+        <div class="sw-status-bar" id="swStatusBar">
+            <div class="sw-indicator" id="swIndicator">
+                <span class="sw-dot" id="swDot"></span>
+                <span class="sw-status-label" id="swStatusText">Service Worker: Checking...</span>
+            </div>
+            <button class="sw-action-btn" id="swActionBtn" style="display: none;"></button>
+        </div>
         <div class="network-update-banner" id="networkUpdateBanner">
             ⚡ <b>Update available for SUABE 2!</b> An updated build is ready. Click "Update" on the build below to download it offline.
         </div>
@@ -1864,6 +1946,10 @@
         const networkUpdateBanner = document.getElementById('networkUpdateBanner');
         const networkUpdateBadge = document.getElementById('networkUpdateBadge');
         const buildsList = document.getElementById('buildsList');
+        const swStatusBar = document.getElementById('swStatusBar');
+        const swDot = document.getElementById('swDot');
+        const swStatusText = document.getElementById('swStatusText');
+        const swActionBtn = document.getElementById('swActionBtn');
 
         // ========== Panel Management ==========
         function openPanel(panelToOpen) {
@@ -1889,6 +1975,7 @@
                 try { localStorage.setItem('suabe2_active_submenu', 'network'); } catch (e) {}
                 renderBuildsList();
                 updateNetworkIndicator();
+                updateSwStatus();
             } else {
                 try { localStorage.removeItem('suabe2_active_submenu'); } catch (e) {}
             }
@@ -2826,6 +2913,100 @@
                 networkDot.className = 'network-dot';
                 networkStatusText.textContent = 'Online';
             }
+        }
+
+        function getServiceWorkerScope() {
+            if (typeof location === 'undefined') return { url: null, scope: null };
+            if (!location.protocol.startsWith('http')) return { url: null, scope: null };
+            
+            let pathname = location.pathname || '/';
+            // Find base path relative to repository
+            const subdirs = ['/dev/', '/releases/', '/stable/'];
+            for (const sub of subdirs) {
+                const idx = pathname.indexOf(sub);
+                if (idx !== -1) {
+                    pathname = pathname.substring(0, idx + 1);
+                    break;
+                }
+            }
+            if (!pathname.endsWith('/')) {
+                pathname = pathname.substring(0, pathname.lastIndexOf('/') + 1);
+            }
+            if (!pathname) pathname = '/';
+            return {
+                url: pathname + 'sw.js',
+                scope: pathname
+            };
+        }
+
+        async function updateSwStatus() {
+            if (!swDot || !swStatusText) return;
+
+            if (typeof navigator === 'undefined' || !('serviceWorker' in navigator)) {
+                swDot.className = 'sw-dot unsupported';
+                swStatusText.textContent = 'Service Worker: Unsupported';
+                if (swActionBtn) swActionBtn.style.display = 'none';
+                return;
+            }
+
+            if (typeof location !== 'undefined' && !location.protocol.startsWith('http')) {
+                swDot.className = 'sw-dot unsupported';
+                swStatusText.textContent = 'Service Worker: Unavailable on file://';
+                swStatusText.title = 'Service Workers require HTTPS (e.g. GitHub Pages) or localhost.';
+                if (swActionBtn) swActionBtn.style.display = 'none';
+                return;
+            }
+
+            try {
+                const { url, scope } = getServiceWorkerScope();
+                const reg = await navigator.serviceWorker.getRegistration(scope);
+
+                if (reg && reg.active) {
+                    swDot.className = 'sw-dot active';
+                    swStatusText.textContent = 'Service Worker: Active (Offline-Ready)';
+                    swStatusText.title = 'Active on scope: ' + reg.scope;
+                    if (swActionBtn) {
+                        swActionBtn.textContent = 'Check SW';
+                        swActionBtn.style.display = 'inline-block';
+                        swActionBtn.onclick = () => {
+                            reg.update().then(() => showStatus('Service Worker checked for updates!', 'success'));
+                        };
+                    }
+                } else if (reg && (reg.installing || reg.waiting)) {
+                    swDot.className = 'sw-dot installing';
+                    swStatusText.textContent = 'Service Worker: Installing...';
+                    if (swActionBtn) swActionBtn.style.display = 'none';
+                } else {
+                    swDot.className = 'sw-dot inactive';
+                    swStatusText.textContent = 'Service Worker: Inactive';
+                    if (swActionBtn) {
+                        swActionBtn.textContent = 'Register';
+                        swActionBtn.style.display = 'inline-block';
+                        swActionBtn.onclick = () => registerServiceWorker(true);
+                    }
+                }
+            } catch(e) {
+                swDot.className = 'sw-dot unsupported';
+                swStatusText.textContent = 'Service Worker: Inactive';
+                if (swActionBtn) swActionBtn.style.display = 'none';
+            }
+        }
+
+        function registerServiceWorker(manual = false) {
+            if (typeof navigator === 'undefined' || !('serviceWorker' in navigator)) return;
+            const { url, scope } = getServiceWorkerScope();
+            if (!url) return;
+
+            navigator.serviceWorker.register(url, { scope: scope })
+                .then(reg => {
+                    updateSwStatus();
+                    if (manual) showStatus('Service Worker registered successfully!', 'success');
+                })
+                .catch(err => {
+                    console.warn('[SW] Registration failed:', err);
+                    updateSwStatus();
+                    if (manual) showStatus('Failed to register Service Worker: ' + err.message, 'error');
+                });
         }
 
         async function fetchReleasesList() {
@@ -4724,6 +4905,14 @@
         window.openFileAsSwf = openFileAsSwf;
         window.formatUrlOrSearch = formatUrlOrSearch;
         window.validateAndFormatUrl = validateAndFormatUrl;
+        window.updateSwStatus = updateSwStatus;
+        window.registerServiceWorker = registerServiceWorker;
+        window.getServiceWorkerScope = getServiceWorkerScope;
+        if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator) {
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                updateSwStatus();
+            });
+        }
         window.addEventListener('storage', (e) => {
             if (e.key === 'suabe2_history') {
                 renderHistory();
@@ -4737,6 +4926,8 @@
         updateSwitcherUI();
         restoreActiveSubmenu();
         updateNetworkIndicator();
+        updateSwStatus();
+        registerServiceWorker(false);
         renderBuildsList();
         setTimeout(() => checkForBuildUpdates(false), 1500);
 
