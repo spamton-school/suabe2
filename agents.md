@@ -234,12 +234,13 @@ The dev build contains experimental features and forward-looking additions.
       - Root `sw.js` implements a Stale-While-Revalidate caching strategy with an offline navigation fallback to `index.html` or `dev/suabe2_loader_dev.html`.
       - `.nojekyll` in repository root bypasses Jekyll preprocessing to serve all static assets cleanly.
     - **Primary Loaders (`dev/suabe2_loader_dev.html` & `dev/suabe2_loader_dev.svg`)**:
-      - `suabe2_loader_dev.html` is the primary entrypoint loader.
-      - Checks `localStorage` in `<head>` for cached build (`suabe2_cached_build_dev`) before any DOM elements are parsed, preventing the loading screen from appearing or sticking when cached.
-      - If cached, halts the loader parser via `window.stop()` and cleanly streams the cached version in-place via `document.open('text/html', 'replace')` without speculative parsing conflicts or iframes.
-      - If not cached or offline without cache, displays a dark themed loader with spinner and "Downloading SUABE 2..." status text, fetches the build from jsDelivr CDN, caches it locally, and launches it.
+      - `suabe2_loader_dev.html` is the primary HTML entrypoint loader.
+      - Zero parser-blocking execution scripts in `<head>` and zero `window.stop()` calls, ensuring the document parser never terminates prematurely or leaves a blank screen.
+      - The loader container (`.loader-box`) is styled with `display: none;` by default. When cached in `localStorage` (`suabe2_cached_build_dev`), SUABE 2 launches immediately via `document.open('text/html', 'replace'); document.write(safeHtml); document.close();` with zero visual flash, zero stuck loading elements, and full interactivity.
+      - If not cached or offline without cache, reveals the dark-themed loader box (`display: flex`) with spinner and "Downloading SUABE 2..." status text, fetches the build from jsDelivr CDN, caches it locally, and launches it. If fetch fails (or offline), presents a clear error message and a "Retry" button.
       - Automatically wraps incoming script contents in an IIFE scope (`/* suabe-scope */`) to eliminate `SyntaxError: redeclaration of let/const` collisions when switching builds in the same window.
-      - `dev/suabe2_loader_dev.svg` is kept in sync with identical offline caching, scoping, and document replacement logic.
+      - `dev/suabe2_loader_dev.svg` operates inside SVG XML `<foreignObject>` using an isolated, styled full-screen `<iframe>` (`iframe.srcdoc = html`) with full game permissions (`allow="fullscreen; autoplay; gamepad; pointer-lock;"`), checking `localStorage` cache first and falling back to CDN fetch with offline error handling.
+      - `generateDataUri` uses a self-contained, robust HTML loader template with full-screen `iframe`, `srcdoc`, instant `localStorage` cache check, and offline Retry error handling. `compressHtml` safely strips `//` comments without disturbing `https://` URLs, preventing single-line comment truncation in Base64 Data URIs.
 
 ---
 
