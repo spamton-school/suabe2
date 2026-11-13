@@ -3,6 +3,7 @@
         <div xmlns="http://www.w3.org/1999/xhtml" id="content" style="height: 100%; display: flex; align-items: center; justify-content: center; font-family: sans-serif; color: #aaa;">
             <div id="loaderStatus" style="font-size: 15px; font-weight: 500;">Loading SUABE 2...</div>
             <script>
+            // <![CDATA[
             (function() {
                 var CACHE_KEY = 'suabe2_cached_build_dev';
                 var CDN_URL = 'https://cdn.jsdelivr.net/gh/spamton-school/suabe2@main/dev/suabe2_dev.html';
@@ -10,9 +11,9 @@
                 function prepare(html) {
                     if (!html) return html;
                     if (html.indexOf('/* suabe-scope */') !== -1) return html;
-                    var lastScriptClose = html.lastIndexOf('<\x2fscript>');
+                    var lastScriptClose = html.lastIndexOf('</' + 'script>');
                     if (lastScriptClose === -1) return html;
-                    var scriptOpenIdx = html.indexOf('<script>');
+                    var scriptOpenIdx = html.indexOf('<' + 'script>');
                     if (scriptOpenIdx === -1) return html;
                     var beforeScript = html.substring(0, scriptOpenIdx + 8);
                     var scriptBody = html.substring(scriptOpenIdx + 8, lastScriptClose);
@@ -49,7 +50,7 @@
 
                 try {
                     var cached = localStorage.getItem(CACHE_KEY);
-                    if (cached &amp;&amp; cached.indexOf('&lt;!DOCTYPE html&gt;') !== -1) {
+                    if (cached && cached.indexOf('<!DOCTYPE html>') !== -1) {
                         launch(cached);
                         return;
                     }
@@ -61,7 +62,7 @@
                 fetch(CDN_URL + '?_=' + Date.now(), { cache: 'no-cache' })
                     .then(function(res) { return res.text(); })
                     .then(function(html) {
-                        if (html &amp;&amp; html.indexOf('&lt;!DOCTYPE html&gt;') !== -1) {
+                        if (html && html.indexOf('<!DOCTYPE html>') !== -1) {
                             try {
                                 localStorage.setItem(CACHE_KEY, html);
                                 localStorage.setItem('suabe2_cached_build_dev_time', String(Date.now()));
@@ -73,6 +74,7 @@
                         if (status) status.textContent = 'Offline: Connect to internet to download SUABE 2.';
                     });
             })();
+            // ]]>
             </script>
         </div>
     </foreignObject>
