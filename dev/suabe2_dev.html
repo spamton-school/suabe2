@@ -1776,6 +1776,63 @@
 
     <script>
     (function() { /* suabe-scope */
+        // ========== Safe Storage Layer (LocalStorage with In-Memory Fallback for Data URIs & Sandboxes) ==========
+        const memoryStorageMap = new Map();
+        let isLocalStorageAvailable = false;
+        try {
+            if (typeof window !== 'undefined' && 'localStorage' in window && window.localStorage !== null) {
+                const testKey = '__suabe2_storage_test__';
+                window.localStorage.setItem(testKey, testKey);
+                window.localStorage.removeItem(testKey);
+                isLocalStorageAvailable = true;
+            }
+        } catch (e) {
+            isLocalStorageAvailable = false;
+        }
+
+        const safeStorage = {
+            isAvailable: isLocalStorageAvailable,
+            getItem(key) {
+                if (isLocalStorageAvailable) {
+                    try {
+                        return window.localStorage.getItem(key);
+                    } catch (e) {}
+                }
+                return memoryStorageMap.has(key) ? memoryStorageMap.get(key) : null;
+            },
+            setItem(key, value) {
+                const valStr = String(value);
+                if (isLocalStorageAvailable) {
+                    try {
+                        window.localStorage.setItem(key, valStr);
+                        return true;
+                    } catch (e) {}
+                }
+                memoryStorageMap.set(key, valStr);
+                return true;
+            },
+            removeItem(key) {
+                if (isLocalStorageAvailable) {
+                    try {
+                        window.localStorage.removeItem(key);
+                        return;
+                    } catch (e) {}
+                }
+                memoryStorageMap.delete(key);
+            },
+            clear() {
+                if (isLocalStorageAvailable) {
+                    try {
+                        window.localStorage.clear();
+                        return;
+                    } catch (e) {}
+                }
+                memoryStorageMap.clear();
+            }
+        };
+
+        const localStorage = safeStorage;
+
         // ========== Configuration ==========
         const CONFIG = {
             closePrompt: 'Are you sure you want to close?',
@@ -1995,7 +2052,6 @@
                 const stored = localStorage.getItem('suabe2_history');
                 return stored ? JSON.parse(stored) : [];
             } catch (e) {
-                console.error('Error reading history:', e);
                 return [];
             }
         }
@@ -2038,7 +2094,6 @@
                     classicSwitcher: false
                 };
             } catch (e) {
-                console.error('Error reading settings:', e);
                 return {
                     replaceCurrentPage: false,
                     useBlobUrl: false,
@@ -3219,6 +3274,12 @@ loadSuabeDataUri();
         }
 
         function removeBuildCache(buildId) {
+            const isOffline = typeof navigator !== 'undefined' && navigator.onLine === false;
+            if (isOffline) {
+                if (!confirm('Are you sure you want to remove this cached build?\n\nYou are currently offline and will not be able to re-download it until you reconnect to the internet.')) {
+                    return;
+                }
+            }
             try {
                 localStorage.removeItem(getBuildStorageKey(buildId));
                 localStorage.removeItem(getBuildStorageKey(buildId) + '_meta');
@@ -4930,6 +4991,7 @@ loadSuabeDataUri();
         window.DEFAULT_BUILDS = DEFAULT_BUILDS;
         window.DEFAULT_FAVICONS = DEFAULT_FAVICONS;
         window.IDBStorage = IDBStorage;
+        window.safeStorage = safeStorage;
         window.switchMode = switchMode;
         window.updateSwitcherUI = updateSwitcherUI;
         window.generateDataUri = generateDataUri;
