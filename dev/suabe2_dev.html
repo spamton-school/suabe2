@@ -473,7 +473,8 @@
             transition: all 0.3s ease;
         }
 
-        .sw-dot.active {
+        .sw-dot.active,
+        .sw-dot.on {
             background: #00ff88;
             box-shadow: 0 0 8px rgba(0, 255, 136, 0.7);
         }
@@ -483,13 +484,11 @@
             box-shadow: 0 0 8px rgba(255, 157, 61, 0.7);
         }
 
-        .sw-dot.inactive {
-            background: #ff5555;
-            box-shadow: 0 0 6px rgba(255, 85, 85, 0.5);
-        }
-
+        .sw-dot.inactive,
+        .sw-dot.off,
         .sw-dot.unsupported {
-            background: #555;
+            background: #ff5555;
+            box-shadow: 0 0 8px rgba(255, 85, 85, 0.7);
         }
 
         .sw-status-label {
@@ -1721,8 +1720,8 @@
         </div>
         <div class="sw-status-bar" id="swStatusBar">
             <div class="sw-indicator" id="swIndicator">
-                <span class="sw-dot" id="swDot"></span>
-                <span class="sw-status-label" id="swStatusText">Service Worker: Checking...</span>
+                <span class="sw-dot off" id="swDot"></span>
+                <span class="sw-status-label" id="swStatusText">Service Worker: Off</span>
             </div>
             <button class="sw-action-btn" id="swActionBtn" style="display: none;"></button>
         </div>
@@ -2983,15 +2982,16 @@ loadSuabeDataUri();
             if (!swDot || !swStatusText) return;
 
             if (typeof navigator === 'undefined' || !('serviceWorker' in navigator)) {
-                swDot.className = 'sw-dot unsupported';
-                swStatusText.textContent = 'Service Worker: Unsupported';
+                swDot.className = 'sw-dot off';
+                swStatusText.textContent = 'Service Worker: Off (Unsupported)';
+                swStatusText.title = 'Your browser does not support Service Workers.';
                 if (swActionBtn) swActionBtn.style.display = 'none';
                 return;
             }
 
             if (typeof location !== 'undefined' && !location.protocol.startsWith('http')) {
-                swDot.className = 'sw-dot unsupported';
-                swStatusText.textContent = 'Service Worker: Unavailable on file://';
+                swDot.className = 'sw-dot off';
+                swStatusText.textContent = 'Service Worker: Off (HTTPS required)';
                 swStatusText.title = 'Service Workers require HTTPS (e.g. GitHub Pages) or localhost.';
                 if (swActionBtn) swActionBtn.style.display = 'none';
                 return;
@@ -3002,14 +3002,17 @@ loadSuabeDataUri();
                 const reg = await navigator.serviceWorker.getRegistration(scope);
 
                 if (reg && reg.active) {
-                    swDot.className = 'sw-dot active';
-                    swStatusText.textContent = 'Service Worker: Active (Offline-Ready)';
+                    swDot.className = 'sw-dot on';
+                    swStatusText.textContent = 'Service Worker: On (Offline-Ready)';
                     swStatusText.title = 'Active on scope: ' + reg.scope;
                     if (swActionBtn) {
-                        swActionBtn.textContent = 'Check SW';
+                        swActionBtn.textContent = 'Turn Off';
                         swActionBtn.style.display = 'inline-block';
                         swActionBtn.onclick = () => {
-                            reg.update().then(() => showStatus('Service Worker checked for updates!', 'success'));
+                            reg.unregister().then(unregistered => {
+                                updateSwStatus();
+                                showStatus(unregistered ? 'Service Worker turned off.' : 'Failed to unregister Service Worker.', unregistered ? 'info' : 'error');
+                            });
                         };
                     }
                 } else if (reg && (reg.installing || reg.waiting)) {
@@ -3017,18 +3020,23 @@ loadSuabeDataUri();
                     swStatusText.textContent = 'Service Worker: Installing...';
                     if (swActionBtn) swActionBtn.style.display = 'none';
                 } else {
-                    swDot.className = 'sw-dot inactive';
-                    swStatusText.textContent = 'Service Worker: Inactive';
+                    swDot.className = 'sw-dot off';
+                    swStatusText.textContent = 'Service Worker: Off';
+                    swStatusText.title = 'Service Worker is inactive or unregistered.';
                     if (swActionBtn) {
-                        swActionBtn.textContent = 'Register';
+                        swActionBtn.textContent = 'Turn On';
                         swActionBtn.style.display = 'inline-block';
                         swActionBtn.onclick = () => registerServiceWorker(true);
                     }
                 }
             } catch(e) {
-                swDot.className = 'sw-dot unsupported';
-                swStatusText.textContent = 'Service Worker: Inactive';
-                if (swActionBtn) swActionBtn.style.display = 'none';
+                swDot.className = 'sw-dot off';
+                swStatusText.textContent = 'Service Worker: Off';
+                if (swActionBtn) {
+                    swActionBtn.textContent = 'Turn On';
+                    swActionBtn.style.display = 'inline-block';
+                    swActionBtn.onclick = () => registerServiceWorker(true);
+                }
             }
         }
 

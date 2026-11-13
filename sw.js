@@ -72,9 +72,10 @@ self.addEventListener('fetch', event => {
                 }
                 return networkResponse;
             }).catch(fetchErr => {
-                // If offline and request is HTML navigation, fallback to index.html or dev loader
+                // If offline and request is HTML navigation, fallback to stable build or cached pages
                 if (event.request.mode === 'navigate') {
-                    return caches.match(basePath + 'index.html')
+                    return caches.match(basePath + 'stable/suabe2.html')
+                        .then(fallback => fallback || caches.match(basePath + 'index.html'))
                         .then(fallback => fallback || caches.match(basePath + 'dev/suabe2_loader_dev.html'))
                         .then(fallback => fallback || caches.match(basePath + 'dev/suabe2_dev.html'));
                 }

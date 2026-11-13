@@ -224,14 +224,14 @@ The dev build contains experimental features and forward-looking additions.
       - Build action cards allowing users to download builds for offline use (`Download`), launch cached builds (`Launch`), or remove them from local storage (`Delete`).
       - Updates are **never automatically installed**; users are notified and choose when to update.
       - **Live Service Worker Visual Indicator (`#swStatusBar`)**:
-        - Displays live status of the Service Worker:
-          - **Active & Offline-Ready** (`.sw-dot.active`, glowing green): Confirms the Service Worker is controlling the page and caching requests so navigating to the site works with zero network/Wi-Fi connection. Includes a "Check SW" button.
-          - **Installing** (`.sw-dot.installing`, amber): Indicates active installation of the Service Worker cache.
-          - **Inactive** (`.sw-dot.inactive`, red): Prompts with a "Register" button to activate the worker.
-          - **Unavailable on file://** (`.sw-dot.unsupported`, gray): Explains that Service Workers require HTTPS (e.g. GitHub Pages) or localhost.
+        - Specifically and persistently indicates whether the Service Worker is **On** or **Off** (never hidden or muted):
+          - **Service Worker: On (Offline-Ready)** (`.sw-dot.on`, glowing green): Confirms the worker is active and caching requests so navigating the site works with zero network/Wi-Fi connection. Includes a "Turn Off" toggle button.
+          - **Service Worker: Installing...** (`.sw-dot.installing`, glowing amber): Indicates active installation of the Service Worker cache.
+          - **Service Worker: Off** (`.sw-dot.off`, glowing red): Explicitly informs the user that the worker is off/inactive, with a "Turn On" button to enable it on HTTPS or localhost.
+          - **Service Worker: Off (HTTPS required)** (`.sw-dot.off`, glowing red): Clarifies that the worker is off because the current page is on `file://` (which cannot run Service Workers without HTTPS or localhost).
     - **GitHub Pages & PWA Service Worker (`sw.js` & `index.html`)**:
-      - Root `index.html` provides the primary landing page and PWA entrypoint for GitHub Pages (`https://<username>.github.io/<repo>/`).
-      - Root `sw.js` implements a Stale-While-Revalidate caching strategy with an offline navigation fallback to `index.html` or `dev/suabe2_loader_dev.html`.
+      - Root `index.html` provides the landing page for GitHub Pages (`https://<username>.github.io/<repo>/`) and immediately redirects to the stable build (`stable/suabe2.html`) via `<meta http-equiv="refresh">` and `window.location.replace('stable/suabe2.html')`, while registering root `sw.js` for repository-wide offline caching.
+      - Root `sw.js` implements a Stale-While-Revalidate caching strategy with an offline navigation fallback to `stable/suabe2.html`.
       - `.nojekyll` in repository root bypasses Jekyll preprocessing to serve all static assets cleanly.
     - **Primary Loaders (`dev/suabe2_loader_dev.html` & `dev/suabe2_loader_dev.svg`)**:
       - `suabe2_loader_dev.html` is the primary HTML entrypoint loader.
