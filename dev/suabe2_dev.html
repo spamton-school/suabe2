@@ -1566,6 +1566,96 @@
             font-weight: 600;
             color: #e0e0e0;
         }
+
+        /* Offline Remove Confirmation Modal */
+        .offline-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100000;
+            animation: fadeInModal 0.2s ease;
+        }
+
+        .offline-modal-overlay.active {
+            display: flex;
+        }
+
+        .offline-modal-card {
+            background: #1a1a1a;
+            border: 1px solid #ff5555;
+            border-radius: 10px;
+            padding: 24px;
+            max-width: 360px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.8), 0 0 15px rgba(255, 85, 85, 0.25);
+            animation: scaleInModal 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes fadeInModal { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes scaleInModal { from { transform: scale(0.92); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        .offline-modal-icon {
+            font-size: 32px;
+            margin-bottom: 12px;
+        }
+
+        .offline-modal-title {
+            font-size: 17px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 8px;
+        }
+
+        .offline-modal-desc {
+            font-size: 13px;
+            color: #bbb;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+
+        .offline-modal-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .offline-modal-btn {
+            flex: 1;
+            padding: 9px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+        }
+
+        .offline-modal-btn.cancel {
+            background: #2a2a2a;
+            color: #ddd;
+            border: 1px solid #444;
+        }
+
+        .offline-modal-btn.cancel:hover {
+            background: #333;
+            color: #fff;
+            border-color: #666;
+        }
+
+        .offline-modal-btn.confirm {
+            background: #d32f2f;
+            color: #fff;
+        }
+
+        .offline-modal-btn.confirm:hover {
+            background: #f44336;
+            box-shadow: 0 0 10px rgba(244, 67, 54, 0.5);
+        }
     </style>
 </head>
 <body>
@@ -1642,6 +1732,21 @@
                 <line x1="12" y1="3" x2="12" y2="15"></line>
             </svg>
             <p>Drop file to open immediately</p>
+        </div>
+    </div>
+
+    <!-- Offline Remove Confirmation Modal -->
+    <div id="offlineConfirmModal" class="offline-modal-overlay">
+        <div class="offline-modal-card">
+            <div class="offline-modal-icon">⚠️</div>
+            <div class="offline-modal-title">Remove Cached Build?</div>
+            <div class="offline-modal-desc">
+                You are currently offline. If you remove this build from your offline cache, you will not be able to re-download it until you reconnect to the internet.
+            </div>
+            <div class="offline-modal-actions">
+                <button type="button" class="offline-modal-btn cancel" id="cancelOfflineRemoveBtn">Cancel</button>
+                <button type="button" class="offline-modal-btn confirm" id="confirmOfflineRemoveBtn">Remove Anyway</button>
+            </div>
         </div>
     </div>
 
@@ -1776,7 +1881,7 @@
 
     <script>
     (function() { /* suabe-scope */
-        // ========== Safe Storage Layer (LocalStorage with In-Memory Fallback for Data URIs & Sandboxes) ==========
+        // ========== Safe Storage Layer (LocalStorage with Session Name Fallback for Data URIs) ==========
         const memoryStorageMap = new Map();
         let isLocalStorageAvailable = false;
         try {
@@ -1788,6 +1893,58 @@
             }
         } catch (e) {
             isLocalStorageAvailable = false;
+        }
+
+        // Restore persisted state from window.name (used in Data URIs to survive reloads)
+        function restoreSessionState() {
+            try {
+                const raw = (typeof window !== 'undefined' && window.name) ? window.name : '';
+                if (raw && raw.indexOf('__SUABE_STORE__:') === 0) {
+                    const parsed = JSON.parse(raw.substring(16));
+                    for (const k in parsed) {
+                        memoryStorageMap.set(k, parsed[k]);
+                    }
+                    return true;
+                }
+            } catch (e) {}
+            return false;
+        }
+
+        // Persist memory map to window.name and parent so it survives tab reloads
+        function persistSessionState() {
+            if (isLocalStorageAvailable) return;
+            try {
+                if (typeof window === 'undefined') return;
+                const obj = {};
+                for (const [k, v] of memoryStorageMap.entries()) {
+                    obj[k] = v;
+                }
+                const serialized = '__SUABE_STORE__:' + JSON.stringify(obj);
+                window.name = serialized;
+                if (window.parent && window.parent !== window) {
+                    window.parent.postMessage({ type: 'SUABE_STORAGE_SYNC', payload: serialized }, '*');
+                }
+            } catch (e) {}
+        }
+
+        if (!isLocalStorageAvailable) {
+            restoreSessionState();
+        }
+
+        if (typeof window !== 'undefined') {
+            window.addEventListener('message', (e) => {
+                if (e.data && e.data.type === 'SUABE_STORAGE_INIT' && e.data.payload) {
+                    try {
+                        const raw = e.data.payload;
+                        if (raw.indexOf('__SUABE_STORE__:') === 0) {
+                            const parsed = JSON.parse(raw.substring(16));
+                            for (const k in parsed) {
+                                memoryStorageMap.set(k, parsed[k]);
+                            }
+                        }
+                    } catch (err) {}
+                }
+            });
         }
 
         const safeStorage = {
@@ -1809,6 +1966,7 @@
                     } catch (e) {}
                 }
                 memoryStorageMap.set(key, valStr);
+                persistSessionState();
                 return true;
             },
             removeItem(key) {
@@ -1819,6 +1977,7 @@
                     } catch (e) {}
                 }
                 memoryStorageMap.delete(key);
+                persistSessionState();
             },
             clear() {
                 if (isLocalStorageAvailable) {
@@ -1828,6 +1987,7 @@
                     } catch (e) {}
                 }
                 memoryStorageMap.clear();
+                persistSessionState();
             }
         };
 
@@ -2842,6 +3002,11 @@ iframe{position:fixed;top:0;left:0;width:100%;height:100%;border:none;z-index:99
 </div>
 <iframe id="frame" allow="fullscreen; autoplay; gamepad; pointer-lock;"></iframe>
 <script>
+window.addEventListener('message', function(e) {
+  if (e.data && e.data.type === 'SUABE_STORAGE_SYNC' && e.data.payload) {
+    window.name = e.data.payload;
+  }
+});
 function loadSuabeDataUri() {
   var m = document.getElementById('msg');
   var s = document.getElementById('spin');
@@ -2853,15 +3018,38 @@ function loadSuabeDataUri() {
   if (m) { m.style.display = 'block'; m.textContent = 'Loading SUABE 2...'; }
   if (e) e.style.display = 'none';
   if (b) b.style.display = 'none';
+
+  function launchHtml(html) {
+    f.onload = function() {
+      try {
+        f.contentWindow.name = window.name || '';
+        f.contentWindow.postMessage({ type: 'SUABE_STORAGE_INIT', payload: window.name || '' }, '*');
+      } catch(err) {}
+    };
+    f.srcdoc = html;
+    f.style.display = 'block';
+    if (l) l.style.display = 'none';
+  }
+
+  var savedPayload = window.name || '';
+  if (savedPayload.indexOf('__SUABE_STORE__:') === 0) {
+    try {
+      var parsed = JSON.parse(savedPayload.substring(16));
+      if (parsed.suabe2_cached_build_dev && parsed.suabe2_cached_build_dev.indexOf('<!DOCTYPE html>') !== -1) {
+        launchHtml(parsed.suabe2_cached_build_dev);
+        return;
+      }
+    } catch(err) {}
+  }
+
   try {
     var cached = localStorage.getItem('suabe2_cached_build_dev');
     if (cached && cached.indexOf('<!DOCTYPE html>') !== -1) {
-      f.srcdoc = cached;
-      f.style.display = 'block';
-      if (l) l.style.display = 'none';
+      launchHtml(cached);
       return;
     }
   } catch(err) {}
+
   var src = 'https://cdn.jsdelivr.net/gh/spamton-school/suabe2@main/dev/suabe2_dev.html?_=' + Date.now();
   fetch(src, { cache: 'no-cache' })
     .then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
@@ -2870,9 +3058,7 @@ function loadSuabeDataUri() {
       try {
         localStorage.setItem('suabe2_cached_build_dev', h);
       } catch(err) {}
-      f.srcdoc = h;
-      f.style.display = 'block';
-      if (l) l.style.display = 'none';
+      launchHtml(h);
     })
     .catch(function(err) {
       if (s) s.style.display = 'none';
@@ -2998,9 +3184,29 @@ loadSuabeDataUri();
             }
         }
 
-        function updateNetworkIndicator() {
-            if (!networkDot || !networkStatusText) return;
+        async function isNetworkOffline() {
             if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+                return true;
+            }
+            try {
+                const controller = new AbortController();
+                const timer = setTimeout(() => controller.abort(), 800);
+                await fetch('https://cdn.jsdelivr.net/gh/spamton-school/suabe2@main/releases.json?_=' + Date.now(), {
+                    method: 'HEAD',
+                    cache: 'no-cache',
+                    signal: controller.signal
+                });
+                clearTimeout(timer);
+                return false;
+            } catch (e) {
+                return true;
+            }
+        }
+
+        async function updateNetworkIndicator() {
+            if (!networkDot || !networkStatusText) return;
+            const offline = await isNetworkOffline();
+            if (offline) {
                 networkDot.className = 'network-dot offline';
                 networkStatusText.textContent = 'Offline';
             } else {
@@ -3273,10 +3479,50 @@ loadSuabeDataUri();
             }
         }
 
-        function removeBuildCache(buildId) {
-            const isOffline = typeof navigator !== 'undefined' && navigator.onLine === false;
-            if (isOffline) {
-                if (!confirm('Are you sure you want to remove this cached build?\n\nYou are currently offline and will not be able to re-download it until you reconnect to the internet.')) {
+        function promptOfflineRemoval(buildId) {
+            return new Promise((resolve) => {
+                const modal = document.getElementById('offlineConfirmModal');
+                const cancelBtn = document.getElementById('cancelOfflineRemoveBtn');
+                const confirmBtn = document.getElementById('confirmOfflineRemoveBtn');
+
+                if (!modal || !cancelBtn || !confirmBtn) {
+                    try {
+                        const confirmed = confirm('Are you sure you want to remove this cached build?\n\nYou are currently offline and cannot re-download it until you reconnect to the internet.');
+                        resolve(confirmed);
+                    } catch(e) {
+                        resolve(true);
+                    }
+                    return;
+                }
+
+                modal.classList.add('active');
+
+                function cleanup(result) {
+                    modal.classList.remove('active');
+                    cancelBtn.removeEventListener('click', onCancel);
+                    confirmBtn.removeEventListener('click', onConfirm);
+                    resolve(result);
+                }
+
+                function onCancel(e) {
+                    if (e) e.preventDefault();
+                    cleanup(false);
+                }
+                function onConfirm(e) {
+                    if (e) e.preventDefault();
+                    cleanup(true);
+                }
+
+                cancelBtn.addEventListener('click', onCancel);
+                confirmBtn.addEventListener('click', onConfirm);
+            });
+        }
+
+        async function removeBuildCache(buildId) {
+            const offline = await isNetworkOffline();
+            if (offline) {
+                const confirmed = await promptOfflineRemoval(buildId);
+                if (!confirmed) {
                     return;
                 }
             }
