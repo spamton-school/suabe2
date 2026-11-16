@@ -9,11 +9,11 @@
       "name": "SUABE 2.1 (Dev)",
       "version": "2.1-dev",
       "channel": "dev",
-      "description": "Experimental development build with network loader, offline build manager, and latest tools.",
+      "description": "Experimental development build with Games Arcade, DevTools, Themes, Status Widget, ROM Emulator, and offline manager.",
       "path": "dev/suabe2_dev.html",
       "url": "https://cdn.jsdelivr.net/gh/spamton-school/suabe2@main/dev/suabe2_dev.html",
       "rawUrl": "https://raw.githubusercontent.com/spamton-school/suabe2/main/dev/suabe2_dev.html",
-      "updatedAt": "2026-11-13T12:00:00Z"
+      "updatedAt": "2026-11-16T18:00:00Z"
     },
     {
       "id": "v2.0",
