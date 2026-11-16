@@ -279,3 +279,5 @@ The dev build contains experimental features and forward-looking additions.
    - Never overwrite or break `stable/suabe2.html` unless the user explicitly requests promoting dev changes to stable.
 3. **Maintain Backward Compatibility**:
    - New settings must provide safe default fallbacks (e.g., `false` or existing defaults) so that existing user `localStorage` data and JSON export files do not crash the application.
+4. **Active Remote Session Protection**:
+   - The user connects remotely over Moonlight / Sunshine to interact with this machine. Never terminate, restart, or disrupt `sunshine.exe`, `web-server.exe`, `nginx.exe`, network adapters, or Docker services without explicit prior confirmation from the user. Always verify that all remote desktop services are running before ending any turn.
