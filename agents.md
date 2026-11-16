@@ -247,36 +247,41 @@ The dev build contains experimental features and forward-looking additions.
     - Pulls a catalog of 850+ unblocked games from `spamtolan/gn-assets` (`zones.json`) and `spamtolan/gn-html`.
     - Rich filter and discovery interface:
       - Real-time instant search input (`#gamesSearchInput`) with 150ms debounce matching titles, authors, and keywords.
-      - Dynamic tag filter dropdown (`#gamesTagSelect`) automatically aggregating tags (3D, Action, Driving, Retro, Multiplayer, etc.) by frequency.
+      - Dynamic tag filter dropdown (`#gamesTagSelect`) automatically aggregating tags (port, flash, emulator, fnf, nds, etc.) by frequency with robust tag normalization (`getZoneTags(z)` supporting arrays, strings, and undefined tags).
       - Performance-optimized lazy-loaded card grid (`#gamesGrid`) with responsive image thumbnails (`loading="lazy"`), fallback icons, and hover lift transitions.
-      - Clicking any game card resolves `{COVER_URL}` and `{HTML_URL}` and launches the game directly into SUABE 2's cloaked player with anti-close protection, chosen disguise, and history logging.
+      - Clicking any game card resolves `{COVER_URL}` and `{HTML_URL}` and fetches game HTML directly from jsDelivr CDN to launch same-origin via `openFileAsHtml` (with automatic `<base href>` injection for CDN assets), ensuring pointer lock, keyboard lock, full game permissions, and in-game DevTools element inspection work out-of-the-box. Falls back cleanly to URL iframe embed for external sites.
       - Offline caching under `suabe2_gn_zones_cache` in `localStorage` for instant load times even offline or on refresh, with manual refresh (`#gamesRefreshBtn`) and retry handling.
       - Integrated into submenu persistence (`suabe2_active_submenu: 'games'`) and JSON export/import.
 
-22. **Aesthetic Themes (`#themeSelect`)**:
+22. **Aesthetic Themes & Color-Coding Consistency (`#themeSelect`)**:
     - Handcrafted color palettes selectable via dropdown in Settings under *Controls & Appearance*:
-      - **Default Dark**: Signature cyan (`#00d9ff`) and amber (`#ff9d3d`).
-      - **Cyberpunk**: High-contrast neon pink (`#ff007f`) and cyan (`#00f3ff`).
-      - **Solar**: Warm glowing amber gold (`#ffaa00`) and flame (`#ff5500`).
-      - **Matrix**: Terminal cyber green (`#00ff66`) and emerald (`#00aa44`).
-      - **Crimson**: Blood ruby (`#ff2a4b`) and deep wine (`#b8142f`).
-      - **Dracula**: Vampire purple (`#bd93f9`) and pink (`#ff79c6`).
-      - **AMOLED**: Pure black (`#000000`) designed for OLED displays.
-    - Dynamically applies CSS custom properties (`--theme-bg`, `--theme-accent`, `--theme-btn-gradient`, etc.) across main page elements, panels, buttons, and inputs.
+      - **Default Dark**: Signature cyan (`#00d9ff`) URL and amber (`#ff9d3d`) File.
+      - **Cyberpunk**: High-contrast neon pink (`#ff007f`) URL and cyan (`#00f3ff`) File.
+      - **Solar**: Warm glowing amber gold (`#ffaa00`) URL and flame (`#ff5500`) File.
+      - **Matrix**: Terminal cyber green (`#00ff66`) URL and emerald (`#00dd55`) File.
+      - **Crimson**: Blood ruby (`#ff2a4b`) URL and rose (`#ff758c`) File.
+      - **Dracula**: Vampire purple (`#bd93f9`) URL and hot pink (`#ff79c6`) File.
+      - **AMOLED**: Pure black (`#000000`) with cyan (`#00d9ff`) URL and amber (`#ff9d3d`) File.
+    - Dynamically applies CSS custom properties (`--theme-bg`, `--theme-accent`, `--url-accent`, `--url-border`, `--url-pinned-border`, `--file-accent`, `--file-border`, `--file-pinned-border`, etc.) across main page elements, panels, buttons, inputs, mode slider, category switchers, drag drop overlay, and history items.
+    - **Strict Color-Coded Theme Adherence**: Every color-coded element strictly matches its category and active theme:
+      - Favorited / pinned URLs display the exact URL theme color (cyan, neon pink, amber gold, green, etc.) for both star fill/stroke and pinned left border, eliminating unwanted orange styling.
+      - Favorited / pinned files display the exact File theme color (amber, cyan, flame, emerald, ruby, pink) for star and pinned left border.
+      - Unpinned stars render in muted gray (`#666`) and dynamically hover-glow with their category's theme accent.
     - Seamlessly passed into the cloaked viewer navigation bar (`buildViewerHtml`) so the in-game topbar matches the active aesthetic.
     - Persisted under `suabe2_theme` and supported in JSON export/import.
 
 23. **Viewer DevTools Toggle (`#devtoolsBtn`)**:
     - Added dedicated code inspect button (`#devtoolsBtn`, icon `</>`) to the viewer topbar `.controls-group`.
-    - Loads the Eruda developer tools console on-demand via jsDelivr CDN (`https://cdn.jsdelivr.net/npm/eruda`).
-    - Provides a full-featured in-page console, DOM element inspector, network request logger, and storage inspector directly inside cloaked tabs without breaking `about:blank` cloaking or requiring browser extension installs.
+    - Automatically checks `iframe.contentDocument` / `iframe.contentWindow` to inject the Eruda developer tools directly inside the iframe content for all same-origin pages (Blob URLs, GN games, uploaded HTML files, ROM emulators, Flash wrappers).
+    - Enables full inspection of the actual game/content DOM elements, game console logs, network requests, and local storage directly inside the player iframe without breaking cloaking or requiring browser extensions.
+    - Gracefully falls back to injecting into the top-level viewer window for cross-origin URLs where iframe DOM access is restricted by browser security policies.
     - Toggles visibility on subsequent clicks with an active glow indicator.
 
-24. **Viewer Topbar Status Widget (Clock, Battery, Audio Quick-Mute & Meter)**:
+24. **Viewer Topbar Status Widget (Clock & Battery)**:
     - Integrated `.topbar-status-widget` in the viewer navigation bar:
       - **Live Clock Pill (`#topbarClock`)**: Displays 12-hour formatted time (`h:mm A`), updating continuously every second.
       - **Battery Indicator Pill (`#topbarBattery`)**: Leverages `navigator.getBattery()` to display current battery percentage and charging state (`⚡` when plugged in, `🔋` on battery), smoothly hiding when unsupported on desktop.
-      - **Audio Status & Quick-Mute (`#topbarAudioBtn`)**: Interactive speaker pill button with an animated 3-bar equalizer meter (`.audio-meter`). Clicking toggles mute on all accessible media elements in the frame and broadcasts `SUABE_SET_MUTED` to embedded players; when muted, the equalizer flatlines and the speaker indicates muted state.
+    - Streamlined layout with sound meter removed for clean, minimal aesthetics.
 
 25. **Client-Side ROM Emulation via EmulatorJS (`openFileAsRom`)**:
     - Native client-side support for retro gaming ROMs (`.gba`, `.gb`, `.gbc`, `.nes`, `.snes`, `.smc`, `.sfc`, `.md`, `.gen`, `.bin`, `.n64`, `.z64`, `.nds`).
