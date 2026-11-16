@@ -5,6 +5,83 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Open</title>
     <style>
+        :root {
+            --theme-bg: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%);
+            --theme-accent: #00d9ff;
+            --theme-accent-glow: rgba(0, 217, 255, 0.3);
+            --theme-btn-gradient: linear-gradient(135deg, #00d9ff 0%, #0099cc 100%);
+            --theme-btn-text: #0f0f0f;
+            --theme-header-gradient: linear-gradient(135deg, #00d9ff 0%, #0099cc 100%);
+            --theme-panel-bg: #1a1a1a;
+            --theme-panel-border: #404040;
+        }
+
+        html[data-theme="cyberpunk"] {
+            --theme-bg: linear-gradient(135deg, #0b001a 0%, #19052b 100%);
+            --theme-accent: #ff007f;
+            --theme-accent-glow: rgba(255, 0, 127, 0.4);
+            --theme-btn-gradient: linear-gradient(135deg, #ff007f 0%, #99004d 100%);
+            --theme-btn-text: #ffffff;
+            --theme-header-gradient: linear-gradient(135deg, #ff007f 0%, #00f3ff 100%);
+            --theme-panel-bg: #140724;
+            --theme-panel-border: #5a1975;
+        }
+
+        html[data-theme="solar"] {
+            --theme-bg: linear-gradient(135deg, #140d04 0%, #241407 100%);
+            --theme-accent: #ffaa00;
+            --theme-accent-glow: rgba(255, 170, 0, 0.4);
+            --theme-btn-gradient: linear-gradient(135deg, #ffaa00 0%, #d47000 100%);
+            --theme-btn-text: #1a0d00;
+            --theme-header-gradient: linear-gradient(135deg, #ffaa00 0%, #ff5500 100%);
+            --theme-panel-bg: #1d1208;
+            --theme-panel-border: #63390f;
+        }
+
+        html[data-theme="matrix"] {
+            --theme-bg: linear-gradient(135deg, #021206 0%, #071f0c 100%);
+            --theme-accent: #00ff66;
+            --theme-accent-glow: rgba(0, 255, 102, 0.4);
+            --theme-btn-gradient: linear-gradient(135deg, #00ff66 0%, #009933 100%);
+            --theme-btn-text: #021206;
+            --theme-header-gradient: linear-gradient(135deg, #00ff66 0%, #00aa44 100%);
+            --theme-panel-bg: #06190b;
+            --theme-panel-border: #134e24;
+        }
+
+        html[data-theme="crimson"] {
+            --theme-bg: linear-gradient(135deg, #150508 0%, #24080e 100%);
+            --theme-accent: #ff2a4b;
+            --theme-accent-glow: rgba(255, 42, 75, 0.4);
+            --theme-btn-gradient: linear-gradient(135deg, #ff2a4b 0%, #b8142f 100%);
+            --theme-btn-text: #ffffff;
+            --theme-header-gradient: linear-gradient(135deg, #ff2a4b 0%, #ff758c 100%);
+            --theme-panel-bg: #1f070d;
+            --theme-panel-border: #5c1824;
+        }
+
+        html[data-theme="dracula"] {
+            --theme-bg: linear-gradient(135deg, #181622 0%, #231f33 100%);
+            --theme-accent: #bd93f9;
+            --theme-accent-glow: rgba(189, 147, 249, 0.4);
+            --theme-btn-gradient: linear-gradient(135deg, #bd93f9 0%, #7d5bb8 100%);
+            --theme-btn-text: #181622;
+            --theme-header-gradient: linear-gradient(135deg, #bd93f9 0%, #ff79c6 100%);
+            --theme-panel-bg: #1f1b2d;
+            --theme-panel-border: #4d4368;
+        }
+
+        html[data-theme="amoled"] {
+            --theme-bg: #000000;
+            --theme-accent: #00d9ff;
+            --theme-accent-glow: rgba(0, 217, 255, 0.3);
+            --theme-btn-gradient: linear-gradient(135deg, #00d9ff 0%, #007799 100%);
+            --theme-btn-text: #000000;
+            --theme-header-gradient: linear-gradient(135deg, #ffffff 0%, #aaaaaa 100%);
+            --theme-panel-bg: #080808;
+            --theme-panel-border: #222222;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -12,7 +89,7 @@
         }
 
         body {
-            background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%);
+            background: var(--theme-bg);
             color: #e0e0e0;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             min-height: 100vh;
@@ -43,7 +120,7 @@
             font-size: 32px;
             font-weight: 700;
             letter-spacing: 2px;
-            background: linear-gradient(135deg, #00d9ff 0%, #0099cc 100%);
+            background: var(--theme-header-gradient);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -85,6 +162,39 @@
             border-color: #00d9ff;
             color: #00d9ff;
             box-shadow: 0 0 10px rgba(0, 217, 255, 0.2);
+        }
+
+        .games-btn {
+            background: none;
+            border: 2px solid #404040;
+            color: #999;
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .games-btn:hover {
+            border-color: #ff3366;
+            color: #ff3366;
+            box-shadow: 0 0 10px rgba(255, 51, 102, 0.25);
+            transform: translateY(-2px);
+        }
+
+        .games-btn:hover svg rect,
+        .games-btn:hover svg line {
+            stroke: #ff3366;
+        }
+
+        .games-btn:hover svg circle {
+            fill: #ff3366;
         }
 
         .network-btn {
@@ -206,8 +316,8 @@
             top: 30px;
             left: 590px;
             width: 300px;
-            background: #1a1a1a;
-            border: 2px solid #404040;
+            background: var(--theme-panel-bg, #1a1a1a);
+            border: 2px solid var(--theme-panel-border, #404040);
             border-radius: 8px;
             padding: 20px;
             max-height: calc(100vh - 60px);
@@ -354,14 +464,226 @@
             accent-color: #00ff88;
         }
 
+        .games-panel {
+            position: fixed;
+            top: 30px;
+            left: 590px;
+            width: 540px;
+            max-width: calc(100vw - 620px);
+            background: var(--theme-panel-bg, #1a1a1a);
+            border: 2px solid var(--theme-panel-border, #404040);
+            border-radius: 8px;
+            padding: 18px;
+            max-height: calc(100vh - 54px);
+            display: flex;
+            flex-direction: column;
+            z-index: 1000;
+            opacity: 0;
+            transform: translateX(-20px);
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+
+        .games-panel.active {
+            opacity: 1;
+            transform: translateX(0);
+            pointer-events: auto;
+        }
+
+        .games-panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .games-panel-header h2 {
+            font-size: 18px;
+            color: #ff3366;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .games-count-badge {
+            font-size: 11px;
+            padding: 2px 7px;
+            border-radius: 10px;
+            background: rgba(255, 51, 102, 0.15);
+            color: #ff3366;
+            font-weight: 600;
+        }
+
+        .games-refresh-btn {
+            background: transparent;
+            border: 1px solid #444;
+            color: #888;
+            width: 28px;
+            height: 28px;
+            padding: 0;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .games-refresh-btn:hover {
+            color: #ff3366;
+            border-color: #ff3366;
+            background: rgba(255, 51, 102, 0.1);
+        }
+
+        .games-search-bar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .games-search-bar input {
+            flex: 1;
+            height: 34px;
+            background: #111;
+            border: 1px solid #333;
+            border-radius: 6px;
+            color: #e0e0e0;
+            padding: 0 10px;
+            font-size: 12.5px;
+            outline: none;
+            transition: border-color 0.2s ease;
+        }
+
+        .games-search-bar input:focus {
+            border-color: #ff3366;
+        }
+
+        .games-search-bar select {
+            width: 140px;
+            height: 34px;
+            background: #111;
+            border: 1px solid #333;
+            border-radius: 6px;
+            color: #ccc;
+            padding: 0 8px;
+            font-size: 12px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .games-grid {
+            flex: 1;
+            min-height: 220px;
+            max-height: calc(100vh - 190px);
+            overflow-y: auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(115px, 1fr));
+            gap: 10px;
+            padding-right: 4px;
+        }
+
+        .game-card {
+            background: #202020;
+            border: 1px solid #333;
+            border-radius: 6px;
+            overflow: hidden;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+            user-select: none;
+        }
+
+        .game-card:hover {
+            transform: translateY(-3px);
+            border-color: #ff3366;
+            box-shadow: 0 4px 12px rgba(255, 51, 102, 0.25);
+        }
+
+        .game-card-thumb-wrap {
+            width: 100%;
+            height: 75px;
+            background: #141414;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .game-card-thumb {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .game-card-thumb-fallback {
+            color: #555;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .game-card-info {
+            padding: 6px 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            background: #1b1b1b;
+        }
+
+        .game-card-title {
+            font-size: 11.5px;
+            font-weight: 600;
+            color: #eee;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .game-card-tag {
+            font-size: 9.5px;
+            color: #888;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .games-loading {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 30px;
+            color: #888;
+            font-size: 13px;
+        }
+
+        .settings-select {
+            width: 100%;
+            height: 36px;
+            background: #141414;
+            border: 1px solid #444;
+            border-radius: 6px;
+            color: #e0e0e0;
+            padding: 0 10px;
+            font-size: 13px;
+            outline: none;
+            cursor: pointer;
+            transition: border-color 0.2s ease;
+        }
+
+        .settings-select:focus {
+            border-color: var(--theme-accent, #00d9ff);
+        }
+
         .network-panel {
             position: fixed;
             top: 30px;
             max-height: calc(100vh - 54px);
             left: 590px;
             width: 340px;
-            background: #1a1a1a;
-            border: 2px solid #404040;
+            background: var(--theme-panel-bg, #1a1a1a);
+            border: 2px solid var(--theme-panel-border, #404040);
             border-radius: 8px;
             padding: 20px;
             z-index: 1000;
@@ -678,8 +1000,8 @@
             top: 30px;
             left: 590px;
             width: 300px;
-            background: #1a1a1a;
-            border: 2px solid #404040;
+            background: var(--theme-panel-bg, #1a1a1a);
+            border: 2px solid var(--theme-panel-border, #404040);
             border-radius: 8px;
             padding: 20px;
             max-height: calc(100vh - 60px);
@@ -765,8 +1087,8 @@
             max-height: calc(100vh - 54px);
             left: 590px;
             width: 320px;
-            background: #1a1a1a;
-            border: 2px solid #404040;
+            background: var(--theme-panel-bg, #1a1a1a);
+            border: 2px solid var(--theme-panel-border, #404040);
             border-radius: 8px;
             padding: 20px;
             z-index: 1000;
@@ -1052,15 +1374,15 @@
         }
 
         input[type="text"]:focus {
-            border-color: #00d9ff;
+            border-color: var(--theme-accent);
             background: #333;
-            box-shadow: 0 0 10px rgba(0, 217, 255, 0.1);
+            box-shadow: 0 0 10px var(--theme-accent-glow);
         }
 
         button {
             padding: 14px 20px;
-            background: linear-gradient(135deg, #00d9ff 0%, #0099cc 100%);
-            color: #0f0f0f;
+            background: var(--theme-btn-gradient);
+            color: var(--theme-btn-text);
             border: none;
             border-radius: 8px;
             font-size: 15px;
@@ -1076,7 +1398,7 @@
 
         button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0, 217, 255, 0.3);
+            box-shadow: 0 8px 20px var(--theme-accent-glow);
         }
 
         button:active {
@@ -1165,8 +1487,8 @@
 
         .mode-slider.url-active .mode-slider-glider {
             transform: translateX(0);
-            background: linear-gradient(135deg, #00d9ff 0%, #0099cc 100%);
-            box-shadow: 0 4px 14px rgba(0, 217, 255, 0.35);
+            background: var(--theme-btn-gradient);
+            box-shadow: 0 4px 14px var(--theme-accent-glow);
         }
 
         .mode-slider.file-active .mode-slider-glider {
@@ -1201,7 +1523,7 @@
         }
 
         .mode-slider.url-active .mode-slider-btn[data-mode="url"] {
-            color: #0f0f0f;
+            color: var(--theme-btn-text);
             font-weight: 700;
         }
 
@@ -1663,6 +1985,15 @@
         <div class="header">
             <h1>SUABE 2 <span class="dev-badge">DEV</span></h1>
             <div class="button-group">
+                <button class="games-btn" id="gamesBtn" title="Games Arcade">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#999999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: block;">
+                        <rect x="2" y="6" width="20" height="12" rx="6"></rect>
+                        <line x1="6" y1="12" x2="10" y2="12"></line>
+                        <line x1="8" y1="10" x2="8" y2="14"></line>
+                        <circle cx="15.5" cy="13" r="1" fill="#999999"></circle>
+                        <circle cx="18" cy="11" r="1" fill="#999999"></circle>
+                    </svg>
+                </button>
                 <button class="network-btn" id="networkBtn" title="Offline Builds & Updates">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#999999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: block;">
                         <path d="M5 12.55a11 11 0 0 1 14.08 0"></path>
@@ -1709,7 +2040,7 @@
         <div class="mode-content" data-mode="file">
             <div class="input-group">
                 <button class="file-button" id="fileButtonUI">Choose File</button>
-                <input type="file" id="fileInput" accept=".html,.htm,.swf,.css,.txt,.js,.json,.xml,.svg,.md,.csv,.log,.java,.py,.cpp,.c,.cs,.php,.rb,.go,.rs,.ts,.tsx,.jsx,.vue,.yaml,.yml,.sh,.bash,.sql">
+                <input type="file" id="fileInput" accept=".html,.htm,.swf,.gba,.gb,.gbc,.nes,.snes,.smc,.sfc,.md,.gen,.bin,.n64,.z64,.nds,.css,.txt,.js,.json,.xml,.svg,.md,.csv,.log,.java,.py,.cpp,.c,.cs,.php,.rb,.go,.rs,.ts,.tsx,.jsx,.vue,.yaml,.yml,.sh,.bash,.sql">
             </div>
         </div>
 
@@ -1795,6 +2126,18 @@
         <div class="settings-section">
             <div class="settings-section-title">Controls & Appearance</div>
             <div class="settings-group">
+                <label for="themeSelect" style="display: block; margin-bottom: 6px; color: #bbb; font-size: 13px;">Aesthetic Theme</label>
+                <select id="themeSelect" class="settings-select">
+                    <option value="default">Default Dark (Cyan / Amber)</option>
+                    <option value="cyberpunk">Cyberpunk (Neon Pink / Cyan)</option>
+                    <option value="solar">Solar (Amber Gold / Flame)</option>
+                    <option value="matrix">Matrix (Hacker Green / Emerald)</option>
+                    <option value="crimson">Crimson (Blood Red / Ruby)</option>
+                    <option value="dracula">Dracula (Vampire Purple / Pink)</option>
+                    <option value="amoled">AMOLED (Pure Black / OLED)</option>
+                </select>
+            </div>
+            <div class="settings-group">
                 <label title="Use classic separate buttons instead of the slider for URL/File switching">
                     <input type="checkbox" id="classicSwitcherCheckbox">
                     <span>Classic Mode Switcher</span>
@@ -1876,6 +2219,27 @@
             <input type="text" id="faviconTitle" placeholder="Title (e.g., Google)">
             <input type="text" id="faviconUrl" placeholder="Icon URL (.ico)">
             <button class="favicon-add-btn" id="faviconAddBtn">Add Custom Favicon</button>
+        </div>
+    </div>
+
+    <!-- Games Drawer Panel -->
+    <div class="games-panel" id="gamesPanel">
+        <div class="games-panel-header">
+            <h2>Games Arcade <span class="games-count-badge" id="gamesCountBadge">0</span></h2>
+            <button class="games-refresh-btn" id="gamesRefreshBtn" title="Refresh Games Catalog">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.19"/>
+                </svg>
+            </button>
+        </div>
+        <div class="games-search-bar">
+            <input type="text" id="gamesSearchInput" placeholder="Search 850+ games..." autocomplete="off">
+            <select id="gamesTagSelect">
+                <option value="all">All Tags</option>
+            </select>
+        </div>
+        <div class="games-grid" id="gamesGrid">
+            <div class="games-loading">Loading games catalog...</div>
         </div>
     </div>
 
@@ -1998,6 +2362,7 @@
             closePrompt: 'Are you sure you want to close?',
             htmlLikeExtensions: ['html', 'htm', 'svg'],
             flashExtensions: ['swf'],
+            romExtensions: ['gba', 'gb', 'gbc', 'nes', 'snes', 'smc', 'sfc', 'md', 'gen', 'bin', 'n64', 'z64', 'nds'],
             maxFileSizeBytes: 5 * 1024 * 1024 // 5MB (localStorage limit, IndexedDB handles >5MB)
         };
 
@@ -2166,6 +2531,14 @@
         const swDot = document.getElementById('swDot');
         const swStatusText = document.getElementById('swStatusText');
         const swActionBtn = document.getElementById('swActionBtn');
+        const themeSelect = document.getElementById('themeSelect');
+        const gamesBtn = document.getElementById('gamesBtn');
+        const gamesPanel = document.getElementById('gamesPanel');
+        const gamesCountBadge = document.getElementById('gamesCountBadge');
+        const gamesSearchInput = document.getElementById('gamesSearchInput');
+        const gamesTagSelect = document.getElementById('gamesTagSelect');
+        const gamesGrid = document.getElementById('gamesGrid');
+        const gamesRefreshBtn = document.getElementById('gamesRefreshBtn');
 
         // ========== Panel Management ==========
         function openPanel(panelToOpen) {
@@ -2174,6 +2547,7 @@
             faviconPanel.classList.remove('active');
             dataUriPanel.classList.remove('active');
             if (networkPanel) networkPanel.classList.remove('active');
+            if (gamesPanel) gamesPanel.classList.remove('active');
             // Open the specified panel
             if (panelToOpen === 'settings') {
                 settingsPanel.classList.add('active');
@@ -2192,6 +2566,10 @@
                 renderBuildsList();
                 updateNetworkIndicator();
                 updateSwStatus();
+            } else if (panelToOpen === 'games') {
+                if (gamesPanel) gamesPanel.classList.add('active');
+                try { localStorage.setItem('suabe2_active_submenu', 'games'); } catch (e) {}
+                initGamesCatalog();
             } else {
                 try { localStorage.removeItem('suabe2_active_submenu'); } catch (e) {}
             }
@@ -2845,6 +3223,7 @@
                 typeTag.className = 'history-item-type';
                 let tagText = entry.type.toUpperCase();
                 if (entry.isFlash) tagText = 'SWF';
+                else if (entry.isRom) tagText = 'ROM';
                 if (entry.inIndexedDB) tagText = '💾 ' + tagText;
                 else if (entry.isLargeFile) tagText = '⚠ ' + tagText;
                 typeTag.textContent = tagText;
@@ -2911,6 +3290,7 @@
                 // File entry
                 let content = entry.content;
                 let isFlash = !!entry.isFlash;
+                let isRetroRom = !!entry.isRom;
 
                 if (entry.inIndexedDB && !content) {
                     showStatus('Loading file from IndexedDB...', 'success');
@@ -2918,6 +3298,7 @@
                     if (cached && cached.data) {
                         content = cached.data;
                         isFlash = !!cached.isFlash;
+                        isRetroRom = !!cached.isRom;
                     }
                 }
 
@@ -2929,13 +3310,20 @@
                             swfDataUrl: content,
                             isFlash: true
                         };
+                    } else if (isRetroRom) {
+                        selectedFileObject = {
+                            name: entry.filename,
+                            size: content.length,
+                            romDataUrl: content,
+                            isRom: true
+                        };
                     } else {
                         const file = new File([content], entry.filename);
                         selectedFileObject = file;
                     }
                     fileButtonUI.innerHTML = '<svg fill="#999999" width="20" height="20" viewBox="0 0 32 32" style="display: inline; margin-right: 4px; vertical-align: middle;"><path d="M16 3c-7.18 0-13 5.82-13 13s5.82 13 13 13 13-5.82 13-13-5.82-13-13-13zM23.258 12.307l-9.486 9.485c-0.238 0.237-0.623 0.237-0.861 0l-0.191-0.191-0.001 0.001-5.219-5.256c-0.238-0.238-0.238-0.624 0-0.862l1.294-1.293c0.238-0.238 0.624-0.238 0.862 0l3.689 3.716 7.756-7.756c0.238-0.238 0.624-0.238 0.862 0l1.294 1.294c0.239 0.237 0.239 0.623 0.001 0.862z"></path></svg>' + entry.filename;
                     originalValue = entry.filename;
-                    showStatus(isFlash ? 'Flash file loaded from cache' : 'File loaded from cache', 'success');
+                    showStatus(isFlash ? 'Flash file loaded from cache' : (isRetroRom ? 'ROM loaded from cache' : 'File loaded from cache'), 'success');
                 } else if (entry.isLargeFile) {
                     fileButtonUI.textContent = 'Choose File';
                     statusMsg.textContent = '⚠ Large file cache unavailable. Please re-upload it.';
@@ -3712,6 +4100,23 @@ loadSuabeDataUri();
             return getFileExtension(filename) === 'swf';
         }
 
+        function isRom(filename) {
+            const ext = getFileExtension(filename);
+            return CONFIG.romExtensions.includes(ext);
+        }
+
+        function getEmulatorCore(filename) {
+            const ext = getFileExtension(filename);
+            if (ext === 'gba') return 'gba';
+            if (ext === 'gb' || ext === 'gbc') return 'gb';
+            if (ext === 'nes') return 'nes';
+            if (ext === 'snes' || ext === 'smc' || ext === 'sfc') return 'snes';
+            if (ext === 'md' || ext === 'gen' || ext === 'bin') return 'segaMD';
+            if (ext === 'n64' || ext === 'z64') return 'n64';
+            if (ext === 'nds') return 'nds';
+            return 'gba';
+        }
+
         function readFileAsText(file) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -3734,20 +4139,21 @@ loadSuabeDataUri();
             try {
                 const filename = file.name;
                 const isFlash = isSwf(filename);
+                const isRetroRom = isRom(filename);
                 const isHtml = isHtmlLike(filename);
                 const isUnderLocalLimit = file.size <= CONFIG.maxFileSizeBytes;
                 let content = null;
-                let swfDataUrl = null;
+                let fileDataUrl = null;
                 let inIndexedDB = false;
                 const entryId = Date.now();
 
-                if (isFlash) {
-                    swfDataUrl = file.swfDataUrl ? file.swfDataUrl : await readFileAsDataUrl(file);
+                if (isFlash || isRetroRom) {
+                    fileDataUrl = file.romDataUrl ? file.romDataUrl : (file.swfDataUrl ? file.swfDataUrl : await readFileAsDataUrl(file));
                 } else {
                     content = await readFileAsText(file);
                 }
 
-                const dataToSave = isFlash ? swfDataUrl : content;
+                const dataToSave = (isFlash || isRetroRom) ? fileDataUrl : content;
 
                 if (!isUnderLocalLimit) {
                     const saved = await IDBStorage.saveFile(entryId, {
@@ -3755,6 +4161,7 @@ loadSuabeDataUri();
                         size: file.size,
                         type: file.type,
                         isFlash: isFlash,
+                        isRom: isRetroRom,
                         data: dataToSave
                     });
                     inIndexedDB = !!saved;
@@ -3769,12 +4176,15 @@ loadSuabeDataUri();
                         isSaved: isUnderLocalLimit || inIndexedDB,
                         isLargeFile: !isUnderLocalLimit,
                         inIndexedDB: inIndexedDB,
-                        isFlash: isFlash
+                        isFlash: isFlash,
+                        isRom: isRetroRom
                     });
                 }
 
                 if (isFlash) {
-                    openFileAsSwf(swfDataUrl, filename);
+                    openFileAsSwf(fileDataUrl, filename);
+                } else if (isRetroRom) {
+                    openFileAsRom(fileDataUrl, filename);
                 } else if (isHtml) {
                     openFileAsHtml(content, filename);
                 } else {
@@ -3855,6 +4265,18 @@ loadSuabeDataUri();
             const safeInitialUrl = (initialUrl || '').replace(/"/g, '&quot;');
             const safeTitle = (pageTitle || 'Viewer').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
+            const savedTheme = (typeof localStorage !== 'undefined' && localStorage.getItem('suabe2_theme')) || 'default';
+            const themeAccents = {
+                default: { accent: '#00d9ff', glow: 'rgba(0, 217, 255, 0.25)' },
+                cyberpunk: { accent: '#ff007f', glow: 'rgba(255, 0, 127, 0.3)' },
+                solar: { accent: '#ffaa00', glow: 'rgba(255, 170, 0, 0.3)' },
+                matrix: { accent: '#00ff66', glow: 'rgba(0, 255, 102, 0.3)' },
+                crimson: { accent: '#ff2a4b', glow: 'rgba(255, 42, 75, 0.3)' },
+                dracula: { accent: '#bd93f9', glow: 'rgba(189, 147, 249, 0.3)' },
+                amoled: { accent: '#00d9ff', glow: 'rgba(0, 217, 255, 0.25)' }
+            };
+            const curThemeConfig = themeAccents[savedTheme] || themeAccents.default;
+
             return `<!DOCTYPE html>
 <html>
 <head>
@@ -3882,8 +4304,8 @@ loadSuabeDataUri();
             --bg-main: #141414;
             --bg-bar: #1c1c1c;
             --border-color: #2f2f2f;
-            --accent: #00d9ff;
-            --accent-glow: rgba(0, 217, 255, 0.25);
+            --accent: ${curThemeConfig.accent};
+            --accent-glow: ${curThemeConfig.glow};
             --file-accent: #ff9d3d;
             --text-main: #e0e0e0;
             --text-muted: #888888;
@@ -4039,6 +4461,71 @@ loadSuabeDataUri();
         .top-upload-btn:active {
             transform: scale(0.97);
         }
+        .topbar-status-widget {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-left: 4px;
+        }
+        .status-pill {
+            height: 26px;
+            background: #141414;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 0 8px;
+            font-size: 11.5px;
+            color: var(--text-muted);
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            user-select: none;
+            white-space: nowrap;
+        }
+        .audio-pill-btn {
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: #141414;
+        }
+        .audio-pill-btn:hover {
+            border-color: var(--accent);
+            color: var(--text-main);
+        }
+        .audio-pill-btn.muted {
+            color: #f44336;
+            border-color: rgba(244, 67, 54, 0.4);
+        }
+        .audio-meter {
+            display: inline-flex;
+            align-items: flex-end;
+            gap: 2px;
+            height: 10px;
+            margin-left: 2px;
+        }
+        .audio-bar {
+            width: 2px;
+            background: var(--accent);
+            border-radius: 1px;
+            height: 3px;
+            transition: height 0.15s ease;
+        }
+        .audio-meter.active .bar-1 { animation: eqJump 0.8s infinite ease-in-out alternate; }
+        .audio-meter.active .bar-2 { animation: eqJump 0.6s infinite ease-in-out 0.2s alternate; }
+        .audio-meter.active .bar-3 { animation: eqJump 0.7s infinite ease-in-out 0.4s alternate; }
+        .audio-pill-btn.muted .audio-bar {
+            height: 2px !important;
+            background: #666;
+            animation: none !important;
+        }
+        @keyframes eqJump {
+            0% { height: 2px; }
+            50% { height: 9px; }
+            100% { height: 4px; }
+        }
+        .bar-btn.active-tool {
+            color: var(--accent);
+            border-color: var(--accent);
+            background: rgba(0, 217, 255, 0.12);
+        }
         .spacer {
             flex: 1;
         }
@@ -4145,7 +4632,7 @@ loadSuabeDataUri();
             </button>
         </div>
         <div class="upload-container">
-            <input type="file" id="topUpload" style="display:none;" accept=".swf,.html,.htm,.css,.txt,.js,.json,.xml,.svg,.md,.csv,.log,.java,.py,.cpp,.c,.cs,.php,.rb,.go,.rs,.ts,.tsx,.jsx,.vue,.yaml,.yml,.sh,.bash,.sql">
+            <input type="file" id="topUpload" style="display:none;" accept=".swf,.gba,.gb,.gbc,.nes,.snes,.smc,.sfc,.md,.gen,.bin,.n64,.z64,.nds,.html,.htm,.css,.txt,.js,.json,.xml,.svg,.md,.csv,.log,.java,.py,.cpp,.c,.cs,.php,.rb,.go,.rs,.ts,.tsx,.jsx,.vue,.yaml,.yml,.sh,.bash,.sql">
             <label for="topUpload" class="top-upload-btn" title="Upload File">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -4155,8 +4642,34 @@ loadSuabeDataUri();
                 <span>Upload File</span>
             </label>
         </div>
+        <div class="topbar-status-widget">
+            <div class="status-pill clock-pill" id="topbarClock" title="Current Time">--:--</div>
+            <div class="status-pill battery-pill" id="topbarBattery" title="Battery Status" style="display: none;">
+                <span class="battery-icon" id="batteryIcon">🔋</span>
+                <span class="battery-pct" id="batteryPct">--%</span>
+            </div>
+            <button class="status-pill audio-pill-btn" id="topbarAudioBtn" title="Audio: Active (Click to Mute)">
+                <span class="audio-icon" id="audioIcon">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                        <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                    </svg>
+                </span>
+                <span class="audio-meter active" id="audioMeter">
+                    <span class="audio-bar bar-1"></span>
+                    <span class="audio-bar bar-2"></span>
+                    <span class="audio-bar bar-3"></span>
+                </span>
+            </button>
+        </div>
         <div class="spacer"></div>
         <div class="controls-group">
+            <button id="devtoolsBtn" class="bar-btn" title="Toggle DevTools (Eruda)">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="16 18 22 12 16 6"></polyline>
+                    <polyline points="8 6 2 12 8 18"></polyline>
+                </svg>
+            </button>
             <button id="minimizeBtn" class="bar-btn" title="Minimize topbar">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <polyline points="18 15 12 9 6 15"></polyline>
@@ -4221,7 +4734,8 @@ loadSuabeDataUri();
                         timestamp: new Date().toLocaleString(),
                         isLargeFile: !!data.isLargeFile,
                         isSaved: data.isSaved !== undefined ? data.isSaved : true,
-                        isFlash: !!data.isFlash
+                        isFlash: !!data.isFlash,
+                        isRom: !!data.isRom
                     };
                     if (type === 'url') {
                         entry.url = data.url;
@@ -4282,6 +4796,7 @@ loadSuabeDataUri();
                 if (!file) return;
                 var ext = (file.name.split('.').pop() || '').toLowerCase();
                 var isFlash = ext === 'swf';
+                var isRetroRom = ['gba', 'gb', 'gbc', 'nes', 'snes', 'smc', 'sfc', 'md', 'gen', 'bin', 'n64', 'z64', 'nds'].indexOf(ext) !== -1;
                 var isHtml = ['html', 'htm', 'svg'].indexOf(ext) !== -1;
                 var isSaved = file.size <= 5 * 1024 * 1024;
 
@@ -4299,7 +4814,29 @@ loadSuabeDataUri();
                             content: isSaved ? swfDataUrl : null,
                             isSaved: isSaved,
                             isLargeFile: !isSaved,
-                            isFlash: true
+                            isFlash: true,
+                            isRom: false
+                        });
+                    };
+                    reader.readAsDataURL(file);
+                } else if (isRetroRom) {
+                    var coreMap = { gba: 'gba', gb: 'gb', gbc: 'gb', nes: 'nes', snes: 'snes', smc: 'snes', sfc: 'snes', md: 'segaMD', gen: 'segaMD', bin: 'segaMD', n64: 'n64', z64: 'n64', nds: 'nds' };
+                    var core = coreMap[ext] || 'gba';
+                    var reader = new FileReader();
+                    reader.onload = function(evt) {
+                        var romDataUrl = evt.target.result;
+                        var romHtml = '<!DOCTYPE html><html><head><meta charset="UTF-8"><style>* { margin:0; padding:0; box-sizing:border-box; } html, body { width:100%; height:100%; overflow:hidden; background:#000; } #game-container { width:100%; height:100%; }<\\/style><\\/head><body><div id="game-container"><\\/div><script>window.EJS_player="#game-container";window.EJS_core="' + core + '";window.EJS_gameUrl="' + romDataUrl + '";window.EJS_pathtodata="https://cdn.jsdelivr.net/gh/EmulatorJS/EmulatorJS@latest/data/";window.EJS_startOnLoaded=true;<\\/script><script src="https://cdn.jsdelivr.net/gh/EmulatorJS/EmulatorJS@latest/data/loader.js"><\\/script><\\/body><\\/html>';
+                        var blob = new Blob([romHtml], { type: 'text/html;charset=utf-8' });
+                        var blobUrl = URL.createObjectURL(blob);
+                        if (iframe) iframe.src = blobUrl;
+                        if (navUrl) navUrl.value = file.name;
+                        addViewerHistory('file', {
+                            filename: file.name,
+                            content: isSaved ? romDataUrl : null,
+                            isSaved: isSaved,
+                            isLargeFile: !isSaved,
+                            isFlash: false,
+                            isRom: true
                         });
                     };
                     reader.readAsDataURL(file);
@@ -4492,6 +5029,126 @@ loadSuabeDataUri();
                     fullscreenIcon.innerHTML = isFull ? exitFsSvg : enterFsSvg;
                 }
             }
+            // Topbar Clock
+            function updateTopbarClock() {
+                var now = new Date();
+                var h = now.getHours();
+                var m = now.getMinutes();
+                var ampm = h >= 12 ? 'PM' : 'AM';
+                h = h % 12; h = h ? h : 12;
+                var mStr = m < 10 ? '0' + m : m;
+                var clockEl = document.getElementById('topbarClock');
+                if (clockEl) clockEl.textContent = h + ':' + mStr + ' ' + ampm;
+            }
+            updateTopbarClock();
+            setInterval(updateTopbarClock, 1000);
+
+            // Battery Indicator
+            if (navigator && navigator.getBattery) {
+                navigator.getBattery().then(function(battery) {
+                    var batEl = document.getElementById('topbarBattery');
+                    var batPct = document.getElementById('batteryPct');
+                    var batIcon = document.getElementById('batteryIcon');
+                    function updateBat() {
+                        if (!batEl) return;
+                        batEl.style.display = 'inline-flex';
+                        var level = Math.round(battery.level * 100);
+                        if (batPct) batPct.textContent = level + '%';
+                        if (batIcon) batIcon.textContent = battery.charging ? '⚡' : (level > 20 ? '🔋' : '🪫');
+                    }
+                    updateBat();
+                    battery.addEventListener('levelchange', updateBat);
+                    battery.addEventListener('chargingchange', updateBat);
+                }).catch(function() {});
+            }
+
+            // Audio Status & Quick Mute
+            var isAudioMuted = false;
+            var audioBtn = document.getElementById('topbarAudioBtn');
+            var audioMeter = document.getElementById('audioMeter');
+            var audioIcon = document.getElementById('audioIcon');
+            var unmutedSvg = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>';
+            var mutedSvg = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>';
+
+            function setAudioMuted(mute) {
+                isAudioMuted = mute;
+                if (audioBtn) {
+                    if (isAudioMuted) {
+                        audioBtn.classList.add('muted');
+                        audioBtn.setAttribute('title', 'Audio: Muted (Click to Unmute)');
+                    } else {
+                        audioBtn.classList.remove('muted');
+                        audioBtn.setAttribute('title', 'Audio: Active (Click to Mute)');
+                    }
+                }
+                if (audioIcon) {
+                    audioIcon.innerHTML = isAudioMuted ? mutedSvg : unmutedSvg;
+                }
+                if (audioMeter) {
+                    if (isAudioMuted) audioMeter.classList.remove('active');
+                    else audioMeter.classList.add('active');
+                }
+                try {
+                    if (iframe && iframe.contentDocument) {
+                        var media = iframe.contentDocument.querySelectorAll('video, audio');
+                        for (var i = 0; i < media.length; i++) {
+                            media[i].muted = isAudioMuted;
+                        }
+                    }
+                } catch (e) {}
+                try {
+                    if (iframe && iframe.contentWindow) {
+                        iframe.contentWindow.postMessage({ type: 'SUABE_SET_MUTED', muted: isAudioMuted }, '*');
+                    }
+                } catch (e) {}
+            }
+
+            if (audioBtn) {
+                audioBtn.addEventListener('click', function() {
+                    setAudioMuted(!isAudioMuted);
+                });
+            }
+
+            // DevTools (Eruda) Toggle
+            var erudaLoaded = false;
+            var devtoolsBtn = document.getElementById('devtoolsBtn');
+            if (devtoolsBtn) {
+                devtoolsBtn.addEventListener('click', function() {
+                    if (!erudaLoaded) {
+                        var script = document.createElement('script');
+                        script.src = 'https://cdn.jsdelivr.net/npm/eruda';
+                        script.onload = function() {
+                            erudaLoaded = true;
+                            if (window.eruda) {
+                                window.eruda.init();
+                                window.eruda.show();
+                                devtoolsBtn.classList.add('active-tool');
+                            }
+                        };
+                        document.body.appendChild(script);
+                    } else if (window.eruda) {
+                        try {
+                            if (window.eruda._isInit) {
+                                var entry = window.eruda._entryBtn ? window.eruda._entryBtn.get() : null;
+                                if (entry && entry.style.display !== 'none') {
+                                    window.eruda.hide();
+                                    devtoolsBtn.classList.remove('active-tool');
+                                } else {
+                                    window.eruda.show();
+                                    devtoolsBtn.classList.add('active-tool');
+                                }
+                            } else {
+                                window.eruda.init();
+                                window.eruda.show();
+                                devtoolsBtn.classList.add('active-tool');
+                            }
+                        } catch (e) {
+                            console.error('Eruda toggle error:', e);
+                        }
+                    }
+                });
+            }
+
             document.addEventListener('fullscreenchange', onFullscreenChange);
             document.addEventListener('webkitfullscreenchange', onFullscreenChange);
         })();
@@ -4755,6 +5412,58 @@ loadSuabeDataUri();
             }
         }
 
+        function buildRomPlayerHtml(romDataUrl, filename) {
+            const pageTitle = currentFavicon ? currentFavicon.title : (filename || 'Retro Game');
+            const safeTitle = (pageTitle || 'Retro Game').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+            const core = getEmulatorCore(filename);
+            const faviconLink = currentFavicon ? `<link rel="icon" type="image/x-icon" href="${currentFavicon.url}">` : '';
+
+            return `<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${safeTitle}</title>
+    ${faviconLink}
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { width: 100%; height: 100vh; overflow: hidden; background: #000; font-family: sans-serif; }
+        #game-container { width: 100%; height: 100%; }
+    </style>
+</head>
+<body>
+    <div id="game-container"></div>
+    <script>
+        window.EJS_player = '#game-container';
+        window.EJS_core = '${core}';
+        window.EJS_gameUrl = '${romDataUrl}';
+        window.EJS_pathtodata = 'https://cdn.jsdelivr.net/gh/EmulatorJS/EmulatorJS@latest/data/';
+        window.EJS_startOnLoaded = true;
+        window.EJS_color = '#00d9ff';
+    <\/script>
+    <script src="https://cdn.jsdelivr.net/gh/EmulatorJS/EmulatorJS@latest/data/loader.js"><\/script>
+</body>
+</html>`;
+        }
+
+        function openFileAsRom(romDataUrl, filename) {
+            const romPlayerHtml = buildRomPlayerHtml(romDataUrl, filename);
+            const pageTitle = currentFavicon ? currentFavicon.title : (filename || 'Retro Game');
+
+            if (getSetting('showViewerTopbar')) {
+                const blob = new Blob([romPlayerHtml], { type: 'text/html;charset=utf-8' });
+                const contentBlobUrl = URL.createObjectURL(blob);
+                const viewerHtml = buildViewerHtml({
+                    initialUrl: contentBlobUrl,
+                    displayUrl: filename || 'game.rom',
+                    pageTitle: pageTitle
+                });
+                openViewerDocument(viewerHtml);
+            } else {
+                openViewerDocument(romPlayerHtml);
+            }
+        }
+
         // ========== URL Validation & Search Fallback ==========
         function formatUrlOrSearch(input, searchFallback = true) {
             if (!input || !input.trim()) return null;
@@ -4832,6 +5541,7 @@ loadSuabeDataUri();
                     favicons: favicons,
                     cloakOrder: getCloakOrder(),
                     activeSubmenu: localStorage.getItem('suabe2_active_submenu') || null,
+                    theme: localStorage.getItem('suabe2_theme') || 'default',
                     settings: settings
                 };
                 
@@ -4925,6 +5635,11 @@ loadSuabeDataUri();
                                 openPanel(importedData.activeSubmenu);
                             } catch (e) {}
                         }
+
+                        // Restore imported theme if present
+                        if (importedData.theme) {
+                            applyTheme(importedData.theme);
+                        }
                         
                         showStatus('Data imported!', 'success');
                     } catch (parseError) {
@@ -4988,6 +5703,8 @@ loadSuabeDataUri();
                 if (selectedFileObject) {
                     if (selectedFileObject.isFlash && selectedFileObject.swfDataUrl) {
                         openFileAsSwf(selectedFileObject.swfDataUrl, selectedFileObject.name);
+                    } else if (selectedFileObject.isRom && selectedFileObject.romDataUrl) {
+                        openFileAsRom(selectedFileObject.romDataUrl, selectedFileObject.name);
                     } else {
                         openFile(selectedFileObject);
                     }
@@ -5226,6 +5943,238 @@ loadSuabeDataUri();
         }
         window.addEventListener('resize', updateFaviconScrollHint);
 
+        // ========== Aesthetic Themes ==========
+        function applyTheme(themeKey) {
+            const validThemes = ['default', 'cyberpunk', 'solar', 'matrix', 'crimson', 'dracula', 'amoled'];
+            const theme = validThemes.indexOf(themeKey) !== -1 ? themeKey : 'default';
+            if (theme === 'default') {
+                document.documentElement.removeAttribute('data-theme');
+            } else {
+                document.documentElement.setAttribute('data-theme', theme);
+            }
+            try {
+                localStorage.setItem('suabe2_theme', theme);
+            } catch (e) {}
+            if (themeSelect && themeSelect.value !== theme) {
+                themeSelect.value = theme;
+            }
+        }
+
+        function initTheme() {
+            try {
+                const saved = localStorage.getItem('suabe2_theme') || 'default';
+                applyTheme(saved);
+            } catch (e) {}
+        }
+
+        if (themeSelect) {
+            themeSelect.addEventListener('change', () => {
+                applyTheme(themeSelect.value);
+            });
+        }
+
+        // ========== Games Drawer Catalog ==========
+        const GN_ZONES_URL = 'https://cdn.jsdelivr.net/gh/spamtolan/gn-assets@main/zones.json';
+        const GN_COVER_BASE = 'https://cdn.jsdelivr.net/gh/spamtolan/gn-covers@main';
+        const GN_HTML_BASE = 'https://cdn.jsdelivr.net/gh/spamtolan/gn-html@main';
+        let gnZonesList = [];
+        let gnFilteredZones = [];
+        let gnDisplayedCount = 0;
+        const GN_BATCH_SIZE = 40;
+        let isFetchingGnZones = false;
+
+        function initGamesCatalog(forceRefresh = false) {
+            if (gnZonesList.length > 0 && !forceRefresh) {
+                return;
+            }
+
+            // Check localStorage cache first
+            if (!forceRefresh) {
+                try {
+                    const cached = localStorage.getItem('suabe2_gn_zones_cache');
+                    if (cached) {
+                        const parsed = JSON.parse(cached);
+                        if (Array.isArray(parsed) && parsed.length > 0) {
+                            gnZonesList = parsed;
+                            onGnZonesLoaded();
+                            return;
+                        }
+                    }
+                } catch (e) {}
+            }
+
+            // Fetch from jsDelivr CDN
+            if (isFetchingGnZones) return;
+            isFetchingGnZones = true;
+            if (gamesGrid) {
+                gamesGrid.innerHTML = '<div class="games-loading">Downloading games catalog (850+ titles)...</div>';
+            }
+
+            fetch(GN_ZONES_URL + '?t=' + Date.now())
+                .then(res => {
+                    if (!res.ok) throw new Error('HTTP ' + res.status);
+                    return res.json();
+                })
+                .then(data => {
+                    isFetchingGnZones = false;
+                    if (Array.isArray(data)) {
+                        gnZonesList = data.filter(z => z && z.id !== -1 && z.name && z.url);
+                        try {
+                            localStorage.setItem('suabe2_gn_zones_cache', JSON.stringify(gnZonesList));
+                        } catch (e) {}
+                        onGnZonesLoaded();
+                    } else {
+                        throw new Error('Invalid format');
+                    }
+                })
+                .catch(err => {
+                    isFetchingGnZones = false;
+                    console.error('Failed to fetch gn-assets zones:', err);
+                    if (gnZonesList.length === 0 && gamesGrid) {
+                        gamesGrid.innerHTML = '<div class="games-loading">⚠️ Failed to load games catalog.<br><button type="button" id="gamesRetryBtn" style="margin-top:10px;padding:6px 12px;font-size:12px;cursor:pointer;">Retry</button></div>';
+                        const retryBtn = document.getElementById('gamesRetryBtn');
+                        if (retryBtn) retryBtn.addEventListener('click', () => initGamesCatalog(true));
+                    }
+                });
+        }
+
+        function onGnZonesLoaded() {
+            if (gamesCountBadge) gamesCountBadge.textContent = gnZonesList.length;
+
+            if (gamesTagSelect) {
+                const tagCounts = new Map();
+                gnZonesList.forEach(z => {
+                    if (z.special && typeof z.special === 'string') {
+                        z.special.split(',').forEach(tag => {
+                            const trimmed = tag.trim();
+                            if (trimmed) {
+                                tagCounts.set(trimmed, (tagCounts.get(trimmed) || 0) + 1);
+                            }
+                        });
+                    }
+                });
+
+                const sortedTags = Array.from(tagCounts.entries())
+                    .sort((a, b) => b[1] - a[1])
+                    .filter(t => t[1] >= 2)
+                    .map(t => t[0]);
+
+                let optionsHtml = '<option value="all">All Tags (' + gnZonesList.length + ')</option>';
+                sortedTags.forEach(tag => {
+                    optionsHtml += '<option value="' + tag.replace(/"/g, '&quot;') + '">' + tag + ' (' + tagCounts.get(tag) + ')</option>';
+                });
+                gamesTagSelect.innerHTML = optionsHtml;
+            }
+
+            filterAndRenderGames();
+        }
+
+        function filterAndRenderGames() {
+            const query = (gamesSearchInput ? gamesSearchInput.value : '').toLowerCase().trim();
+            const selectedTag = gamesTagSelect ? gamesTagSelect.value : 'all';
+
+            gnFilteredZones = gnZonesList.filter(z => {
+                const matchesQuery = !query ||
+                    (z.name && z.name.toLowerCase().includes(query)) ||
+                    (z.author && z.author.toLowerCase().includes(query)) ||
+                    (z.special && z.special.toLowerCase().includes(query));
+
+                const matchesTag = selectedTag === 'all' ||
+                    (z.special && z.special.toLowerCase().includes(selectedTag.toLowerCase()));
+
+                return matchesQuery && matchesTag;
+            });
+
+            if (gamesGrid) gamesGrid.innerHTML = '';
+            gnDisplayedCount = 0;
+            renderMoreGames();
+        }
+
+        function renderMoreGames() {
+            if (!gamesGrid || gnDisplayedCount >= gnFilteredZones.length) return;
+
+            const nextBatch = gnFilteredZones.slice(gnDisplayedCount, gnDisplayedCount + GN_BATCH_SIZE);
+            gnDisplayedCount += nextBatch.length;
+
+            if (gnFilteredZones.length === 0) {
+                gamesGrid.innerHTML = '<div class="games-loading">No games match your search.</div>';
+                return;
+            }
+
+            const frag = document.createDocumentFragment();
+            nextBatch.forEach(zone => {
+                const card = document.createElement('div');
+                card.className = 'game-card';
+                card.title = zone.name + (zone.special ? ' • ' + zone.special : '');
+
+                const coverUrl = zone.cover ? zone.cover.replace('{COVER_URL}', GN_COVER_BASE) : '';
+                const tagDisplay = zone.special ? zone.special.split(',')[0].trim() : 'Game';
+
+                card.innerHTML = `
+                    <div class="game-card-thumb-wrap">
+                        <img class="game-card-thumb" src="${coverUrl}" alt="${zone.name}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                        <div class="game-card-thumb-fallback" style="display:none;">🎮</div>
+                    </div>
+                    <div class="game-card-info">
+                        <div class="game-card-title">${zone.name}</div>
+                        <div class="game-card-tag">${tagDisplay}</div>
+                    </div>
+                `;
+
+                card.addEventListener('click', () => {
+                    launchGnGame(zone);
+                });
+
+                frag.appendChild(card);
+            });
+
+            gamesGrid.appendChild(frag);
+        }
+
+        function launchGnGame(zone) {
+            if (!zone || !zone.url) return;
+            const fullUrl = zone.url.replace('{COVER_URL}', GN_COVER_BASE).replace('{HTML_URL}', GN_HTML_BASE);
+            if (urlInput) urlInput.value = fullUrl;
+            switchMode('url');
+            openInIframe(fullUrl);
+        }
+
+        if (gamesGrid) {
+            gamesGrid.addEventListener('scroll', () => {
+                if (gamesGrid.scrollTop + gamesGrid.clientHeight >= gamesGrid.scrollHeight - 80) {
+                    renderMoreGames();
+                }
+            });
+        }
+
+        let searchDebounceTimer = null;
+        if (gamesSearchInput) {
+            gamesSearchInput.addEventListener('input', () => {
+                clearTimeout(searchDebounceTimer);
+                searchDebounceTimer = setTimeout(filterAndRenderGames, 150);
+            });
+        }
+
+        if (gamesTagSelect) {
+            gamesTagSelect.addEventListener('change', filterAndRenderGames);
+        }
+
+        if (gamesRefreshBtn) {
+            gamesRefreshBtn.addEventListener('click', () => {
+                initGamesCatalog(true);
+            });
+        }
+
+        if (gamesBtn) {
+            gamesBtn.addEventListener('click', () => {
+                if (gamesPanel && gamesPanel.classList.contains('active')) {
+                    openPanel(null);
+                } else {
+                    openPanel('games');
+                }
+            });
+        }
+
         // Expose functions on window
         window.renderHistory = renderHistory;
         window.renderFavicons = renderFavicons;
@@ -5255,9 +6204,16 @@ loadSuabeDataUri();
         window.saveHistory = saveHistory;
         window.getFavicons = getFavicons;
         window.isSwf = isSwf;
+        window.isRom = isRom;
+        window.getEmulatorCore = getEmulatorCore;
         window.openFileAsHtml = openFileAsHtml;
         window.openFileAsText = openFileAsText;
         window.openFileAsSwf = openFileAsSwf;
+        window.openFileAsRom = openFileAsRom;
+        window.applyTheme = applyTheme;
+        window.initTheme = initTheme;
+        window.initGamesCatalog = initGamesCatalog;
+        window.launchGnGame = launchGnGame;
         window.formatUrlOrSearch = formatUrlOrSearch;
         window.validateAndFormatUrl = validateAndFormatUrl;
         window.updateSwStatus = updateSwStatus;
@@ -5274,7 +6230,8 @@ loadSuabeDataUri();
             }
         });
 
-        // Load history on page load
+        // Initialize theme and load history on page load
+        initTheme();
         renderHistory();
         renderFavicons();
         initDataUriCache();

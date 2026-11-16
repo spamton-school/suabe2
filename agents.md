@@ -242,6 +242,49 @@ The dev build contains experimental features and forward-looking additions.
       - `dev/suabe2_loader_dev.svg` operates inside SVG XML `<foreignObject>` using an isolated, styled full-screen `<iframe>` (`iframe.srcdoc = html`) with full game permissions (`allow="fullscreen; autoplay; gamepad; pointer-lock;"`), checking `localStorage` cache first and falling back to CDN fetch with offline error handling.
       - `generateDataUri` uses a self-contained, robust HTML loader template with full-screen `iframe`, `srcdoc`, instant `localStorage` cache check, and offline Retry error handling. `compressHtml` safely strips `//` comments without disturbing `https://` URLs, preventing single-line comment truncation in Base64 Data URIs.
 
+21. **Integrated Games Drawer & Arcade (`#gamesBtn` & `#gamesPanel`)**:
+    - Dedicated arcade gamepad button (`#gamesBtn`) styled in neon pink/magenta theme (`#ff3366`) positioned in the header button group.
+    - Pulls a catalog of 850+ unblocked games from `spamtolan/gn-assets` (`zones.json`) and `spamtolan/gn-html`.
+    - Rich filter and discovery interface:
+      - Real-time instant search input (`#gamesSearchInput`) with 150ms debounce matching titles, authors, and keywords.
+      - Dynamic tag filter dropdown (`#gamesTagSelect`) automatically aggregating tags (3D, Action, Driving, Retro, Multiplayer, etc.) by frequency.
+      - Performance-optimized lazy-loaded card grid (`#gamesGrid`) with responsive image thumbnails (`loading="lazy"`), fallback icons, and hover lift transitions.
+      - Clicking any game card resolves `{COVER_URL}` and `{HTML_URL}` and launches the game directly into SUABE 2's cloaked player with anti-close protection, chosen disguise, and history logging.
+      - Offline caching under `suabe2_gn_zones_cache` in `localStorage` for instant load times even offline or on refresh, with manual refresh (`#gamesRefreshBtn`) and retry handling.
+      - Integrated into submenu persistence (`suabe2_active_submenu: 'games'`) and JSON export/import.
+
+22. **Aesthetic Themes (`#themeSelect`)**:
+    - Handcrafted color palettes selectable via dropdown in Settings under *Controls & Appearance*:
+      - **Default Dark**: Signature cyan (`#00d9ff`) and amber (`#ff9d3d`).
+      - **Cyberpunk**: High-contrast neon pink (`#ff007f`) and cyan (`#00f3ff`).
+      - **Solar**: Warm glowing amber gold (`#ffaa00`) and flame (`#ff5500`).
+      - **Matrix**: Terminal cyber green (`#00ff66`) and emerald (`#00aa44`).
+      - **Crimson**: Blood ruby (`#ff2a4b`) and deep wine (`#b8142f`).
+      - **Dracula**: Vampire purple (`#bd93f9`) and pink (`#ff79c6`).
+      - **AMOLED**: Pure black (`#000000`) designed for OLED displays.
+    - Dynamically applies CSS custom properties (`--theme-bg`, `--theme-accent`, `--theme-btn-gradient`, etc.) across main page elements, panels, buttons, and inputs.
+    - Seamlessly passed into the cloaked viewer navigation bar (`buildViewerHtml`) so the in-game topbar matches the active aesthetic.
+    - Persisted under `suabe2_theme` and supported in JSON export/import.
+
+23. **Viewer DevTools Toggle (`#devtoolsBtn`)**:
+    - Added dedicated code inspect button (`#devtoolsBtn`, icon `</>`) to the viewer topbar `.controls-group`.
+    - Loads the Eruda developer tools console on-demand via jsDelivr CDN (`https://cdn.jsdelivr.net/npm/eruda`).
+    - Provides a full-featured in-page console, DOM element inspector, network request logger, and storage inspector directly inside cloaked tabs without breaking `about:blank` cloaking or requiring browser extension installs.
+    - Toggles visibility on subsequent clicks with an active glow indicator.
+
+24. **Viewer Topbar Status Widget (Clock, Battery, Audio Quick-Mute & Meter)**:
+    - Integrated `.topbar-status-widget` in the viewer navigation bar:
+      - **Live Clock Pill (`#topbarClock`)**: Displays 12-hour formatted time (`h:mm A`), updating continuously every second.
+      - **Battery Indicator Pill (`#topbarBattery`)**: Leverages `navigator.getBattery()` to display current battery percentage and charging state (`⚡` when plugged in, `🔋` on battery), smoothly hiding when unsupported on desktop.
+      - **Audio Status & Quick-Mute (`#topbarAudioBtn`)**: Interactive speaker pill button with an animated 3-bar equalizer meter (`.audio-meter`). Clicking toggles mute on all accessible media elements in the frame and broadcasts `SUABE_SET_MUTED` to embedded players; when muted, the equalizer flatlines and the speaker indicates muted state.
+
+25. **Client-Side ROM Emulation via EmulatorJS (`openFileAsRom`)**:
+    - Native client-side support for retro gaming ROMs (`.gba`, `.gb`, `.gbc`, `.nes`, `.snes`, `.smc`, `.sfc`, `.md`, `.gen`, `.bin`, `.n64`, `.z64`, `.nds`).
+    - Automatically maps file extension to the corresponding EmulatorJS core (`gba`, `gb`, `nes`, `snes`, `segaMD`, `n64`, `nds`).
+    - Generates self-contained emulator wrapper via `buildRomPlayerHtml` loading the official EmulatorJS WebAssembly player from jsDelivr CDN (`https://cdn.jsdelivr.net/gh/EmulatorJS/EmulatorJS@latest/data/loader.js`).
+    - Seamlessly integrated with SUABE 2's IndexedDB file cache (`IDBStorage`) for large ROMs ($>5\text{MB}$), history caching, and topbar in-viewer file uploads.
+    - History items display a distinct `ROM` badge (e.g. `💾 ROM`) and can be re-launched instantly from cache.
+
 ---
 
 ## 🛠️ Technical Details & Architecture for Future Agents
@@ -254,7 +297,9 @@ The dev build contains experimental features and forward-looking additions.
   - `suabe2_history`: JSON array of entries `{ id, type, url, filename, display, timestamp, isSaved, isLargeFile, isPinned?: boolean, inIndexedDB?: boolean, isFlash?: boolean, content?: string }`.
   - `suabe2_favicons`: JSON array of `{ id, title, url }`.
   - `suabe2_cloak_order`: JSON array of string IDs representing custom cloak order.
-  - `suabe2_active_submenu`: String (`'settings'`, `'favicon'`, `'dataUri'`, `'network'`) or null indicating the last open submenu.
+  - `suabe2_active_submenu`: String (`'settings'`, `'favicon'`, `'dataUri'`, `'network'`, `'games'`) or null indicating the last open submenu.
+  - `suabe2_theme`: String theme key (`'default'`, `'cyberpunk'`, `'solar'`, `'matrix'`, `'crimson'`, `'dracula'`, `'amoled'`).
+  - `suabe2_gn_zones_cache`: Cached JSON array of the 850+ games catalog from `gn-assets`.
   - `suabe2_lastSelectedFavicon`: JSON object `{ id, title, url }`.
   - `suabe2_cached_data_uri`: Base64 string of the generated HTML Data URI.
   - `suabe2_cache_data_uri_pref`: String (`'true'` / `'false'`) indicating whether to cache the generated Data URI.
@@ -263,7 +308,7 @@ The dev build contains experimental features and forward-looking additions.
   - `suabe2_releases_cache`: Cached copy of `releases.json` data for offline build listings.
 - **IndexedDB Schema**:
   - Database: `suabe2_files_db` (version 1)
-  - Object Store: `files` (keyPath: `id`) -> `{ id, name, size, type, isFlash, data }`
+  - Object Store: `files` (keyPath: `id`) -> `{ id, name, size, type, isFlash, isRom, data }`
 - **Popup Handling**: `window.open` calls must stay attached to direct user interaction events (`click`, `Enter` keypress) to avoid browser popup blockers.
 - **CDN Dependency for Loaders**: Ensure that the jsDelivr CDN endpoints in `stable/image.svg` and `dev/image.svg` point to the correct release paths in `spamton-school/suabe2`.
 
